@@ -96,3 +96,21 @@ func TestInjectIdempotent(t *testing.T) {
 		t.Errorf("re-inject not idempotent:\n%q\nvs\n%q", first, second)
 	}
 }
+
+// Regression (self-scan dogfooding): an artifact whose body embedded a raw
+// end marker made the next injection cut at the impostor, leaving shredded
+// content after the block. Render must refuse such input outright.
+func TestInjectRejectsRenderedContainingRawMarkers(t *testing.T) {
+	dir := t.TempDir()
+	for _, evil := range []string{
+		"body with <!-- kervo:end --> impostor",
+		"body with <!-- kervo:begin --> impostor",
+	} {
+		if err := (Injector{}).Inject(context.Background(), dir, evil); err == nil {
+			t.Errorf("expected rejection for %q", evil)
+		}
+	}
+	if _, err := os.Stat(filepath.Join(dir, "CLAUDE.md")); !os.IsNotExist(err) {
+		t.Error("CLAUDE.md written despite rejected content")
+	}
+}

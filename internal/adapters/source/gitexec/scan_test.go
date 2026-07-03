@@ -149,6 +149,34 @@ func TestScanBadCursorDegradesToFull(t *testing.T) {
 	}
 }
 
+// Merge commits are noise on PR-driven repos (prometheus: half of Recent
+// Changes was "Merge pull request #...") — the scan drops them.
+func TestScanExcludesMergeCommits(t *testing.T) {
+	dir := mkRepo(t)
+	git(t, dir, "checkout", "-q", "-b", "feature")
+	write(t, dir, "f.go", "package f\n")
+	git(t, dir, "add", ".")
+	git(t, dir, "commit", "-q", "-m", "feature work")
+	git(t, dir, "checkout", "-q", "main")
+	write(t, dir, "g.go", "package g\n")
+	git(t, dir, "add", ".")
+	git(t, dir, "commit", "-q", "-m", "main work")
+	git(t, dir, "merge", "--no-ff", "-q", "-m", "merge feature into main", "feature")
+
+	snap, _, err := New().Scan(context.Background(), dir, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, c := range snap.Commits {
+		if strings.HasPrefix(c.Subject, "merge feature") {
+			t.Errorf("merge commit leaked into scan: %q", c.Subject)
+		}
+	}
+	if len(snap.Commits) != 5 { // 3 from mkRepo + feature work + main work
+		t.Errorf("commits = %d, want 5 non-merge", len(snap.Commits))
+	}
+}
+
 func TestScanEmptyRepoStillSucceeds(t *testing.T) {
 	dir := t.TempDir()
 	git(t, dir, "init", "-q", "-b", "main")

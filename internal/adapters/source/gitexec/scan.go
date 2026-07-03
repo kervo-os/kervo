@@ -84,9 +84,13 @@ func (s *Scanner) Scan(ctx context.Context, dir, cursor string) (fact.Snapshot, 
 }
 
 // log returns commits newest-first, capped. partial reports a hit cap.
+// Merge commits are excluded: on PR-driven repos they double the list
+// while carrying no information the merged commits don't (prometheus:
+// half of Recent Changes was "Merge pull request #...").
 func (s *Scanner) log(ctx context.Context, dir, cursor string, cap int) ([]fact.Commit, bool, error) {
 	args := []string{
 		"log",
+		"--no-merges",
 		"--max-count=" + strconv.Itoa(cap+1), // +1 probe detects overflow
 		"--format=%x1e%H%x1f%aI%x1f%s",
 		"--name-only",

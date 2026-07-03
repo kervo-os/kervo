@@ -104,13 +104,19 @@ func (s *Scanner) maxDocBytes() int {
 	return DefaultMaxDocBytes
 }
 
-var todoRe = regexp.MustCompile(`\b(TODO|FIXME)\b:?\s*(.*)`)
+// todoRe accepts TODO/FIXME only immediately after a comment marker
+// (`// TODO: x`, `# FIXME y`, `* TODO(alice): z`). A bare word match drowned
+// real tasks in noise on self-scan: string literals, regexes, and prose
+// like "parses TODO comments" all counted as open tasks.
+// Groups: 1=token, 2=colon (if any), 3=rest.
+var todoRe = regexp.MustCompile(`(?:^|\s)(?://+|#+|/\*+|\*+|--+|<!--|;+)\s*(TODO|FIXME)\b(?:\([^)]*\))?(:)?[ \t]*(.*)`)
 
 // skipDirs are never descended into. Hidden dirs are skipped separately.
+// testdata holds fixtures — their TODOs are test material, not open tasks.
 var skipDirs = map[string]bool{
 	"node_modules": true, "vendor": true, "third_party": true,
 	"dist": true, "build": true, "target": true,
-	"venv": true, "__pycache__": true,
+	"venv": true, "__pycache__": true, "testdata": true,
 }
 
 // scanTodos walks the tree in deterministic (lexical) order collecting
@@ -143,6 +149,10 @@ func (s *Scanner) scanTodos(ctx context.Context, dir string) ([]fact.Todo, bool)
 		if len(todos) >= max {
 			truncated = true
 			return filepath.SkipAll
+		}
+		// Test fixtures fabricate TODOs on purpose; they are not open tasks.
+		if strings.HasSuffix(name, "_test.go") {
+			return nil
 		}
 		if info, err := d.Info(); err != nil || info.Size() > maxScanFileBytes {
 			return nil
@@ -181,7 +191,12 @@ func scanFileTodos(path, rel string, budget int) ([]fact.Todo, bool) {
 		if m == nil {
 			continue
 		}
-		text := strings.TrimSpace(m[1] + ": " + strings.TrimSpace(m[2]))
+		// "// TODO/FIXME handling" is wrapped prose, not a task: a colon-less
+		// token flowing straight into "/" or "|" is compound wording.
+		if m[2] == "" && (strings.HasPrefix(m[3], "/") || strings.HasPrefix(m[3], "|")) {
+			continue
+		}
+		text := strings.TrimSpace(m[1] + ": " + strings.TrimSpace(m[3]))
 		if len(text) > maxTodoTextLen {
 			text = text[:maxTodoTextLen] + "…"
 		}

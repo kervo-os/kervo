@@ -21,6 +21,12 @@ const (
 	MarkerEnd   = "<!-- kervo:end -->"
 )
 
+// ReservedPrefix opens every structural marker above. Renderers must
+// neutralize it inside data-derived text (compiler esc) so workspace
+// content can never impersonate a marker — a TODO whose text embedded a
+// literal end marker once truncated the CLAUDE.md injection (dogfooding).
+const ReservedPrefix = "<!-- kervo:"
+
 // Slots returns every enhancement slot the skeleton renders, in canonical
 // section order. The compiler and Attach share this list so the
 // Skeleton/Enhancement boundary stays byte-precise (RFC-0003 §2.2).

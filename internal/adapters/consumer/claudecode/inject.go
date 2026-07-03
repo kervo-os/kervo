@@ -32,6 +32,14 @@ func (i Injector) Inject(ctx context.Context, workspaceDir, rendered string) err
 // callers can validate the injection (corrupt markers, unreadable file)
 // BEFORE writing any other output — no partially-applied init runs.
 func (i Injector) Render(workspaceDir, rendered string) (path, content string, err error) {
+	// Invariant: the artifact must never contain the raw begin/end markers
+	// (compiler esc guarantees it). If one slips through, replacing the
+	// block later would cut at the impostor marker and shred the file —
+	// surface the bug instead of injecting a landmine.
+	if strings.Contains(rendered, artifact.MarkerBegin) || strings.Contains(rendered, artifact.MarkerEnd) {
+		return "", "", fmt.Errorf("claudecode: rendered artifact contains a reserved marker — compiler must escape data-derived text")
+	}
+
 	name := i.FileName
 	if name == "" {
 		name = "CLAUDE.md"

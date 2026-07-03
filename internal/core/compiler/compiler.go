@@ -8,6 +8,7 @@ package compiler
 
 import (
 	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -74,25 +75,32 @@ func BuildSkeleton(s fact.Snapshot) (string, error) {
 	return b.String(), nil
 }
 
+// esc neutralizes the reserved marker prefix inside snapshot-derived text.
+// Every data write site below MUST go through it: workspace content that
+// impersonates a marker corrupts slot replacement and CLAUDE.md injection.
+func esc(s string) string {
+	return strings.ReplaceAll(s, artifact.ReservedPrefix, `<!-- kervo\:`)
+}
+
 func writeRepoSummary(b *strings.Builder, s fact.Snapshot) {
 	b.WriteString("## Repository Summary\n\n")
-	b.WriteString("- Name: " + orDash(s.Repo.Name) + "\n")
-	b.WriteString("- Branch: " + orDash(s.Repo.Branch) + "\n")
-	b.WriteString("- Languages: " + orDash(strings.Join(s.Repo.Languages, ", ")) + "\n")
-	b.WriteString("- Frameworks: " + orDash(strings.Join(s.Repo.Frameworks, ", ")) + "\n")
+	b.WriteString("- Name: " + orDash(esc(s.Repo.Name)) + "\n")
+	b.WriteString("- Branch: " + orDash(esc(s.Repo.Branch)) + "\n")
+	b.WriteString("- Languages: " + orDash(esc(strings.Join(s.Repo.Languages, ", "))) + "\n")
+	b.WriteString("- Frameworks: " + orDash(esc(strings.Join(s.Repo.Frameworks, ", "))) + "\n")
 	var docNames []string
 	for _, d := range s.Docs {
 		docNames = append(docNames, d.Path)
 	}
-	b.WriteString("- Docs: " + orDash(strings.Join(docNames, ", ")) + "\n\n")
+	b.WriteString("- Docs: " + orDash(esc(strings.Join(docNames, ", "))) + "\n\n")
 
 	for _, d := range s.Docs {
 		if d.Path != "README.md" && d.Path != "README" {
 			continue
 		}
 		if ex := firstParagraph(d.Content); ex != "" {
-			b.WriteString("### " + d.Path + " (excerpt)\n\n")
-			b.WriteString("> " + ex + "\n\n")
+			b.WriteString("### " + esc(d.Path) + " (excerpt)\n\n")
+			b.WriteString("> " + esc(ex) + "\n\n")
 		}
 		break
 	}
@@ -109,7 +117,7 @@ func writeRecentChanges(b *strings.Builder, s fact.Snapshot) {
 		shown = maxRecentCommits
 	}
 	for _, c := range s.Commits[:shown] {
-		b.WriteString("- `" + shortSHA(c.SHA) + "` " + c.At.UTC().Format("2006-01-02") + " " + c.Subject + "\n")
+		b.WriteString("- `" + shortSHA(c.SHA) + "` " + c.At.UTC().Format("2006-01-02") + " " + esc(c.Subject) + "\n")
 	}
 	if shown < len(s.Commits) || s.Partial {
 		note := "\n_Showing " + strconv.Itoa(shown) + " of " + strconv.Itoa(len(s.Commits)) + " analyzed commits."
@@ -127,7 +135,7 @@ func writeRecentChanges(b *strings.Builder, s fact.Snapshot) {
 			n = maxHotFiles
 		}
 		for _, f := range s.Files[:n] {
-			b.WriteString("- " + f.Path + " (" + strconv.Itoa(f.Changes) + ")\n")
+			b.WriteString("- " + esc(f.Path) + " (" + strconv.Itoa(f.Changes) + ")\n")
 		}
 		b.WriteString("\n")
 	}
@@ -144,7 +152,7 @@ func writeOpenTasks(b *strings.Builder, s fact.Snapshot) {
 		shown = maxOpenTasks
 	}
 	for _, td := range s.Todos[:shown] {
-		b.WriteString("- " + td.Path + ":" + strconv.Itoa(td.Line) + " — " + td.Text + "\n")
+		b.WriteString("- " + esc(td.Path) + ":" + strconv.Itoa(td.Line) + " — " + esc(td.Text) + "\n")
 	}
 	if shown < len(s.Todos) {
 		b.WriteString("\n_Showing " + strconv.Itoa(shown) + " of " + strconv.Itoa(len(s.Todos)) + " open tasks._\n")
@@ -159,7 +167,7 @@ func writeRelatedModules(b *strings.Builder, s fact.Snapshot) {
 		return
 	}
 	for _, m := range s.Modules {
-		b.WriteString("- " + m.Path + "/ (" + strconv.Itoa(m.Files) + " files)\n")
+		b.WriteString("- " + esc(m.Path) + "/ (" + strconv.Itoa(m.Files) + " files)\n")
 	}
 	b.WriteString("\n")
 }
@@ -237,23 +245,38 @@ func replaceSlot(doc, slot, content string) (string, error) {
 	return doc[:i+len(begin)] + "\n" + content + "\n" + doc[j:], nil
 }
 
-// firstParagraph extracts the first prose paragraph: headings, HTML
-// comments, and blank lines are skipped. Purely extractive — deterministic
-// by construction (summarizing is Semantic territory).
+var (
+	paragraphSplitRe = regexp.MustCompile(`\n\s*\n`)
+	htmlTagRe        = regexp.MustCompile(`<[^>]*>`)
+	mdImageRe        = regexp.MustCompile(`!\[[^\]]*\]\([^)]*\)`)
+	mdLinkRe         = regexp.MustCompile(`\[([^\]]*)\]\(([^)]*)\)`) // keep link text
+)
+
+// minExcerptLen filters decoration paragraphs: a stripped logo block or
+// badge row leaves almost no text, real prose does.
+const minExcerptLen = 20
+
+// firstParagraph extracts the first prose paragraph, working per paragraph
+// and stripping HTML tags / markdown images / badge wrappers before judging
+// it. Line-based skipping was not enough: prometheus's README opens with a
+// multi-line <p> block whose closing line ("…guides.</p>") masqueraded as
+// prose. Purely extractive — deterministic (summarizing is Semantic).
 func firstParagraph(content string) string {
-	var para []string
-	for _, line := range strings.Split(content, "\n") {
-		t := strings.TrimSpace(line)
-		switch {
-		case t == "" && len(para) > 0:
-			return capRunes(strings.Join(para, " "), maxExcerptLen)
-		case t == "", strings.HasPrefix(t, "#"), strings.HasPrefix(t, "<!--"):
-			continue
-		default:
-			para = append(para, t)
+	content = strings.ReplaceAll(content, "\r\n", "\n")
+	for _, block := range paragraphSplitRe.Split(content, -1) {
+		text := strings.Join(strings.Fields(block), " ") // collapse whitespace
+		if text == "" || strings.HasPrefix(text, "#") {
+			continue // heading or empty
+		}
+		text = htmlTagRe.ReplaceAllString(text, " ")
+		text = mdImageRe.ReplaceAllString(text, " ")
+		text = mdLinkRe.ReplaceAllString(text, "$1")
+		text = strings.Join(strings.Fields(text), " ")
+		if len([]rune(text)) >= minExcerptLen {
+			return capRunes(text, maxExcerptLen)
 		}
 	}
-	return capRunes(strings.Join(para, " "), maxExcerptLen)
+	return ""
 }
 
 func capRunes(s string, max int) string {

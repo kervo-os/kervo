@@ -111,6 +111,49 @@ func TestTodosInsideMarkerBlockIgnored(t *testing.T) {
 	}
 }
 
+// Regression (self-scan dogfooding): bare-word TODO matching produced 23
+// false tasks from 0 real ones — string literals, regex sources, and prose
+// all counted. Only comment-marker-prefixed TODOs are tasks.
+func TestTodoRequiresCommentMarker(t *testing.T) {
+	dir := t.TempDir()
+	write(t, dir, "code.go", strings.Join([]string{
+		`var s = "TODO: inside a string literal"`,     // no
+		`var re = "\\b(TODO|FIXME)\\b"`,               // no
+		`// this parser reads TODO comments from src`, // no: mid-comment prose
+		`// TODO: real task`,                          // yes
+		`x := 1 // FIXME(alice): trailing comment`,    // yes
+		`# TODO hash style`,                           // yes
+		`// TODO/FIXME lines are collected here`,      // no: wrapped compound prose
+	}, "\n")+"\n")
+	snap, _, err := New().Scan(context.Background(), dir, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(snap.Todos) != 3 {
+		t.Fatalf("todos = %+v, want 3", snap.Todos)
+	}
+	wants := []string{"TODO: real task", "FIXME: trailing comment", "TODO: hash style"}
+	for i, w := range wants {
+		if snap.Todos[i].Text != w {
+			t.Errorf("todo[%d] = %q, want %q", i, snap.Todos[i].Text, w)
+		}
+	}
+}
+
+func TestTestFilesAndTestdataSkipped(t *testing.T) {
+	dir := t.TempDir()
+	write(t, dir, "scan_test.go", "// TODO: fixture, not a task\n")
+	write(t, dir, "testdata/golden.md", "<!-- TODO: fixture too -->\n")
+	write(t, dir, "real.go", "// TODO: the only real one\n")
+	snap, _, err := New().Scan(context.Background(), dir, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(snap.Todos) != 1 || snap.Todos[0].Path != "real.go" {
+		t.Fatalf("todos = %+v, want only real.go", snap.Todos)
+	}
+}
+
 func TestBinaryFilesSkipped(t *testing.T) {
 	dir := t.TempDir()
 	write(t, dir, "bin.dat", "TODO\x00binary")
