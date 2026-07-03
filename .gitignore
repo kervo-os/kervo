@@ -1,3 +1,4 @@
 /kervo
 /dist/
 .kervo/cache/
+.kervo/cursor
