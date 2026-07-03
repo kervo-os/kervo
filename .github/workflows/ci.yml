@@ -1,0 +1,27 @@
+# Release gate (ARCH-0001 §10.4): the byte-identity golden test and the
+# core-purity arch-check run on every push — design principles as checks.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+      - name: gofmt
+        run: test -z "$(gofmt -l .)" || (gofmt -l . && exit 1)
+      - name: vet
+        run: go vet ./...
+      - name: build
+        run: go build ./...
+      - name: test (includes skeleton byte-identity golden)
+        run: go test ./...
+      - name: arch-check (core must not import adapters)
+        run: make arch-check
