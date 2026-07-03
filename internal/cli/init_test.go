@@ -1,0 +1,119 @@
+package cli
+
+import (
+	"os"
+	"os/exec"
+	"path/filepath"
+	"strings"
+	"testing"
+)
+
+func git(t *testing.T, dir string, args ...string) {
+	t.Helper()
+	cmd := exec.Command("git", append([]string{"-C", dir}, args...)...)
+	cmd.Env = append(os.Environ(),
+		"GIT_AUTHOR_NAME=test", "GIT_AUTHOR_EMAIL=t@t",
+		"GIT_COMMITTER_NAME=test", "GIT_COMMITTER_EMAIL=t@t",
+		"GIT_AUTHOR_DATE=2026-07-01T10:00:00+09:00",
+		"GIT_COMMITTER_DATE=2026-07-01T10:00:00+09:00",
+	)
+	if out, err := cmd.CombinedOutput(); err != nil {
+		t.Fatalf("git %v: %v\n%s", args, err, out)
+	}
+}
+
+func writeFile(t *testing.T, dir, rel, content string) {
+	t.Helper()
+	p := filepath.Join(dir, rel)
+	if err := os.MkdirAll(filepath.Dir(p), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(p, []byte(content), 0o644); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestInitEndToEnd(t *testing.T) {
+	dir := t.TempDir()
+	git(t, dir, "init", "-q", "-b", "main")
+	writeFile(t, dir, "README.md", "# demo\n\nA workspace for the init e2e test.\n")
+	writeFile(t, dir, "CLAUDE.md", "# House rules\n\nalways run tests\n")
+	writeFile(t, dir, "src/main.go", "package main\n// TODO: handle signals\n")
+	git(t, dir, "add", ".")
+	git(t, dir, "commit", "-q", "-m", "initial import")
+
+	if err := runInit([]string{"-dir", dir}); err != nil {
+		t.Fatal(err)
+	}
+
+	artifactPath := filepath.Join(dir, ".kervo", "artifact.md")
+	art, err := os.ReadFile(artifactPath)
+	if err != nil {
+		t.Fatalf("artifact.md not written: %v", err)
+	}
+	for _, want := range []string{
+		"# Context Artifact",
+		"- Branch: main",
+		"initial import",
+		"src/main.go:2 — TODO: handle signals",
+		"- src/ (1 files)",
+		"A workspace for the init e2e test.",
+	} {
+		if !strings.Contains(string(art), want) {
+			t.Errorf("artifact missing %q", want)
+		}
+	}
+
+	cursor, err := os.ReadFile(filepath.Join(dir, ".kervo", "cursor"))
+	if err != nil || len(strings.TrimSpace(string(cursor))) != 40 {
+		t.Errorf("cursor not persisted: %q err=%v", cursor, err)
+	}
+
+	claude, err := os.ReadFile(filepath.Join(dir, "CLAUDE.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{"# House rules", "always run tests", "<!-- kervo:begin -->", "<!-- kervo:end -->"} {
+		if !strings.Contains(string(claude), want) {
+			t.Errorf("CLAUDE.md missing %q", want)
+		}
+	}
+
+	// Re-running init on an unchanged workspace must be byte-idempotent —
+	// the determinism contract, observed end-to-end.
+	if err := runInit([]string{"-dir", dir}); err != nil {
+		t.Fatal(err)
+	}
+	art2, _ := os.ReadFile(artifactPath)
+	if string(art) != string(art2) {
+		t.Error("artifact.md differs across identical runs")
+	}
+	claude2, _ := os.ReadFile(filepath.Join(dir, "CLAUDE.md"))
+	if string(claude) != string(claude2) {
+		t.Error("CLAUDE.md differs across identical runs")
+	}
+}
+
+func TestInitOutsideRepoFails(t *testing.T) {
+	if err := runInit([]string{"-dir", t.TempDir()}); err == nil {
+		t.Fatal("expected error outside a git repository")
+	}
+}
+
+// Regression: a failing injection must fail the WHOLE run before any write.
+// Previously artifact.md was written first, leaving a half-applied init.
+func TestInitCorruptMarkersLeavesNoPartialState(t *testing.T) {
+	dir := t.TempDir()
+	git(t, dir, "init", "-q", "-b", "main")
+	writeFile(t, dir, "main.go", "package main\n")
+	writeFile(t, dir, "CLAUDE.md", "human\n<!-- kervo:begin -->\nno end marker\n")
+	git(t, dir, "add", ".")
+	git(t, dir, "commit", "-q", "-m", "x")
+
+	if err := runInit([]string{"-dir", dir}); err == nil {
+		t.Fatal("expected corrupt-marker error")
+	}
+	if _, err := os.Stat(filepath.Join(dir, ".kervo")); !os.IsNotExist(err) {
+		t.Error(".kervo was created despite the failed injection (partial state)")
+	}
+}
