@@ -17,6 +17,11 @@
 
 > A demo REST API used to exercise the compiler. It has two paragraphs.
 
+## Commands
+
+- `make build` — go build -o demo ./cmd
+- `npm run test` — jest --coverage
+
 ## Recent Changes
 
 - `aaaaaaa` 2026-07-03 add auth middleware

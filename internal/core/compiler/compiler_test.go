@@ -42,6 +42,10 @@ func fixture() fact.Snapshot {
 			{Path: "mw", Files: 3},
 			{Path: "store", Files: 5},
 		},
+		Commands: []fact.Command{
+			{Run: "make build", Detail: "go build -o demo ./cmd", Source: "Makefile"},
+			{Run: "npm run test", Detail: "jest --coverage", Source: "package.json"},
+		},
 		Todos: []fact.Todo{
 			{Path: "mw/auth.go", Line: 42, Text: "TODO: rotate signing keys"},
 			{Path: "main.go", Line: 7, Text: "FIXME: graceful shutdown"},

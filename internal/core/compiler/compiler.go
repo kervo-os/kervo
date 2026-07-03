@@ -57,6 +57,7 @@ func BuildSkeleton(s fact.Snapshot) (string, error) {
 	b.WriteString("> — do not edit by hand.\n\n")
 
 	writeRepoSummary(&b, s)
+	writeCommands(&b, s)
 	writeRecentChanges(&b, s)
 	writeOpenTasks(&b, s)
 	writeRelatedModules(&b, s)
@@ -104,6 +105,25 @@ func writeRepoSummary(b *strings.Builder, s fact.Snapshot) {
 		}
 		break
 	}
+}
+
+// writeCommands surfaces workspace-declared entry points. Evidence for the
+// section: Environment/commands is the most prevalent hand-written context
+// type (72% of 401 repos, arXiv:2512.18925) — the thing users re-explain most.
+func writeCommands(b *strings.Builder, s fact.Snapshot) {
+	b.WriteString("## Commands\n\n")
+	if len(s.Commands) == 0 {
+		b.WriteString("_No declared commands found (Makefile targets, package.json scripts)._\n\n")
+		return
+	}
+	for _, c := range s.Commands {
+		line := "- `" + esc(c.Run) + "`"
+		if c.Detail != "" {
+			line += " — " + esc(c.Detail)
+		}
+		b.WriteString(line + "\n")
+	}
+	b.WriteString("\n")
 }
 
 func writeRecentChanges(b *strings.Builder, s fact.Snapshot) {

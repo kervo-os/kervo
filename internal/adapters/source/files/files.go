@@ -48,6 +48,7 @@ func (s *Scanner) Scan(ctx context.Context, dir, _ string) (fact.Snapshot, strin
 	var snap fact.Snapshot
 	snap.Docs = s.readDocs(dir)
 	snap.Repo.Frameworks = detectFrameworks(dir)
+	snap.Commands = detectCommands(dir)
 	todos, truncated := s.scanTodos(ctx, dir)
 	snap.Todos = todos
 	snap.Partial = truncated
@@ -232,6 +233,85 @@ func isBinary(raw []byte) bool {
 		probe = probe[:8000]
 	}
 	return bytes.IndexByte(probe, 0) >= 0
+}
+
+const maxCommandsPerManifest = 12
+
+// makeTargetRe matches simple Makefile rule lines ("build:", "arch-check:").
+// Variable assignments (":="), pattern rules ("%"), dot-targets (".PHONY"),
+// and multi-target lines are deliberately not matched.
+var makeTargetRe = regexp.MustCompile(`^([A-Za-z0-9][\w.-]*)\s*:($|[^=])`)
+
+// detectCommands collects runnable entry points the workspace declares.
+// Evidence for the section: build/test commands are the most prevalent
+// hand-written context type (72% of 401 repos, arXiv:2512.18925).
+func detectCommands(dir string) []fact.Command {
+	var cmds []fact.Command
+	cmds = append(cmds, makefileCommands(dir)...)
+	cmds = append(cmds, packageJSONCommands(dir)...)
+	return cmds
+}
+
+func makefileCommands(dir string) []fact.Command {
+	raw, err := os.ReadFile(filepath.Join(dir, "Makefile"))
+	if err != nil {
+		return nil
+	}
+	lines := strings.Split(string(raw), "\n")
+	var cmds []fact.Command
+	for i, line := range lines {
+		m := makeTargetRe.FindStringSubmatch(line)
+		if m == nil {
+			continue
+		}
+		detail := ""
+		if i+1 < len(lines) && strings.HasPrefix(lines[i+1], "\t") {
+			detail = capLine(strings.TrimSpace(lines[i+1]), 80)
+		}
+		cmds = append(cmds, fact.Command{
+			Run: "make " + m[1], Detail: detail, Source: "Makefile",
+		})
+		if len(cmds) >= maxCommandsPerManifest {
+			break
+		}
+	}
+	return cmds
+}
+
+func packageJSONCommands(dir string) []fact.Command {
+	raw, err := os.ReadFile(filepath.Join(dir, "package.json"))
+	if err != nil {
+		return nil
+	}
+	var pkg struct {
+		Scripts map[string]string `json:"scripts"`
+	}
+	if json.Unmarshal(raw, &pkg) != nil || len(pkg.Scripts) == 0 {
+		return nil
+	}
+	names := make([]string, 0, len(pkg.Scripts))
+	for n := range pkg.Scripts {
+		names = append(names, n)
+	}
+	sort.Strings(names) // JSON maps are unordered; determinism requires sorting
+	if len(names) > maxCommandsPerManifest {
+		names = names[:maxCommandsPerManifest]
+	}
+	var cmds []fact.Command
+	for _, n := range names {
+		cmds = append(cmds, fact.Command{
+			Run: "npm run " + n, Detail: capLine(pkg.Scripts[n], 80), Source: "package.json",
+		})
+	}
+	return cmds
+}
+
+func capLine(s string, max int) string {
+	r := []rune(s)
+	if len(r) <= max {
+		return s
+	}
+	return string(r[:max]) + "…"
 }
 
 // manifestEcosystems maps manifest files to a framework/ecosystem label.

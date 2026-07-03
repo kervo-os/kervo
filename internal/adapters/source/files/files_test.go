@@ -111,6 +111,36 @@ func TestTodosInsideMarkerBlockIgnored(t *testing.T) {
 	}
 }
 
+func TestDetectCommands(t *testing.T) {
+	dir := t.TempDir()
+	write(t, dir, "Makefile", ".PHONY: build test\nVAR := x\n\nbuild:\n\tgo build -o app ./cmd\n\ntest: build\n\tgo test ./...\n\n%.o: %.c\n\tcc -c $<\n")
+	write(t, dir, "package.json", `{"scripts":{"test":"jest --coverage","build":"tsc -p ."}}`)
+	snap, _, err := New().Scan(context.Background(), dir, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var runs []string
+	for _, c := range snap.Commands {
+		runs = append(runs, c.Run)
+	}
+	// Makefile targets in file order, then package.json scripts sorted.
+	want := []string{"make build", "make test", "npm run build", "npm run test"}
+	if strings.Join(runs, ",") != strings.Join(want, ",") {
+		t.Fatalf("commands = %v, want %v", runs, want)
+	}
+	if snap.Commands[0].Detail != "go build -o app ./cmd" {
+		t.Errorf("make build detail = %q", snap.Commands[0].Detail)
+	}
+	if snap.Commands[3].Detail != "jest --coverage" {
+		t.Errorf("npm test detail = %q", snap.Commands[3].Detail)
+	}
+	for _, c := range snap.Commands {
+		if strings.Contains(c.Run, ".PHONY") || strings.Contains(c.Run, "VAR") || strings.Contains(c.Run, "%") {
+			t.Errorf("non-command leaked: %+v", c)
+		}
+	}
+}
+
 // Regression (self-scan dogfooding): bare-word TODO matching produced 23
 // false tasks from 0 real ones — string literals, regex sources, and prose
 // all counted. Only comment-marker-prefixed TODOs are tasks.

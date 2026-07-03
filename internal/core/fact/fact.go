@@ -5,16 +5,19 @@ package fact
 import "time"
 
 // Snapshot is everything Mode 1 needs to build a skeleton.
-// (Revised once during gitexec implementation, as budgeted by PRD risk #12:
-// Modules added for the deterministic Related Modules section.)
+// (Revision log — PRD risk #12 budgeted one: r1 Modules for Related
+// Modules; r2 Commands, evidence-backed by arXiv:2512.18925 — build/test
+// commands are the single most prevalent hand-written context type, 72%
+// of 401 studied repos.)
 type Snapshot struct {
-	Repo    RepoInfo
-	Commits []Commit
-	Files   []ChangedFile
-	Modules []Module
-	Todos   []Todo
-	Docs    []DocSummaryInput
-	Partial bool // true if scan caps were hit (ARCH perf budget)
+	Repo     RepoInfo
+	Commits  []Commit
+	Files    []ChangedFile
+	Modules  []Module
+	Commands []Command
+	Todos    []Todo
+	Docs     []DocSummaryInput
+	Partial  bool // true if scan caps were hit (ARCH perf budget)
 }
 
 // Module is a top-level directory of the repository with its tracked-file
@@ -22,6 +25,15 @@ type Snapshot struct {
 type Module struct {
 	Path  string
 	Files int
+}
+
+// Command is a runnable entry point the workspace itself declares
+// (Makefile target, package.json script). Declared-only — never inferred:
+// synthesizing commands would be Semantic territory.
+type Command struct {
+	Run    string // what to type: "make build", "npm run test"
+	Detail string // underlying recipe/script line, may be empty
+	Source string // manifest of origin: "Makefile", "package.json"
 }
 
 type RepoInfo struct {

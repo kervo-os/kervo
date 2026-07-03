@@ -80,6 +80,7 @@ func mergeSnapshots(git, fls fact.Snapshot) fact.Snapshot {
 	git.Todos = fls.Todos
 	git.Docs = fls.Docs
 	git.Repo.Frameworks = fls.Repo.Frameworks
+	git.Commands = fls.Commands
 	git.Partial = git.Partial || fls.Partial
 	return git
 }
