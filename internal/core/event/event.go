@@ -2,7 +2,10 @@
 // Rule: events are never mutated or deleted. State is derived by replay.
 package event
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+)
 
 // Kind separates the two experience sources (PRD §6.2).
 type Kind string
@@ -27,7 +30,9 @@ type Event struct {
 	Actor string // who recorded/judged: "human:<name>", "agent:claude-code",
 	// "system" — multi-party identity (RFC-0005 §3; same logic as
 	// Repo: costs nothing now, is a migration later)
-	Source  string // "git", "files", "consumer:claude-code", "human", ...
-	Ref     string // subject id: commit sha, file path, observation id
-	Payload []byte // JSON body; schema per Type
+	Source string // "git", "files", "consumer:claude-code", "human", ...
+	Ref    string // subject id: commit sha, file path, observation id
+	// Payload is embedded as raw JSON, not base64: the ledger must stay
+	// human-inspectable ("장부는 들여다볼 수 있어야 신뢰" — RFC-0005 §4).
+	Payload json.RawMessage // JSON body; schema per Type
 }

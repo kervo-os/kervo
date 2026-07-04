@@ -1,0 +1,2 @@
+{"ID":"01KWPRQF5KGM2T5YC4XJZ340VT","Kind":"observation","Type":"note","At":"2026-07-04T14:32:40.371709Z","Repo":"kervo","Actor":"human:refuse1993","Source":"human","Ref":"","Payload":{"body":"Phase 3 spike: JSONL ledger + capture/hook landed"}}
+{"ID":"01KWPRQF5RCS3SHHY92SS4KKHN","Kind":"fact","Type":"hook:SessionStart","At":"2026-07-04T14:32:40.376861Z","Repo":"kervo","Actor":"agent:claude-code","Source":"consumer:claude-code","Ref":"demo","Payload":{"hook_event_name":"SessionStart","session_id":"demo"}}
