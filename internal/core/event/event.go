@@ -24,8 +24,9 @@ type Event struct {
 	Repo string // repository identity within the workspace (RFC-0004 §2:
 	// a Workspace holds 1+ repos; v1 implements one, the
 	// model assumes many — set even when it seems redundant)
-	Actor string // who recorded/judged — multi-party identity (RFC-0005 §3;
-	// same logic as Repo: costs nothing now, is a migration later)
+	Actor string // who recorded/judged: "human:<name>", "agent:claude-code",
+	// "system" — multi-party identity (RFC-0005 §3; same logic as
+	// Repo: costs nothing now, is a migration later)
 	Source  string // "git", "files", "consumer:claude-code", "human", ...
 	Ref     string // subject id: commit sha, file path, observation id
 	Payload []byte // JSON body; schema per Type
