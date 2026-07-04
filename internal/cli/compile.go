@@ -5,11 +5,14 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/kervo-os/kervo/internal/adapters/consumer/claudecode"
 	"github.com/kervo-os/kervo/internal/adapters/semantic/consumer"
+	"github.com/kervo-os/kervo/internal/adapters/semantic/openaicompat"
 	"github.com/kervo-os/kervo/internal/adapters/source/files"
 	"github.com/kervo-os/kervo/internal/adapters/source/gitexec"
+	"github.com/kervo-os/kervo/internal/core/artifact"
 	"github.com/kervo-os/kervo/internal/core/compiler"
 	"github.com/kervo-os/kervo/internal/core/fact"
 	"github.com/kervo-os/kervo/internal/core/i18n"
@@ -40,19 +43,47 @@ func runCompile(args []string) error {
 		return err
 	}
 
+	// RFC-0003 §4 fallback order: Mode 3 (backend) → Mode 2 (staged
+	// proposals) → Mode 1 (fact-only). A mode failing is a demotion with a
+	// warning, never a failed run.
 	rendered := skeleton
 	mode := "Mode 1 — Fact-only"
-	enh, err := consumer.FileProposals{Dir: *dir}.Propose(ctx, skeleton, snap)
-	switch {
-	case err != nil:
-		fmt.Fprintf(os.Stderr, "kervo: semantic degraded to fact-only: %v\n", err)
-	case len(enh) > 0:
+	var enh []artifact.Enhancement
+
+	if backend, berr := openaicompat.FromEnv(lang); berr != nil {
+		fmt.Fprintf(os.Stderr, "kervo: Mode 3 misconfigured, falling back: %v\n", berr)
+	} else if backend != nil {
+		// The LLM is the real bottleneck — it gets its own budget, off the
+		// 30s Mode-1 contract.
+		semCtx, semCancel := context.WithTimeout(context.Background(), 3*time.Minute)
+		got, perr := backend.Propose(semCtx, skeleton, snap)
+		semCancel()
+		if perr != nil {
+			fmt.Fprintf(os.Stderr, "kervo: Mode 3 failed, falling back: %v\n", perr)
+		} else {
+			enh = got
+			mode = "Mode 3 — backend:" + backend.Model
+		}
+	}
+
+	if enh == nil {
+		got, perr := consumer.FileProposals{Dir: *dir}.Propose(ctx, skeleton, snap)
+		switch {
+		case perr != nil:
+			fmt.Fprintf(os.Stderr, "kervo: Mode 2 proposals invalid, fact-only: %v\n", perr)
+		case len(got) > 0:
+			enh = got
+			mode = fmt.Sprintf("Mode 2 — %d proposals attached (generated)", len(got))
+		}
+	}
+
+	if len(enh) > 0 {
 		attached, aerr := compiler.Attach(skeleton, enh)
 		if aerr != nil {
-			fmt.Fprintf(os.Stderr, "kervo: semantic degraded to fact-only: %v\n", aerr)
+			fmt.Fprintf(os.Stderr, "kervo: attach failed, fact-only: %v\n", aerr)
+			rendered, mode = skeleton, "Mode 1 — Fact-only"
 		} else {
 			rendered = attached
-			mode = fmt.Sprintf("Mode 2 — %d proposals attached (generated)", len(enh))
 		}
 	}
 

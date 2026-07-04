@@ -1,6 +1,9 @@
 package cli
 
 import (
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"strings"
@@ -56,6 +59,49 @@ func TestCompileDegradesOnBadProposals(t *testing.T) {
 	art, _ := os.ReadFile(filepath.Join(dir, ".kervo", "artifact.md"))
 	if !strings.Contains(string(art), "_No proposal yet.") {
 		t.Error("degraded artifact is not the fact-only skeleton")
+	}
+}
+
+// Mode 3 outranks Mode 2 when configured; on backend failure compile
+// falls through to the staged proposals (RFC-0003 §4 chain, e2e).
+func TestCompileMode3ChainAndFallback(t *testing.T) {
+	dir := t.TempDir()
+	git(t, dir, "init", "-q", "-b", "main")
+	writeFile(t, dir, "main.go", "package main\n")
+	git(t, dir, "add", ".")
+	git(t, dir, "commit", "-q", "-m", "initial")
+	writeFile(t, dir, ".kervo/proposals.json", `[{"slot":"goal","body":"Mode 2 fallback goal.","source":"consumer:test"}]`)
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"choices": []map[string]any{{"message": map[string]string{
+				"content": `[{"slot":"goal","body":"Mode 3 backend goal. Evidence: commits."}]`,
+			}}},
+		})
+	}))
+	defer srv.Close()
+
+	t.Setenv("KERVO_SEMANTIC_URL", srv.URL)
+	t.Setenv("KERVO_SEMANTIC_MODEL", "test-model")
+	if err := runCompile([]string{"-dir", dir}); err != nil {
+		t.Fatal(err)
+	}
+	art, _ := os.ReadFile(filepath.Join(dir, ".kervo", "artifact.md"))
+	if !strings.Contains(string(art), "backend:test-model") || !strings.Contains(string(art), "Mode 3 backend goal.") {
+		t.Errorf("Mode 3 result missing:\n%s", art)
+	}
+	if strings.Contains(string(art), "Mode 2 fallback goal.") {
+		t.Error("Mode 2 applied even though Mode 3 succeeded")
+	}
+
+	// Kill the backend: same run must demote to the staged Mode 2 proposals.
+	srv.Close()
+	if err := runCompile([]string{"-dir", dir}); err != nil {
+		t.Fatalf("backend death must demote, not fail: %v", err)
+	}
+	art, _ = os.ReadFile(filepath.Join(dir, ".kervo", "artifact.md"))
+	if !strings.Contains(string(art), "Mode 2 fallback goal.") {
+		t.Error("fallback to Mode 2 proposals did not happen")
 	}
 }
 
