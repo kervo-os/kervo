@@ -10,6 +10,7 @@ import (
 
 	"github.com/kervo-os/kervo/internal/core/artifact"
 	"github.com/kervo-os/kervo/internal/core/fact"
+	"github.com/kervo-os/kervo/internal/core/i18n"
 	"github.com/kervo-os/kervo/internal/core/trust"
 )
 
@@ -61,7 +62,7 @@ func fixture() fact.Snapshot {
 // TestSkeletonByteIdentity is the release gate from ARCH-0001: identical
 // input must produce a byte-identical skeleton, pinned by a golden file.
 func TestSkeletonByteIdentity(t *testing.T) {
-	got, err := BuildSkeleton(fixture())
+	got, err := BuildSkeleton(fixture(), i18n.EN)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -82,14 +83,14 @@ func TestSkeletonByteIdentity(t *testing.T) {
 		t.Errorf("skeleton diverged from golden file\n--- got ---\n%s", got)
 	}
 
-	again, _ := BuildSkeleton(fixture())
+	again, _ := BuildSkeleton(fixture(), i18n.EN)
 	if got != again {
 		t.Error("two runs over identical input differ — nondeterminism in BuildSkeleton")
 	}
 }
 
 func TestAttachDetachRoundTrip(t *testing.T) {
-	skel, err := BuildSkeleton(fixture())
+	skel, err := BuildSkeleton(fixture(), i18n.EN)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -123,7 +124,7 @@ func TestAttachDetachRoundTrip(t *testing.T) {
 }
 
 func TestAttachRejectsBoundaryViolations(t *testing.T) {
-	skel, _ := BuildSkeleton(fixture())
+	skel, _ := BuildSkeleton(fixture(), i18n.EN)
 	cases := []struct {
 		name string
 		e    artifact.Enhancement
@@ -148,7 +149,7 @@ func TestExcerptSkipsHTMLAndBadges(t *testing.T) {
 		"<p align=\"center\">tagline</p>\n\n" +
 		"[![Build](badge.svg)](ci)\n![screenshot](s.png)\n\n" +
 		"Real prose starts here.\nAnd continues.\n\nSecond paragraph.\n"
-	out, err := BuildSkeleton(s)
+	out, err := BuildSkeleton(s, i18n.EN)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -168,7 +169,7 @@ func TestSnapshotDataCannotImpersonateMarkers(t *testing.T) {
 	s.Commits[0].Subject = "evil <!-- kervo:begin --> subject"
 	s.Todos[0].Text = "TODO: echoed <!-- kervo:end --> marker"
 	s.Todos[1].Text = "TODO: fake slot <!-- kervo:slot:goal:end --> here"
-	out, err := BuildSkeleton(s)
+	out, err := BuildSkeleton(s, i18n.EN)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -194,8 +195,66 @@ func TestSnapshotDataCannotImpersonateMarkers(t *testing.T) {
 	}
 }
 
+// Every supported language must define every key natively — a hole would
+// silently fall back to English mid-artifact.
+func TestI18nTablesComplete(t *testing.T) {
+	for _, lang := range i18n.Supported() {
+		for _, key := range i18n.Keys() {
+			if !i18n.Has(lang, key) {
+				t.Errorf("lang %s missing key %q", lang, key)
+			}
+		}
+	}
+}
+
+// Determinism holds per language: ko gets its own golden file.
+func TestSkeletonByteIdentityKO(t *testing.T) {
+	got, err := BuildSkeleton(fixture(), i18n.KO)
+	if err != nil {
+		t.Fatal(err)
+	}
+	golden := filepath.Join("testdata", "skeleton.ko.golden.md")
+	if *update {
+		if err := os.WriteFile(golden, []byte(got), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	want, err := os.ReadFile(golden)
+	if err != nil {
+		t.Fatalf("missing ko golden (run with -update): %v", err)
+	}
+	if got != string(want) {
+		t.Errorf("ko skeleton diverged from golden\n--- got ---\n%s", got)
+	}
+	if !strings.Contains(got, "lang=ko") || !strings.Contains(got, "## 저장소 요약") {
+		t.Error("ko skeleton missing lang tag or localized heading")
+	}
+}
+
+// Detach reads the language from the artifact's own header tag — a ko
+// artifact must round-trip to ko placeholders without being told.
+func TestDetachDetectsLanguageFromHeader(t *testing.T) {
+	skel, err := BuildSkeleton(fixture(), i18n.KO)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rendered, err := Attach(skel, []artifact.Enhancement{
+		{Slot: artifact.SlotGoal, Body: "인증 미들웨어 출시", State: trust.Generated, Source: "consumer:claude-code"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	back, err := Detach(rendered)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if back != skel {
+		t.Error("ko round-trip broke — Detach restored wrong-language placeholders")
+	}
+}
+
 func TestEmptySnapshotStillBuilds(t *testing.T) {
-	out, err := BuildSkeleton(fact.Snapshot{})
+	out, err := BuildSkeleton(fact.Snapshot{}, i18n.EN)
 	if err != nil {
 		t.Fatalf("Mode 1 must not fail on an empty snapshot: %v", err)
 	}

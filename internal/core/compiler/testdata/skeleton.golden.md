@@ -1,4 +1,4 @@
-<!-- kervo:artifact v1 skeleton=fact-only -->
+<!-- kervo:artifact v1 skeleton=fact-only lang=en -->
 # Context Artifact
 
 > Machine-generated context for AI agents. Fact sections are deterministic;

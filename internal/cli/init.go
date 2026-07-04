@@ -20,7 +20,12 @@ const initBudget = 30 * time.Second
 func runInit(args []string) error {
 	fs := newFlagSet("init")
 	dir := fs.String("dir", ".", "workspace directory")
+	langFlag := fs.String("lang", "", "artifact language: en, ko, ja (default: en)")
 	if err := fs.Parse(args); err != nil {
+		return err
+	}
+	lang, err := resolveLang(*dir, *langFlag)
+	if err != nil {
 		return err
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), initBudget)
@@ -28,11 +33,11 @@ func runInit(args []string) error {
 
 	// init is always Mode 1 — the first experience must never depend on a
 	// semantic provider (PRD §6: onboarding = mode order).
-	snap, cursor, skeleton, err := buildSkeleton(ctx, *dir)
+	snap, cursor, skeleton, err := buildSkeleton(ctx, *dir, lang)
 	if err != nil {
 		return err
 	}
-	if err := writeOutputs(ctx, *dir, skeleton, cursor); err != nil {
+	if err := writeOutputs(ctx, *dir, skeleton, cursor, lang); err != nil {
 		return err
 	}
 	fmt.Print(renderColdStart(newUI(), snap, Version))

@@ -3,7 +3,8 @@
 //
 // HARD BOUNDARY (RFC-0003 §2, enforced by `make arch-check` + review):
 // this package must never import LLM clients or adapters. Skeleton output
-// is byte-identical for identical input — guarded by tests.
+// is byte-identical for identical input — guarded by tests. The language
+// is part of the input: per-language golden files pin determinism.
 package compiler
 
 import (
@@ -14,11 +15,12 @@ import (
 
 	"github.com/kervo-os/kervo/internal/core/artifact"
 	"github.com/kervo-os/kervo/internal/core/fact"
+	"github.com/kervo-os/kervo/internal/core/i18n"
 )
 
 // Display caps. Snapshot keeps more; the artifact stays prompt-sized.
 // Constants are part of the byte-identity contract — changing them changes
-// the golden file.
+// the golden files.
 const (
 	maxRecentCommits = 20
 	maxOpenTasks     = 30
@@ -26,52 +28,53 @@ const (
 	maxExcerptLen    = 300
 )
 
-// slotTitles maps each enhancement slot to its section heading.
-var slotTitles = map[string]string{
-	artifact.SlotGoal:      "Possible Current Goal",
-	artifact.SlotDecisions: "Known Decisions",
-	artifact.SlotRisks:     "Known Risks",
-	artifact.SlotSummaries: "Doc Summaries",
+// slotTitleKeys maps each enhancement slot to its heading's i18n key.
+var slotTitleKeys = map[string]string{
+	artifact.SlotGoal:      "slot.goal",
+	artifact.SlotDecisions: "slot.decisions",
+	artifact.SlotRisks:     "slot.risks",
+	artifact.SlotSummaries: "slot.summaries",
 }
 
 // placeholderFor is the empty-slot content. Detach restores it, which is
 // what makes the round-trip invariant byte-exact.
-func placeholderFor(slot string) string {
-	switch slot {
-	case artifact.SlotGoal:
-		return "_No proposal yet. A confirmed goal becomes the first Verified observation._"
-	default:
-		return "_None proposed yet. Semantic providers (Mode 2/3) attach labeled observations here._"
+func placeholderFor(slot string, lang i18n.Lang) string {
+	if slot == artifact.SlotGoal {
+		return i18n.T(lang, "ph.goal")
 	}
+	return i18n.T(lang, "ph.generic")
 }
 
-// BuildSkeleton renders the deterministic Mode-1 artifact.
+// langRe extracts the language tag from the artifact header so Detach can
+// restore the right placeholders without being told the language.
+var langRe = regexp.MustCompile(`<!-- kervo:artifact v1 skeleton=fact-only lang=([a-z]{2}) -->`)
+
+// BuildSkeleton renders the deterministic Mode-1 artifact in lang.
 // Input -> template -> markdown. No LLM, no clock beyond snapshot data.
-func BuildSkeleton(s fact.Snapshot) (string, error) {
+func BuildSkeleton(s fact.Snapshot, lang i18n.Lang) (string, error) {
+	tr := func(key string) string { return i18n.T(lang, key) }
 	var b strings.Builder
 
-	b.WriteString("<!-- kervo:artifact v1 skeleton=fact-only -->\n")
+	b.WriteString("<!-- kervo:artifact v1 skeleton=fact-only lang=" + string(lang) + " -->\n")
 	b.WriteString("# Context Artifact\n\n")
-	b.WriteString("> Machine-generated context for AI agents. Fact sections are deterministic;\n")
-	b.WriteString("> slot sections carry trust-labeled observations. Regenerate with `kervo compile`\n")
-	b.WriteString("> — do not edit by hand.\n\n")
+	b.WriteString(tr("hdr.quote") + "\n\n")
 
-	writeRepoSummary(&b, s)
-	writeCommands(&b, s)
-	writeRecentChanges(&b, s)
-	writeOpenTasks(&b, s)
-	writeRelatedModules(&b, s)
-	writeWorkspaceFacts(&b, s)
+	writeRepoSummary(&b, s, tr)
+	writeCommands(&b, s, tr)
+	writeRecentChanges(&b, s, tr)
+	writeOpenTasks(&b, s, tr)
+	writeRelatedModules(&b, s, tr)
+	writeWorkspaceFacts(&b, s, tr)
 
 	for _, slot := range artifact.Slots() {
-		b.WriteString("## " + slotTitles[slot] + "\n\n")
+		b.WriteString("## " + tr(slotTitleKeys[slot]) + "\n\n")
 		b.WriteString(artifact.SlotBegin(slot) + "\n")
-		b.WriteString(placeholderFor(slot) + "\n")
+		b.WriteString(placeholderFor(slot, lang) + "\n")
 		b.WriteString(artifact.SlotEnd(slot) + "\n\n")
 	}
 
-	b.WriteString("## Deprecated / Stale Notes\n\n")
-	b.WriteString("_None recorded. Stale or deprecated observations are listed here with their\nexclusion reason instead of being silently dropped._\n")
+	b.WriteString("## " + tr("sec.stale") + "\n\n")
+	b.WriteString(tr("stale.empty") + "\n")
 
 	return b.String(), nil
 }
@@ -83,24 +86,24 @@ func esc(s string) string {
 	return strings.ReplaceAll(s, artifact.ReservedPrefix, `<!-- kervo\:`)
 }
 
-func writeRepoSummary(b *strings.Builder, s fact.Snapshot) {
-	b.WriteString("## Repository Summary\n\n")
-	b.WriteString("- Name: " + orDash(esc(s.Repo.Name)) + "\n")
-	b.WriteString("- Branch: " + orDash(esc(s.Repo.Branch)) + "\n")
-	b.WriteString("- Languages: " + orDash(esc(strings.Join(s.Repo.Languages, ", "))) + "\n")
-	b.WriteString("- Frameworks: " + orDash(esc(strings.Join(s.Repo.Frameworks, ", "))) + "\n")
+func writeRepoSummary(b *strings.Builder, s fact.Snapshot, tr func(string) string) {
+	b.WriteString("## " + tr("sec.summary") + "\n\n")
+	b.WriteString("- " + tr("lbl.name") + ": " + orDash(esc(s.Repo.Name)) + "\n")
+	b.WriteString("- " + tr("lbl.branch") + ": " + orDash(esc(s.Repo.Branch)) + "\n")
+	b.WriteString("- " + tr("lbl.languages") + ": " + orDash(esc(strings.Join(s.Repo.Languages, ", "))) + "\n")
+	b.WriteString("- " + tr("lbl.frameworks") + ": " + orDash(esc(strings.Join(s.Repo.Frameworks, ", "))) + "\n")
 	var docNames []string
 	for _, d := range s.Docs {
 		docNames = append(docNames, d.Path)
 	}
-	b.WriteString("- Docs: " + orDash(esc(strings.Join(docNames, ", "))) + "\n\n")
+	b.WriteString("- " + tr("lbl.docs") + ": " + orDash(esc(strings.Join(docNames, ", "))) + "\n\n")
 
 	for _, d := range s.Docs {
 		if d.Path != "README.md" && d.Path != "README" {
 			continue
 		}
 		if ex := firstParagraph(d.Content); ex != "" {
-			b.WriteString("### " + esc(d.Path) + " (excerpt)\n\n")
+			b.WriteString("### " + esc(d.Path) + " " + tr("excerpt.suffix") + "\n\n")
 			b.WriteString("> " + esc(ex) + "\n\n")
 		}
 		break
@@ -110,10 +113,10 @@ func writeRepoSummary(b *strings.Builder, s fact.Snapshot) {
 // writeCommands surfaces workspace-declared entry points. Evidence for the
 // section: Environment/commands is the most prevalent hand-written context
 // type (72% of 401 repos, arXiv:2512.18925) — the thing users re-explain most.
-func writeCommands(b *strings.Builder, s fact.Snapshot) {
-	b.WriteString("## Commands\n\n")
+func writeCommands(b *strings.Builder, s fact.Snapshot, tr func(string) string) {
+	b.WriteString("## " + tr("sec.commands") + "\n\n")
 	if len(s.Commands) == 0 {
-		b.WriteString("_No declared commands found (Makefile targets, package.json scripts)._\n\n")
+		b.WriteString(tr("commands.empty") + "\n\n")
 		return
 	}
 	for _, c := range s.Commands {
@@ -126,10 +129,10 @@ func writeCommands(b *strings.Builder, s fact.Snapshot) {
 	b.WriteString("\n")
 }
 
-func writeRecentChanges(b *strings.Builder, s fact.Snapshot) {
-	b.WriteString("## Recent Changes\n\n")
+func writeRecentChanges(b *strings.Builder, s fact.Snapshot, tr func(string) string) {
+	b.WriteString("## " + tr("sec.recent") + "\n\n")
 	if len(s.Commits) == 0 {
-		b.WriteString("_No commits found._\n\n")
+		b.WriteString(tr("recent.empty") + "\n\n")
 		return
 	}
 	shown := len(s.Commits)
@@ -140,16 +143,16 @@ func writeRecentChanges(b *strings.Builder, s fact.Snapshot) {
 		b.WriteString("- `" + shortSHA(c.SHA) + "` " + c.At.UTC().Format("2006-01-02") + " " + esc(c.Subject) + "\n")
 	}
 	if shown < len(s.Commits) || s.Partial {
-		note := "\n_Showing " + strconv.Itoa(shown) + " of " + strconv.Itoa(len(s.Commits)) + " analyzed commits."
+		note := "\n_" + fmt.Sprintf(tr("recent.showing"), shown, len(s.Commits))
 		if s.Partial {
-			note += " Scan capped — older history not analyzed (Partial)."
+			note += tr("recent.capped")
 		}
 		b.WriteString(note + "_\n")
 	}
 	b.WriteString("\n")
 
 	if len(s.Files) > 0 {
-		b.WriteString("### Frequently Changed Files\n\n")
+		b.WriteString("### " + tr("sec.hotfiles") + "\n\n")
 		n := len(s.Files)
 		if n > maxHotFiles {
 			n = maxHotFiles
@@ -161,10 +164,10 @@ func writeRecentChanges(b *strings.Builder, s fact.Snapshot) {
 	}
 }
 
-func writeOpenTasks(b *strings.Builder, s fact.Snapshot) {
-	b.WriteString("## Open Tasks\n\n")
+func writeOpenTasks(b *strings.Builder, s fact.Snapshot, tr func(string) string) {
+	b.WriteString("## " + tr("sec.tasks") + "\n\n")
 	if len(s.Todos) == 0 {
-		b.WriteString("_No TODO/FIXME comments found._\n\n")
+		b.WriteString(tr("tasks.empty") + "\n\n")
 		return
 	}
 	shown := len(s.Todos)
@@ -175,42 +178,43 @@ func writeOpenTasks(b *strings.Builder, s fact.Snapshot) {
 		b.WriteString("- " + esc(td.Path) + ":" + strconv.Itoa(td.Line) + " — " + esc(td.Text) + "\n")
 	}
 	if shown < len(s.Todos) {
-		b.WriteString("\n_Showing " + strconv.Itoa(shown) + " of " + strconv.Itoa(len(s.Todos)) + " open tasks._\n")
+		b.WriteString("\n_" + fmt.Sprintf(tr("tasks.showing"), shown, len(s.Todos)) + "_\n")
 	}
 	b.WriteString("\n")
 }
 
-func writeRelatedModules(b *strings.Builder, s fact.Snapshot) {
-	b.WriteString("## Related Modules\n\n")
+func writeRelatedModules(b *strings.Builder, s fact.Snapshot, tr func(string) string) {
+	b.WriteString("## " + tr("sec.modules") + "\n\n")
 	if len(s.Modules) == 0 {
-		b.WriteString("_No top-level modules (flat repository)._\n\n")
+		b.WriteString(tr("modules.empty") + "\n\n")
 		return
 	}
 	for _, m := range s.Modules {
-		b.WriteString("- " + esc(m.Path) + "/ (" + strconv.Itoa(m.Files) + " files)\n")
+		b.WriteString(fmt.Sprintf(tr("modules.line"), esc(m.Path), m.Files) + "\n")
 	}
 	b.WriteString("\n")
 }
 
-func writeWorkspaceFacts(b *strings.Builder, s fact.Snapshot) {
-	b.WriteString("## Workspace Facts\n\n")
-	completeness := "complete"
+func writeWorkspaceFacts(b *strings.Builder, s fact.Snapshot, tr func(string) string) {
+	b.WriteString("## " + tr("sec.facts") + "\n\n")
+	completeness := tr("facts.complete")
 	if s.Partial {
-		completeness = "partial — caps hit"
+		completeness = tr("facts.partial")
 	}
-	b.WriteString("- Commits analyzed: " + strconv.Itoa(len(s.Commits)) + " (" + completeness + ")\n")
-	b.WriteString("- Open tasks (TODO/FIXME): " + strconv.Itoa(len(s.Todos)) + "\n")
-	b.WriteString("- Top-level modules: " + strconv.Itoa(len(s.Modules)) + "\n")
-	b.WriteString("- Docs captured: " + strconv.Itoa(len(s.Docs)) + "\n\n")
+	b.WriteString("- " + tr("facts.commits") + ": " + strconv.Itoa(len(s.Commits)) + " (" + completeness + ")\n")
+	b.WriteString("- " + tr("facts.tasks") + ": " + strconv.Itoa(len(s.Todos)) + "\n")
+	b.WriteString("- " + tr("facts.modules") + ": " + strconv.Itoa(len(s.Modules)) + "\n")
+	b.WriteString("- " + tr("facts.docs") + ": " + strconv.Itoa(len(s.Docs)) + "\n\n")
 }
 
 // Attach inserts enhancements into their slots without touching skeleton
 // sections. Removing all enhancements must yield the skeleton unchanged
 // (RFC-0003 §2.2 invariant — covered by a round-trip test).
+// Trust-state labels are protocol tokens and are never localized.
 func Attach(skeleton string, es []artifact.Enhancement) (string, error) {
 	bySlot := map[string][]artifact.Enhancement{}
 	for _, e := range es {
-		if _, ok := slotTitles[e.Slot]; !ok {
+		if _, ok := slotTitleKeys[e.Slot]; !ok {
 			return "", fmt.Errorf("compiler: unknown slot %q", e.Slot)
 		}
 		// An unlabeled enhancement is a §2.3 boundary violation, not a warning.
@@ -243,11 +247,20 @@ func Attach(skeleton string, es []artifact.Enhancement) (string, error) {
 }
 
 // Detach restores every slot to its placeholder: Detach(Attach(s, es)) == s.
+// The language is read from the artifact's own header tag.
 func Detach(rendered string) (string, error) {
+	lang := i18n.EN
+	if m := langRe.FindStringSubmatch(rendered); m != nil {
+		parsed, err := i18n.Parse(m[1])
+		if err != nil {
+			return "", fmt.Errorf("compiler: artifact declares %v", err)
+		}
+		lang = parsed
+	}
 	out := rendered
 	for _, slot := range artifact.Slots() {
 		var err error
-		out, err = replaceSlot(out, slot, placeholderFor(slot))
+		out, err = replaceSlot(out, slot, placeholderFor(slot, lang))
 		if err != nil {
 			return "", err
 		}

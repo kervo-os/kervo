@@ -12,6 +12,7 @@ import (
 	"github.com/kervo-os/kervo/internal/adapters/source/gitexec"
 	"github.com/kervo-os/kervo/internal/core/compiler"
 	"github.com/kervo-os/kervo/internal/core/fact"
+	"github.com/kervo-os/kervo/internal/core/i18n"
 )
 
 // runCompile: rescan -> deterministic skeleton -> attach staged Enhancement
@@ -23,13 +24,18 @@ import (
 func runCompile(args []string) error {
 	fs := newFlagSet("compile")
 	dir := fs.String("dir", ".", "workspace directory")
+	langFlag := fs.String("lang", "", "artifact language: en, ko, ja (default: workspace setting or en)")
 	if err := fs.Parse(args); err != nil {
+		return err
+	}
+	lang, err := resolveLang(*dir, *langFlag)
+	if err != nil {
 		return err
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), initBudget)
 	defer cancel()
 
-	snap, cursor, skeleton, err := buildSkeleton(ctx, *dir)
+	snap, cursor, skeleton, err := buildSkeleton(ctx, *dir, lang)
 	if err != nil {
 		return err
 	}
@@ -50,7 +56,7 @@ func runCompile(args []string) error {
 		}
 	}
 
-	if err := writeOutputs(ctx, *dir, rendered, cursor); err != nil {
+	if err := writeOutputs(ctx, *dir, rendered, cursor, lang); err != nil {
 		return err
 	}
 	fmt.Printf("Artifact: .kervo/artifact.md (%s)\n", mode)
@@ -59,8 +65,8 @@ func runCompile(args []string) error {
 }
 
 // buildSkeleton runs the shared fact pipeline: scan git + files, merge,
-// render the deterministic skeleton.
-func buildSkeleton(ctx context.Context, dir string) (fact.Snapshot, string, string, error) {
+// render the deterministic skeleton in lang.
+func buildSkeleton(ctx context.Context, dir string, lang i18n.Lang) (fact.Snapshot, string, string, error) {
 	snap, cursor, err := gitexec.New().Scan(ctx, dir, "")
 	if err != nil {
 		return fact.Snapshot{}, "", "", err
@@ -70,7 +76,7 @@ func buildSkeleton(ctx context.Context, dir string) (fact.Snapshot, string, stri
 		return fact.Snapshot{}, "", "", err
 	}
 	snap = mergeSnapshots(snap, fsnap)
-	skeleton, err := compiler.BuildSkeleton(snap)
+	skeleton, err := compiler.BuildSkeleton(snap, lang)
 	if err != nil {
 		return fact.Snapshot{}, "", "", err
 	}
@@ -78,8 +84,8 @@ func buildSkeleton(ctx context.Context, dir string) (fact.Snapshot, string, stri
 }
 
 // writeOutputs stages the injection before any write (no partial state),
-// then persists artifact, cursor, and the consumer file.
-func writeOutputs(ctx context.Context, dir, rendered, cursor string) error {
+// then persists artifact, cursor, language, and the consumer file.
+func writeOutputs(ctx context.Context, dir, rendered, cursor string, lang i18n.Lang) error {
 	injector := claudecode.Injector{}
 	injPath, injContent, err := injector.Render(dir, rendered)
 	if err != nil {
@@ -93,6 +99,9 @@ func writeOutputs(ctx context.Context, dir, rendered, cursor string) error {
 		return err
 	}
 	if err := os.WriteFile(filepath.Join(stateDir, "cursor"), []byte(cursor+"\n"), 0o644); err != nil {
+		return err
+	}
+	if err := os.WriteFile(filepath.Join(stateDir, "lang"), []byte(string(lang)+"\n"), 0o644); err != nil {
 		return err
 	}
 	return injector.Apply(injPath, injContent)
