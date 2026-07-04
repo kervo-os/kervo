@@ -54,6 +54,43 @@ warned, the fact skeleton always produced.
 Artifacts render in English by default; `--lang ko` / `--lang ja` localize
 them (the choice persists per workspace).
 
+## Capture: wire the hooks
+
+Live capture feeds the ledger and the built-in measurement counters.
+For Claude Code, add to your project's `.claude/settings.json`
+(hooks run in the project directory, so `kervo` just needs to be on PATH):
+
+```json
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      { "hooks": [{ "type": "command", "command": "kervo hook || true", "timeout": 10 }] }
+    ],
+    "SessionStart": [
+      { "hooks": [{ "type": "command", "command": "kervo hook || true", "timeout": 10 }] }
+    ],
+    "PostToolUse": [
+      { "matcher": "Edit|Write",
+        "hooks": [{ "type": "command", "command": "kervo hook || true", "timeout": 10 }] }
+    ]
+  }
+}
+```
+
+The hook is a millisecond-budget local append — no LLM, no network, and
+it never breaks your session (garbage in, exit 0 out). The committed
+ledger stores **names, paths, and sizes only**: prompt and file contents
+never leave your machine or enter git history.
+
+What you get:
+
+```bash
+kervo capture -type decision -body "JWT over sessions"   # record by hand
+kervo trust -id 01KWP -to verified -reason "team agreed" # judge
+kervo status                                             # one-screen trust view
+kervo metrics                                            # prompt sizes: with vs without artifact
+```
+
 ## Why trust labels
 
 Accumulated context rots — and wrong context is worse than none. Every
