@@ -26,6 +26,9 @@
 
 ## Recent Changes
 
+- `1ed8e65` 2026-07-04 capture: event ledger + manual capture + consumer hook (H2' spike, build side)
+- `990755f` 2026-07-04 event: adopt Actor value convention from planning-session skeleton
+- `307b330` 2026-07-04 storage: adopt RFC-0005 layout — events are truth, artifacts are derived
 - `cafedbe` 2026-07-04 packaging: npm name is @kervo-os/kervo (unscoped blocked by typosquat filter)
 - `b61de3e` 2026-07-04 packaging: npm wrapper v0.0.1 (name reservation + future npx channel)
 - `92d18b3` 2026-07-04 openaicompat: tolerate trailing commas (field finding from gpt-oss-120b)
@@ -41,16 +44,16 @@
 
 ### Frequently Changed Files
 
+- internal/cli/compile.go (5)
+- .gitignore (4)
+- .kervo/artifact.md (4)
+- CLAUDE.md (4)
 - internal/adapters/source/files/files.go (4)
 - internal/adapters/source/files/files_test.go (4)
-- internal/cli/compile.go (4)
 - internal/cli/init.go (4)
 - internal/core/compiler/compiler.go (4)
 - internal/core/compiler/compiler_test.go (4)
-- .gitignore (3)
-- .kervo/artifact.md (3)
-- CLAUDE.md (3)
-- internal/core/compiler/testdata/skeleton.golden.md (3)
+- internal/core/event/event.go (4)
 
 ## Open Tasks
 
@@ -61,12 +64,12 @@ _No TODO/FIXME comments found._
 - .github/ (1 files)
 - assets/ (1 files)
 - cmd/ (1 files)
-- internal/ (40 files)
+- internal/ (44 files)
 - packaging/ (3 files)
 
 ## Workspace Facts
 
-- Commits analyzed: 12 (complete)
+- Commits analyzed: 15 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 5
 - Docs captured: 1
@@ -92,11 +95,14 @@ _None proposed yet. Semantic providers (Mode 2/3) attach labeled observations he
 ## Doc Summaries
 
 <!-- kervo:slot:summaries:begin -->
-_None proposed yet. Semantic providers (Mode 2/3) attach labeled observations here._
+**[verified — human:refuse1993]**
+Phase 3 spike: JSONL ledger + capture/hook landed
 <!-- kervo:slot:summaries:end -->
 
 ## Deprecated / Stale Notes
 
+<!-- kervo:slot:stale:begin -->
 _None recorded. Stale or deprecated observations are listed here with their
 exclusion reason instead of being silently dropped._
+<!-- kervo:slot:stale:end -->
 <!-- kervo:end -->

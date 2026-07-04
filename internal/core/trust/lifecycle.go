@@ -14,11 +14,14 @@ const (
 )
 
 // CanTransition encodes the allowed edges.
-// Generated -> Observed -> Verified; any -> Stale; Stale -> {Verified, Deprecated}.
+// Generated -> {Observed, Verified}; Observed -> Verified; any -> Stale;
+// Stale -> {Verified, Deprecated}. Generated -> Verified is legal because a
+// human confirmation of a fresh proposal is one act, not two (PRD §7.2:
+// the Cold Start goal Confirm becomes the first Verified).
 func CanTransition(from, to State) bool {
 	switch from {
 	case Generated:
-		return to == Observed || to == Stale || to == Deprecated
+		return to == Observed || to == Verified || to == Stale || to == Deprecated
 	case Observed:
 		return to == Verified || to == Stale || to == Deprecated
 	case Verified:

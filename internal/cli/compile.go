@@ -2,9 +2,11 @@ package cli
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"time"
 
 	"github.com/kervo-os/kervo/internal/adapters/consumer/claudecode"
@@ -12,22 +14,26 @@ import (
 	"github.com/kervo-os/kervo/internal/adapters/semantic/openaicompat"
 	"github.com/kervo-os/kervo/internal/adapters/source/files"
 	"github.com/kervo-os/kervo/internal/adapters/source/gitexec"
+	"github.com/kervo-os/kervo/internal/adapters/store/jsonl"
 	"github.com/kervo-os/kervo/internal/core/artifact"
 	"github.com/kervo-os/kervo/internal/core/compiler"
+	"github.com/kervo-os/kervo/internal/core/event"
 	"github.com/kervo-os/kervo/internal/core/fact"
 	"github.com/kervo-os/kervo/internal/core/i18n"
+	"github.com/kervo-os/kervo/internal/core/trust"
 )
 
-// runCompile: rescan -> deterministic skeleton -> attach staged Enhancement
-// proposals (Mode 2, file transport) -> artifact + CLAUDE.md injection.
-// Degradation is the RFC-0003 §4 contract: any semantic failure demotes to
-// the fact-only skeleton with a warning — never a failed run.
-// (Event-store replay and Mode 3 backends join here later; the cursor is
-// refreshed for future incremental scans.)
+// runCompile: rescan -> skeleton -> ingest new proposals into the ledger
+// (Mode 3 backend, else staged Mode 2 file — RFC-0003 §4 chain, failures
+// demote with a warning) -> age-based stale sweep -> render EVERYTHING from
+// the replayed trust view (PRD §7.2 treatment: Verified first, labeled
+// Observed/Generated, Stale listed with reasons, Deprecated excluded from
+// the artifact but preserved in the ledger).
 func runCompile(args []string) error {
 	fs := newFlagSet("compile")
 	dir := fs.String("dir", ".", "workspace directory")
 	langFlag := fs.String("lang", "", "artifact language: en, ko, ja (default: workspace setting or en)")
+	staleAfter := fs.Duration("stale-after", 720*time.Hour, "demote generated/observed observations older than this")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
@@ -42,57 +48,219 @@ func runCompile(args []string) error {
 	if err != nil {
 		return err
 	}
+	store := jsonl.Open(*dir)
 
-	// RFC-0003 §4 fallback order: Mode 3 (backend) → Mode 2 (staged
-	// proposals) → Mode 1 (fact-only). A mode failing is a demotion with a
-	// warning, never a failed run.
-	rendered := skeleton
+	// ── 1. Collect this run's proposals (Mode 3 → Mode 2 → none).
 	mode := "Mode 1 — Fact-only"
-	var enh []artifact.Enhancement
-
+	var proposals []artifact.Enhancement
+	usedBackend := false
 	if backend, berr := openaicompat.FromEnv(lang); berr != nil {
 		fmt.Fprintf(os.Stderr, "kervo: Mode 3 misconfigured, falling back: %v\n", berr)
 	} else if backend != nil {
-		// The LLM is the real bottleneck — it gets its own budget, off the
-		// 30s Mode-1 contract.
 		semCtx, semCancel := context.WithTimeout(context.Background(), 3*time.Minute)
 		got, perr := backend.Propose(semCtx, skeleton, snap)
 		semCancel()
 		if perr != nil {
 			fmt.Fprintf(os.Stderr, "kervo: Mode 3 failed, falling back: %v\n", perr)
 		} else {
-			enh = got
+			proposals, usedBackend = got, true
 			mode = "Mode 3 — backend:" + backend.Model
 		}
 	}
-
-	if enh == nil {
+	if !usedBackend {
 		got, perr := consumer.FileProposals{Dir: *dir}.Propose(ctx, skeleton, snap)
 		switch {
 		case perr != nil:
 			fmt.Fprintf(os.Stderr, "kervo: Mode 2 proposals invalid, fact-only: %v\n", perr)
 		case len(got) > 0:
-			enh = got
-			mode = fmt.Sprintf("Mode 2 — %d proposals attached (generated)", len(got))
+			proposals = got
+			mode = "Mode 2 — staged proposals"
 		}
 	}
 
+	// ── 2. Ingest proposals as Generated observations. Backends gap-fill
+	// only (never spam slots that already carry live context); staged
+	// proposals dedup by (slot, body).
+	folder, err := replayFolder(store)
+	if err != nil {
+		return err
+	}
+	repo := filepath.Base(mustAbs(*dir))
+	if n, err := ingestProposals(store, folder, proposals, repo, usedBackend); err != nil {
+		return err
+	} else if n > 0 {
+		fmt.Fprintf(os.Stderr, "kervo: %d new observation(s) entered the ledger as generated\n", n)
+	}
+
+	// ── 3. Conservative stale sweep: age only, never semantics (PRD §7.2);
+	// Verified survives — only a human may demote what a human confirmed.
+	folder, err = replayFolder(store)
+	if err != nil {
+		return err
+	}
+	if err := sweepStale(store, folder, repo, *staleAfter); err != nil {
+		return err
+	}
+
+	// ── 4. Render from the trust view.
+	folder, err = replayFolder(store)
+	if err != nil {
+		return err
+	}
+	enh, staleNotes := renderView(folder)
+	rendered := skeleton
 	if len(enh) > 0 {
-		attached, aerr := compiler.Attach(skeleton, enh)
-		if aerr != nil {
-			fmt.Fprintf(os.Stderr, "kervo: attach failed, fact-only: %v\n", aerr)
-			rendered, mode = skeleton, "Mode 1 — Fact-only"
-		} else {
-			rendered = attached
+		rendered, err = compiler.Attach(skeleton, enh)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "kervo: attach failed, fact-only: %v\n", err)
+			rendered = skeleton
 		}
+	}
+	rendered, err = compiler.AttachStale(rendered, staleNotes)
+	if err != nil {
+		return err
 	}
 
 	if err := writeOutputs(ctx, *dir, rendered, cursor, lang); err != nil {
 		return err
 	}
-	fmt.Printf("Artifact: .kervo/artifact.md (%s)\n", mode)
+	fmt.Printf("Artifact: .kervo/artifact.md (%s · ledger: %d live, %d stale)\n", mode, len(enh), len(staleNotes))
 	fmt.Println("Injected: CLAUDE.md (marker block)")
 	return nil
+}
+
+func ingestProposals(store *jsonl.Store, folder *trust.Folder, proposals []artifact.Enhancement, repo string, gapFillOnly bool) (int, error) {
+	if len(proposals) == 0 {
+		return 0, nil
+	}
+	liveSlot := map[string]bool{}
+	seen := map[string]bool{}
+	for _, o := range folder.Observations() {
+		if o.State == trust.Deprecated {
+			continue
+		}
+		slot := slotForType(o.Type)
+		seen[slot+"\x00"+o.Body] = true
+		if o.State != trust.Stale {
+			liveSlot[slot] = true
+		}
+	}
+	n := 0
+	for _, p := range proposals {
+		if gapFillOnly && liveSlot[p.Slot] {
+			continue
+		}
+		if seen[p.Slot+"\x00"+p.Body] {
+			continue
+		}
+		payload, err := json.Marshal(map[string]string{"body": p.Body})
+		if err != nil {
+			return n, err
+		}
+		if _, err := store.Append(context.Background(), event.Event{
+			Kind:    event.KindObservation,
+			Type:    typeForSlot(p.Slot),
+			Repo:    repo,
+			Actor:   p.Source, // provider identity — non-human, so it enters as Generated
+			Source:  p.Source,
+			Payload: json.RawMessage(payload),
+		}); err != nil {
+			return n, err
+		}
+		seen[p.Slot+"\x00"+p.Body] = true
+		n++
+	}
+	return n, nil
+}
+
+func sweepStale(store *jsonl.Store, folder *trust.Folder, repo string, staleAfter time.Duration) error {
+	if staleAfter <= 0 {
+		return nil
+	}
+	now := time.Now().UTC()
+	for _, o := range folder.Observations() {
+		if o.State != trust.Generated && o.State != trust.Observed {
+			continue
+		}
+		age := now.Sub(o.At)
+		if age <= staleAfter {
+			continue
+		}
+		reason := fmt.Sprintf("age %dd > %dd without reaffirmation", int(age.Hours()/24), int(staleAfter.Hours()/24))
+		payload, err := json.Marshal(map[string]string{"to": string(trust.Stale), "reason": reason})
+		if err != nil {
+			return err
+		}
+		if _, err := store.Append(context.Background(), event.Event{
+			Kind: event.KindTransition, Type: "transition", Repo: repo,
+			Actor: "system", Source: "system", Ref: o.ID,
+			Payload: json.RawMessage(payload),
+		}); err != nil {
+			return err
+		}
+		fmt.Fprintf(os.Stderr, "kervo: %s demoted to stale (%s)\n", shortID(o.ID), reason)
+	}
+	return nil
+}
+
+// renderView applies the PRD §7.2 treatment table to the folded ledger.
+func renderView(folder *trust.Folder) ([]artifact.Enhancement, []compiler.StaleNote) {
+	var enh []artifact.Enhancement
+	var stale []compiler.StaleNote
+	for _, o := range folder.Observations() {
+		switch o.State {
+		case trust.Verified, trust.Observed, trust.Generated:
+			enh = append(enh, artifact.Enhancement{
+				Slot: slotForType(o.Type), Body: o.Body,
+				State: o.State, Source: o.LastActor, Conflict: o.Conflict,
+			})
+		case trust.Stale:
+			reason := o.Reason
+			if reason == "" {
+				reason = "stale"
+			}
+			stale = append(stale, compiler.StaleNote{Body: o.Body, Reason: reason, Actor: o.LastActor})
+		case trust.Deprecated:
+			// excluded from the artifact; the ledger keeps the history
+		}
+	}
+	rank := map[trust.State]int{trust.Verified: 0, trust.Observed: 1, trust.Generated: 2}
+	sort.SliceStable(enh, func(i, j int) bool { return rank[enh[i].State] < rank[enh[j].State] })
+	return enh, stale
+}
+
+func slotForType(t string) string {
+	switch t {
+	case "decision":
+		return artifact.SlotDecisions
+	case "risk":
+		return artifact.SlotRisks
+	case "goal":
+		return artifact.SlotGoal
+	default: // note, summary, correction, ...
+		return artifact.SlotSummaries
+	}
+}
+
+func typeForSlot(s string) string {
+	switch s {
+	case artifact.SlotDecisions:
+		return "decision"
+	case artifact.SlotRisks:
+		return "risk"
+	case artifact.SlotGoal:
+		return "goal"
+	default:
+		return "summary"
+	}
+}
+
+func mustAbs(dir string) string {
+	abs, err := filepath.Abs(dir)
+	if err != nil {
+		return dir
+	}
+	return abs
 }
 
 // buildSkeleton runs the shared fact pipeline: scan git + files, merge,

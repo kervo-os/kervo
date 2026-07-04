@@ -79,5 +79,7 @@ _None proposed yet. Semantic providers (Mode 2/3) attach labeled observations he
 
 ## Deprecated / Stale Notes
 
+<!-- kervo:slot:stale:begin -->
 _None recorded. Stale or deprecated observations are listed here with their
 exclusion reason instead of being silently dropped._
+<!-- kervo:slot:stale:end -->

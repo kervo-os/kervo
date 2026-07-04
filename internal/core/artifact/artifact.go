@@ -43,8 +43,9 @@ func SlotEnd(slot string) string   { return "<!-- kervo:slot:" + slot + ":end --
 // The compiler renders trust labels; it never assigns states
 // (RFC-0003 §2.2 — states are set by the lifecycle, not the renderer).
 type Enhancement struct {
-	Slot   string
-	Body   string
-	State  trust.State
-	Source string // provider identity, printed as provenance
+	Slot     string
+	Body     string
+	State    trust.State
+	Source   string // provider identity, printed as provenance
+	Conflict bool   // actors' latest judgments disagree — rendered, never hidden
 }

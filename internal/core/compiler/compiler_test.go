@@ -176,9 +176,9 @@ func TestSnapshotDataCannotImpersonateMarkers(t *testing.T) {
 	if strings.Contains(out, artifact.MarkerBegin) || strings.Contains(out, artifact.MarkerEnd) {
 		t.Error("data-derived begin/end marker survived into the skeleton")
 	}
-	// Exactly the template's own structural markers: header + 4 slot pairs.
-	if got := strings.Count(out, artifact.ReservedPrefix); got != 9 {
-		t.Errorf("reserved-prefix count = %d, want 9 (impostor escaped none?)", got)
+	// Exactly the template's own structural markers: header + 4 slot pairs + stale pair.
+	if got := strings.Count(out, artifact.ReservedPrefix); got != 11 {
+		t.Errorf("reserved-prefix count = %d, want 11 (impostor escaped none?)", got)
 	}
 	// Slot machinery must still work on the escaped skeleton.
 	es := []artifact.Enhancement{{Slot: artifact.SlotGoal, Body: "g", State: trust.Generated, Source: "s"}}

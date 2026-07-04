@@ -74,9 +74,36 @@ func BuildSkeleton(s fact.Snapshot, lang i18n.Lang) (string, error) {
 	}
 
 	b.WriteString("## " + tr("sec.stale") + "\n\n")
+	b.WriteString(artifact.SlotBegin(staleSlot) + "\n")
 	b.WriteString(tr("stale.empty") + "\n")
+	b.WriteString(artifact.SlotEnd(staleSlot) + "\n")
 
 	return b.String(), nil
+}
+
+// staleSlot is compiler-owned: providers cannot target it (it is not in
+// slotTitleKeys), only the trust view fills it via AttachStale.
+const staleSlot = "stale"
+
+// StaleNote is one excluded observation, shown with its exclusion reason
+// instead of being silently dropped (PRD §7.2 treatment table).
+type StaleNote struct {
+	Body   string
+	Reason string
+	Actor  string // who demoted it (often "system")
+}
+
+// AttachStale fills the Deprecated/Stale section. Empty notes = no-op
+// (the placeholder stays, keeping Detach round-trips byte-exact).
+func AttachStale(doc string, notes []StaleNote) (string, error) {
+	if len(notes) == 0 {
+		return doc, nil
+	}
+	var lines []string
+	for _, n := range notes {
+		lines = append(lines, "- **[stale — "+esc(n.Reason)+"]** "+esc(n.Body)+" _("+esc(n.Actor)+")_")
+	}
+	return replaceSlot(doc, staleSlot, strings.Join(lines, "\n"))
 }
 
 // esc neutralizes the reserved marker prefix inside snapshot-derived text.
@@ -235,7 +262,11 @@ func Attach(skeleton string, es []artifact.Enhancement) (string, error) {
 		}
 		var parts []string
 		for _, e := range entries {
-			parts = append(parts, "**["+string(e.State)+" — "+e.Source+"]**\n"+strings.TrimSpace(e.Body))
+			label := "**[" + string(e.State) + " — " + e.Source + "]**"
+			if e.Conflict {
+				label += " ⚠ conflict"
+			}
+			parts = append(parts, label+"\n"+strings.TrimSpace(e.Body))
 		}
 		var err error
 		out, err = replaceSlot(out, slot, strings.Join(parts, "\n\n"))
@@ -264,6 +295,11 @@ func Detach(rendered string) (string, error) {
 		if err != nil {
 			return "", err
 		}
+	}
+	// The compiler-owned stale region round-trips too.
+	out, err := replaceSlot(out, staleSlot, i18n.T(lang, "stale.empty"))
+	if err != nil {
+		return "", err
 	}
 	return out, nil
 }

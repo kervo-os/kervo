@@ -16,7 +16,9 @@ func commands() []command {
 	return []command{
 		{"init", "Scan workspace, build Cold Start artifact (Mode 1, 30s budget)", runInit},
 		{"compile", "Incremental scan + recompile artifact (fallback: RFC-0003 §4)", runCompile},
-		{"capture", "Record an Observation into the event store", runCapture},
+		{"capture", "Record an Observation into the event ledger", runCapture},
+		{"trust", "Judge an observation: -id <prefix> -to verified|stale|deprecated", runTrust},
+		{"status", "One-screen view: ledger size, trust states, observations", runStatus},
 		{"hook", "Entry point invoked by Consumer hooks (stdin JSON)", runHook},
 		{"mcp", "Serve stdio MCP (Facts out, Observations in)", runMCP},
 		{"version", "Print version", runVersion},
