@@ -19,6 +19,7 @@ func commands() []command {
 		{"capture", "Record an Observation into the event ledger", runCapture},
 		{"trust", "Judge an observation: -id <prefix> -to verified|stale|deprecated", runTrust},
 		{"status", "One-screen view: ledger size, trust states, observations", runStatus},
+		{"metrics", "H3 counters: prompt sizes with vs without the artifact", runMetrics},
 		{"hook", "Entry point invoked by Consumer hooks (stdin JSON)", runHook},
 		{"mcp", "Serve stdio MCP (Facts out, Observations in)", runMCP},
 		{"version", "Print version", runVersion},

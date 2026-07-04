@@ -7,8 +7,10 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/kervo-os/kervo/internal/adapters/store/jsonl"
+	"github.com/kervo-os/kervo/internal/core/artifact"
 	"github.com/kervo-os/kervo/internal/core/event"
 )
 
@@ -56,19 +58,89 @@ func runHook(args []string) error {
 	if err != nil {
 		return err
 	}
-	if _, err := jsonl.Open(*dir).Append(context.Background(), event.Event{
+	repo := filepath.Base(abs)
+	store := jsonl.Open(*dir)
+
+	// The ledger is committed to git: payloads carry SIZES AND NAMES, never
+	// content (prompts and file bodies would leak into history otherwise).
+	reduced, err := json.Marshal(reducePayload(payload))
+	if err != nil {
+		reduced = []byte("{}")
+	}
+	if _, err := store.Append(context.Background(), event.Event{
 		Kind:    event.KindFact,
 		Type:    "hook:" + hookName,
-		Repo:    filepath.Base(abs),
+		Repo:    repo,
 		Actor:   "agent:claude-code",
 		Source:  "consumer:claude-code",
 		Ref:     ref,
-		Payload: json.RawMessage(raw),
+		Payload: json.RawMessage(reduced),
 	}); err != nil {
 		// Failing to persist is worth a warning, but never a broken session.
 		fmt.Fprintf(os.Stderr, "kervo hook: append failed: %v\n", err)
 	}
+
+	// H3 counters ride the capture path (PRD §12: cannot be added after
+	// the fact). Each prompt yields one deterministic metric event carrying
+	// the A/B variable: was the compiled artifact present when typed?
+	if hookName == "UserPromptSubmit" {
+		if prompt := firstString(payload, "prompt", "user_prompt", "userPrompt"); prompt != "" {
+			present, artifactBytes := artifactInjected(*dir)
+			m, err := json.Marshal(map[string]any{
+				"session":          firstString(payload, "session_id", "sessionId"),
+				"prompt_chars":     len(prompt),
+				"prompt_words":     len(strings.Fields(prompt)),
+				"artifact_present": present,
+				"artifact_bytes":   artifactBytes,
+			})
+			if err == nil {
+				if _, err := store.Append(context.Background(), event.Event{
+					Kind: event.KindFact, Type: "metric:prompt", Repo: repo,
+					Actor: "system", Source: "consumer:claude-code",
+					Ref:     firstString(payload, "session_id", "sessionId"),
+					Payload: json.RawMessage(m),
+				}); err != nil {
+					fmt.Fprintf(os.Stderr, "kervo hook: metric append failed: %v\n", err)
+				}
+			}
+		}
+	}
 	return nil
+}
+
+// reducePayload keeps only measurement-grade fields: names, paths, sizes.
+func reducePayload(payload map[string]any) map[string]any {
+	out := map[string]any{}
+	for _, k := range []string{"hook_event_name", "hookEventName", "tool_name", "toolName", "session_id", "sessionId"} {
+		if v, ok := payload[k].(string); ok && v != "" {
+			out[k] = v
+		}
+	}
+	if prompt := firstString(payload, "prompt", "user_prompt", "userPrompt"); prompt != "" {
+		out["prompt_chars"] = len(prompt)
+	}
+	if ti, ok := payload["tool_input"].(map[string]any); ok {
+		if fp, ok := ti["file_path"].(string); ok && fp != "" {
+			out["file_path"] = fp // paths are already public in git
+		}
+		if c, ok := ti["content"].(string); ok {
+			out["content_chars"] = len(c)
+		}
+		if c, ok := ti["command"].(string); ok {
+			out["command_chars"] = len(c) // commands may embed secrets — size only
+		}
+	}
+	return out
+}
+
+// artifactInjected reports whether CLAUDE.md carried the kervo block at
+// this moment, and how large the whole file was — the H3 A/B variable.
+func artifactInjected(dir string) (bool, int) {
+	raw, err := os.ReadFile(filepath.Join(dir, "CLAUDE.md"))
+	if err != nil {
+		return false, 0
+	}
+	return strings.Contains(string(raw), artifact.MarkerBegin), len(raw)
 }
 
 // hookIsRecursive is the single shared guard (two signals, per the
