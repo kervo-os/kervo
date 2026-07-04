@@ -115,7 +115,8 @@ func buildSkeleton(ctx context.Context, dir string, lang i18n.Lang) (fact.Snapsh
 }
 
 // writeOutputs stages the injection before any write (no partial state),
-// then persists artifact, cursor, language, and the consumer file.
+// then persists artifact, cursor, language, the consumer file, and the
+// RFC-0005 ignore rules (derived state never gets committed).
 func writeOutputs(ctx context.Context, dir, rendered, cursor string, lang i18n.Lang) error {
 	injector := claudecode.Injector{}
 	injPath, injContent, err := injector.Render(dir, rendered)
@@ -123,16 +124,21 @@ func writeOutputs(ctx context.Context, dir, rendered, cursor string, lang i18n.L
 		return err
 	}
 	stateDir := filepath.Join(dir, ".kervo")
-	if err := os.MkdirAll(stateDir, 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Join(stateDir, "cache"), 0o755); err != nil {
 		return err
 	}
 	if err := os.WriteFile(filepath.Join(stateDir, "artifact.md"), []byte(rendered), 0o644); err != nil {
 		return err
 	}
-	if err := os.WriteFile(filepath.Join(stateDir, "cursor"), []byte(cursor+"\n"), 0o644); err != nil {
+	// Incremental scan cursor lives under cache/ (RFC-0005 §2.1 layout).
+	if err := os.WriteFile(filepath.Join(stateDir, "cache", "cursor"), []byte(cursor+"\n"), 0o644); err != nil {
 		return err
 	}
+	// lang is a workspace choice (not derivable) — stays committable.
 	if err := os.WriteFile(filepath.Join(stateDir, "lang"), []byte(string(lang)+"\n"), 0o644); err != nil {
+		return err
+	}
+	if err := ensureGitignore(dir); err != nil {
 		return err
 	}
 	return injector.Apply(injPath, injContent)

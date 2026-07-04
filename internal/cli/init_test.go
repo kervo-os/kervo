@@ -64,9 +64,24 @@ func TestInitEndToEnd(t *testing.T) {
 		}
 	}
 
-	cursor, err := os.ReadFile(filepath.Join(dir, ".kervo", "cursor"))
+	cursor, err := os.ReadFile(filepath.Join(dir, ".kervo", "cache", "cursor"))
 	if err != nil || len(strings.TrimSpace(string(cursor))) != 40 {
-		t.Errorf("cursor not persisted: %q err=%v", cursor, err)
+		t.Errorf("cursor not persisted under cache/: %q err=%v", cursor, err)
+	}
+
+	// RFC-0005 §2.4: init auto-registers derived-state ignore rules,
+	// idempotently and without touching existing human rules.
+	gi, err := os.ReadFile(filepath.Join(dir, ".gitignore"))
+	if err != nil {
+		t.Fatalf(".gitignore not created: %v", err)
+	}
+	for _, rule := range []string{".kervo/artifact.md", ".kervo/index.db", ".kervo/cache/"} {
+		if !strings.Contains(string(gi), rule) {
+			t.Errorf(".gitignore missing %q", rule)
+		}
+	}
+	if strings.Count(string(gi), ".kervo/artifact.md") != 1 {
+		t.Error("ignore rules duplicated across runs (init ran twice above)")
 	}
 
 	claude, err := os.ReadFile(filepath.Join(dir, "CLAUDE.md"))
