@@ -123,7 +123,14 @@ func writeRepoSummary(b *strings.Builder, s fact.Snapshot, tr func(string) strin
 	for _, d := range s.Docs {
 		docNames = append(docNames, d.Path)
 	}
-	b.WriteString("- " + tr("lbl.docs") + ": " + orDash(esc(strings.Join(docNames, ", "))) + "\n\n")
+	// Monorepos can carry a doc per module; keep the summary line scannable.
+	const maxDocsListed = 12
+	docsLine := strings.Join(docNames, ", ")
+	if len(docNames) > maxDocsListed {
+		docsLine = strings.Join(docNames[:maxDocsListed], ", ") +
+			" (+" + strconv.Itoa(len(docNames)-maxDocsListed) + ")"
+	}
+	b.WriteString("- " + tr("lbl.docs") + ": " + orDash(esc(docsLine)) + "\n\n")
 
 	for _, d := range s.Docs {
 		if d.Path != "README.md" && d.Path != "README" {

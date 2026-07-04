@@ -264,3 +264,23 @@ func TestEmptySnapshotStillBuilds(t *testing.T) {
 		}
 	}
 }
+
+// Monorepos can surface a doc per module; the summary line lists at most 12
+// and folds the rest into a count so the artifact stays scannable.
+func TestDocsLineCapped(t *testing.T) {
+	s := fixture()
+	s.Docs = nil
+	for _, m := range []string{"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n"} {
+		s.Docs = append(s.Docs, fact.DocSummaryInput{Path: m + "/CLAUDE.md", Content: "module " + m + "\n"})
+	}
+	got, err := BuildSkeleton(s, i18n.EN)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(got, "l/CLAUDE.md (+2)") {
+		t.Errorf("docs line not capped with fold count:\n%s", got)
+	}
+	if strings.Contains(got, "m/CLAUDE.md") || strings.Contains(got, "n/CLAUDE.md") {
+		t.Error("docs beyond the cap leaked into the summary line")
+	}
+}

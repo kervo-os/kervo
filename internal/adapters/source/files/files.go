@@ -55,30 +55,65 @@ func (s *Scanner) Scan(ctx context.Context, dir, _ string) (fact.Snapshot, strin
 	return snap, "", nil
 }
 
+// maxDocs bounds the doc list on monorepos (12 modules × 2 docs adds up).
+const maxDocs = 20
+
 func (s *Scanner) readDocs(dir string) []fact.DocSummaryInput {
 	var docs []fact.DocSummaryInput
-	for _, name := range docCandidates {
-		raw, err := os.ReadFile(filepath.Join(dir, name))
+	add := func(rel string) {
+		if len(docs) >= maxDocs {
+			return
+		}
+		raw, err := os.ReadFile(filepath.Join(dir, rel))
 		if err != nil {
-			continue
+			return
 		}
 		content := string(raw)
-		if name == "CLAUDE.md" {
+		if filepath.Base(rel) == "CLAUDE.md" {
 			// Never feed our own injected block back in (feedback loop).
 			content = stripMarkerBlock(content)
 			// A CLAUDE.md that is nothing but our block carries zero human
 			// context — counting it as a captured doc makes init change its
 			// own next scan (caught by the compile==init byte test).
 			if strings.TrimSpace(content) == "" {
-				continue
+				return
 			}
 		}
 		docs = append(docs, fact.DocSummaryInput{
-			Path:    name,
+			Path:    rel,
 			Content: capAtNewline(content, s.maxDocBytes()),
 		})
 	}
+	for _, name := range docCandidates {
+		add(name)
+	}
+	// Monorepo support: modules often carry their own context docs
+	// (field evidence: a 12-module CTI repo maintained api/CLAUDE.md,
+	// database/CLAUDE.md, ... by hand — the richest context on disk).
+	for _, mod := range moduleDirs(dir) {
+		add(filepath.Join(mod, "CLAUDE.md"))
+		add(filepath.Join(mod, "README.md"))
+	}
 	return docs
+}
+
+// moduleDirs lists top-level module directories — the one-level monorepo
+// scan surface shared by docs, manifests, and framework detection. Depth
+// stays at 1 by design: recursing turns the scanner into a build system.
+func moduleDirs(dir string) []string {
+	entries, err := os.ReadDir(dir) // already sorted — determinism for free
+	if err != nil {
+		return nil
+	}
+	var out []string
+	for _, e := range entries {
+		name := e.Name()
+		if !e.IsDir() || skipDirs[name] || strings.HasPrefix(name, ".") {
+			continue
+		}
+		out = append(out, name)
+	}
+	return out
 }
 
 // stripMarkerBlock removes the kervo-owned region of CLAUDE.md, keeping
@@ -254,7 +289,150 @@ var makeTargetRe = regexp.MustCompile(`^([A-Za-z0-9][\w.-]*)\s*:($|[^=])`)
 func detectCommands(dir string) []fact.Command {
 	var cmds []fact.Command
 	cmds = append(cmds, makefileCommands(dir)...)
+	cmds = append(cmds, justfileCommands(dir)...)
 	cmds = append(cmds, packageJSONCommands(dir)...)
+	cmds = append(cmds, pyprojectCommands(dir)...)
+	cmds = append(cmds, composeCommands(dir)...)
+	return cmds
+}
+
+// pyprojectCommands reads declared script entry points from pyproject.toml —
+// root first, then one level into module dirs (field evidence: a monorepo
+// keeping analyzer/pyproject.toml and processor/pyproject.toml, root bare).
+// Sections: [project.scripts], [tool.poetry.scripts], [tool.pdm.scripts].
+// Line-based TOML subset — declared entries only, nothing inferred.
+// The maxCommandsPerManifest cap is shared across all pyproject files.
+func pyprojectCommands(dir string) []fact.Command {
+	scriptSections := map[string]bool{
+		"[project.scripts]": true, "[tool.poetry.scripts]": true, "[tool.pdm.scripts]": true,
+	}
+	var cmds []fact.Command
+	parse := func(rel string) {
+		raw, err := os.ReadFile(filepath.Join(dir, rel))
+		if err != nil {
+			return
+		}
+		in := false
+		for _, line := range strings.Split(string(raw), "\n") {
+			t := strings.TrimSpace(line)
+			if strings.HasPrefix(t, "[") {
+				in = scriptSections[t]
+				continue
+			}
+			if !in || t == "" || strings.HasPrefix(t, "#") {
+				continue
+			}
+			name, val, ok := strings.Cut(t, "=")
+			if !ok {
+				continue
+			}
+			name = strings.TrimSpace(name)
+			val = strings.Trim(strings.TrimSpace(val), `"'`)
+			if name == "" {
+				continue
+			}
+			cmds = append(cmds, fact.Command{Run: name, Detail: capLine(val, 80), Source: rel})
+			if len(cmds) >= maxCommandsPerManifest {
+				return
+			}
+		}
+	}
+	parse("pyproject.toml")
+	for _, mod := range moduleDirs(dir) {
+		if len(cmds) >= maxCommandsPerManifest {
+			break
+		}
+		parse(filepath.Join(mod, "pyproject.toml"))
+	}
+	return cmds
+}
+
+// justfileCommands parses just recipes (same shape as Makefile targets).
+func justfileCommands(dir string) []fact.Command {
+	var raw []byte
+	var err error
+	for _, n := range []string{"justfile", "Justfile", ".justfile"} {
+		if raw, err = os.ReadFile(filepath.Join(dir, n)); err == nil {
+			break
+		}
+	}
+	if err != nil {
+		return nil
+	}
+	lines := strings.Split(string(raw), "\n")
+	var cmds []fact.Command
+	for i, line := range lines {
+		m := makeTargetRe.FindStringSubmatch(line)
+		if m == nil {
+			continue
+		}
+		detail := ""
+		if i+1 < len(lines) && (strings.HasPrefix(lines[i+1], "\t") || strings.HasPrefix(lines[i+1], "  ")) {
+			detail = capLine(strings.TrimSpace(lines[i+1]), 80)
+		}
+		cmds = append(cmds, fact.Command{Run: "just " + m[1], Detail: detail, Source: "justfile"})
+		if len(cmds) >= maxCommandsPerManifest {
+			break
+		}
+	}
+	return cmds
+}
+
+// composeCommands lists declared docker-compose services. Line-based YAML
+// subset: keys indented exactly two spaces under a top-level "services:".
+func composeCommands(dir string) []fact.Command {
+	matches, _ := filepath.Glob(filepath.Join(dir, "docker-compose*.y*ml"))
+	more, _ := filepath.Glob(filepath.Join(dir, "compose.y*ml"))
+	matches = append(matches, more...)
+	sort.Strings(matches)
+	var cmds []fact.Command
+	for _, path := range matches {
+		raw, err := os.ReadFile(path)
+		if err != nil {
+			continue
+		}
+		file := filepath.Base(path)
+		flag := ""
+		if file != "docker-compose.yml" && file != "compose.yml" && file != "docker-compose.yaml" && file != "compose.yaml" {
+			flag = " -f " + file
+		}
+		in := false
+		var detail string
+		var pending string
+		flush := func() {
+			if pending != "" && len(cmds) < maxCommandsPerManifest {
+				cmds = append(cmds, fact.Command{
+					Run: "docker compose" + flag + " up " + pending, Detail: detail, Source: file,
+				})
+			}
+			pending, detail = "", ""
+		}
+		for _, line := range strings.Split(string(raw), "\n") {
+			t := strings.TrimRight(line, " \r")
+			switch {
+			case t == "services:":
+				in = true
+			case in && t != "" && !strings.HasPrefix(t, " ") && !strings.HasPrefix(t, "#"):
+				in = false // next top-level key ends the services block
+			case in && strings.HasPrefix(t, "  ") && !strings.HasPrefix(t, "   ") &&
+				strings.HasSuffix(t, ":") && !strings.Contains(strings.TrimSpace(t), " "):
+				flush()
+				pending = strings.TrimSuffix(strings.TrimSpace(t), ":")
+			case in && pending != "" && detail == "":
+				if img, ok := strings.CutPrefix(strings.TrimSpace(t), "image:"); ok {
+					// YAML: whitespace + '#' starts an inline comment.
+					if i := strings.Index(img, " #"); i >= 0 {
+						img = img[:i]
+					}
+					detail = capLine(strings.TrimSpace(img), 60)
+				}
+			}
+		}
+		flush() // trailing service (EOF or block exited)
+		if len(cmds) >= maxCommandsPerManifest {
+			break
+		}
+	}
 	return cmds
 }
 
@@ -358,6 +536,35 @@ func detectFrameworks(dir string) []string {
 			}
 		}
 	}
+	// Notable Python frameworks, from declared dependencies only. Module
+	// manifests count too — monorepos often keep the root bare.
+	var pyDeps []byte
+	pyManifests := []string{"requirements.txt", "pyproject.toml"}
+	for _, mod := range moduleDirs(dir) {
+		pyManifests = append(pyManifests,
+			filepath.Join(mod, "requirements.txt"), filepath.Join(mod, "pyproject.toml"))
+	}
+	for _, rel := range pyManifests {
+		if raw, err := os.ReadFile(filepath.Join(dir, rel)); err == nil {
+			set["Python"] = true
+			pyDeps = append(pyDeps, raw...)
+		}
+	}
+	if len(pyDeps) > 0 {
+		low := strings.ToLower(string(pyDeps))
+		for dep, label := range notablePyDeps {
+			if strings.Contains(low, dep) {
+				set[label] = true
+			}
+		}
+	}
+	if _, err := os.Stat(filepath.Join(dir, "Dockerfile")); err == nil {
+		set["Docker"] = true
+	}
+	if m, _ := filepath.Glob(filepath.Join(dir, "docker-compose*.y*ml")); len(m) > 0 {
+		set["Docker Compose"] = true
+	}
+
 	if len(set) == 0 {
 		return nil
 	}
@@ -367,4 +574,9 @@ func detectFrameworks(dir string) []string {
 	}
 	sort.Strings(out)
 	return out
+}
+
+var notablePyDeps = map[string]string{
+	"fastapi": "FastAPI", "django": "Django", "flask": "Flask",
+	"celery": "Celery", "sqlalchemy": "SQLAlchemy",
 }

@@ -210,3 +210,231 @@ func TestBinaryFilesSkipped(t *testing.T) {
 		t.Errorf("binary file scanned: %+v", snap.Todos)
 	}
 }
+
+// Field evidence (12-module CTI monorepo): Commands was empty because the
+// repo declared everything via compose + pyproject, and four hand-written
+// module CLAUDE.md files were invisible. Declared-only, still.
+func TestComposeCommands(t *testing.T) {
+	dir := t.TempDir()
+	write(t, dir, "docker-compose.yml", strings.Join([]string{
+		"version: \"3.9\"",
+		"services:",
+		"  api:",
+		"    image: the adopted repo/api:latest  # inline comment must not leak",
+		"    ports:",
+		"      - \"8000:8000\"",
+		"  worker:",
+		"    build: ./worker",
+		"  # commented: not a service",
+		"volumes:",
+		"  data:",
+		"", // trailing newline
+	}, "\n"))
+	snap, _, err := New().Scan(context.Background(), dir, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var runs []string
+	for _, c := range snap.Commands {
+		runs = append(runs, c.Run)
+	}
+	want := []string{"docker compose up api", "docker compose up worker"}
+	if strings.Join(runs, ",") != strings.Join(want, ",") {
+		t.Fatalf("commands = %v, want %v", runs, want)
+	}
+	if snap.Commands[0].Detail != "the adopted repo/api:latest" {
+		t.Errorf("api detail = %q, want image ref", snap.Commands[0].Detail)
+	}
+	// "data:" under volumes: must not leak — the services block ended.
+	for _, c := range snap.Commands {
+		if strings.Contains(c.Run, "data") || strings.Contains(c.Run, "commented") {
+			t.Errorf("non-service leaked: %+v", c)
+		}
+	}
+}
+
+func TestComposeVariantFileGetsFlag(t *testing.T) {
+	dir := t.TempDir()
+	write(t, dir, "docker-compose.dev.yml", "services:\n  db:\n    image: postgres:16\n")
+	snap, _, err := New().Scan(context.Background(), dir, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(snap.Commands) != 1 || snap.Commands[0].Run != "docker compose -f docker-compose.dev.yml up db" {
+		t.Fatalf("commands = %+v, want -f flag for non-default file", snap.Commands)
+	}
+}
+
+func TestPyprojectScripts(t *testing.T) {
+	dir := t.TempDir()
+	write(t, dir, "pyproject.toml", strings.Join([]string{
+		"[project]",
+		`name = "demo"`,
+		`dependencies = ["fastapi>=0.115", "celery"]`,
+		"",
+		"[project.scripts]",
+		`ingest = "the adopted repo.ingest:main"`,
+		"# a comment",
+		`serve = "the adopted repo.api:run"`,
+		"",
+		"[tool.poetry.scripts]",
+		`report = "the adopted repo.report:cli"`,
+		"",
+		"[tool.black]",
+		"line-length = 100",
+	}, "\n"))
+	snap, _, err := New().Scan(context.Background(), dir, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var runs []string
+	for _, c := range snap.Commands {
+		runs = append(runs, c.Run)
+	}
+	want := []string{"ingest", "serve", "report"}
+	if strings.Join(runs, ",") != strings.Join(want, ",") {
+		t.Fatalf("commands = %v, want %v (file order, script sections only)", runs, want)
+	}
+	if snap.Commands[0].Detail != "the adopted repo.ingest:main" {
+		t.Errorf("ingest detail = %q", snap.Commands[0].Detail)
+	}
+	// [tool.black] entries must not count as scripts.
+	for _, c := range snap.Commands {
+		if strings.Contains(c.Run, "line-length") {
+			t.Errorf("non-script section leaked: %+v", c)
+		}
+	}
+	// Python frameworks come from declared deps, not imports.
+	got := strings.Join(snap.Repo.Frameworks, ",")
+	for _, wantFw := range []string{"Python", "FastAPI", "Celery"} {
+		if !strings.Contains(got, wantFw) {
+			t.Errorf("frameworks = %v, missing %s", snap.Repo.Frameworks, wantFw)
+		}
+	}
+}
+
+func TestJustfileCommands(t *testing.T) {
+	dir := t.TempDir()
+	write(t, dir, "justfile", "set shell := [\"bash\", \"-c\"]\n\nbuild:\n  go build ./...\n\ntest: build\n  go test ./...\n")
+	snap, _, err := New().Scan(context.Background(), dir, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var runs []string
+	for _, c := range snap.Commands {
+		runs = append(runs, c.Run)
+	}
+	want := []string{"just build", "just test"}
+	if strings.Join(runs, ",") != strings.Join(want, ",") {
+		t.Fatalf("commands = %v, want %v", runs, want)
+	}
+	if snap.Commands[0].Detail != "go build ./..." {
+		t.Errorf("build detail = %q", snap.Commands[0].Detail)
+	}
+}
+
+func TestDockerFrameworkDetection(t *testing.T) {
+	dir := t.TempDir()
+	write(t, dir, "Dockerfile", "FROM golang:1.26\n")
+	write(t, dir, "docker-compose.yml", "services:\n  app:\n    build: .\n")
+	snap, _, err := New().Scan(context.Background(), dir, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := strings.Join(snap.Repo.Frameworks, ",")
+	for _, want := range []string{"Docker", "Docker Compose"} {
+		if !strings.Contains(got, want) {
+			t.Errorf("frameworks = %v, missing %s", snap.Repo.Frameworks, want)
+		}
+	}
+}
+
+// Monorepo: top-level module dirs often carry their own CLAUDE.md/README.md
+// (field evidence: 4 hand-written module CLAUDE.md files ignored on a real
+// 12-module repo). Root docs come first; module docs follow in lexical order.
+func TestModuleDocsCaptured(t *testing.T) {
+	dir := t.TempDir()
+	write(t, dir, "README.md", "# Root\n\nRoot readme.\n")
+	write(t, dir, "api/CLAUDE.md", "API module context.\n")
+	write(t, dir, "api/README.md", "API readme.\n")
+	write(t, dir, "database/CLAUDE.md", "DB module context.\n")
+	write(t, dir, "node_modules/pkg/README.md", "vendored, skipped\n")
+	write(t, dir, ".hidden/CLAUDE.md", "hidden, skipped\n")
+	snap, _, err := New().Scan(context.Background(), dir, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var paths []string
+	for _, d := range snap.Docs {
+		paths = append(paths, filepath.ToSlash(d.Path))
+	}
+	want := []string{"README.md", "api/CLAUDE.md", "api/README.md", "database/CLAUDE.md"}
+	if strings.Join(paths, ",") != strings.Join(want, ",") {
+		t.Fatalf("docs = %v, want %v", paths, want)
+	}
+}
+
+// Module CLAUDE.md files get the same marker-strip treatment as the root one.
+func TestModuleClaudeMdMarkerStripped(t *testing.T) {
+	dir := t.TempDir()
+	write(t, dir, "api/CLAUDE.md", "<!-- kervo:begin -->\nartifact body\n<!-- kervo:end -->\n")
+	write(t, dir, "db/CLAUDE.md", "human notes\n<!-- kervo:begin -->\ninjected\n<!-- kervo:end -->\n")
+	snap, _, err := New().Scan(context.Background(), dir, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(snap.Docs) != 1 {
+		t.Fatalf("docs = %+v, want only db/CLAUDE.md (marker-only skipped)", snap.Docs)
+	}
+	if strings.Contains(snap.Docs[0].Content, "injected") {
+		t.Error("module CLAUDE.md marker block not stripped")
+	}
+}
+
+func TestDocsCapOnManyModules(t *testing.T) {
+	dir := t.TempDir()
+	write(t, dir, "README.md", "# Root\n")
+	for _, m := range []string{"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l"} {
+		write(t, dir, filepath.Join(m, "CLAUDE.md"), "module "+m+"\n")
+		write(t, dir, filepath.Join(m, "README.md"), "readme "+m+"\n")
+	}
+	snap, _, err := New().Scan(context.Background(), dir, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(snap.Docs) != maxDocs {
+		t.Fatalf("docs = %d, want capped at %d", len(snap.Docs), maxDocs)
+	}
+}
+
+// Monorepo manifests: root can be bare while modules declare everything
+// (field evidence: analyzer/pyproject.toml + processor/pyproject.toml,
+// no root pyproject at all). One level deep, vendored dirs excluded.
+func TestModulePyprojectScripts(t *testing.T) {
+	dir := t.TempDir()
+	write(t, dir, "analyzer/pyproject.toml", "[project]\nname = \"analyzer\"\ndependencies = [\"celery>=5\"]\n\n[project.scripts]\nanalyze = \"analyzer.cli:main\"\n")
+	write(t, dir, "processor/pyproject.toml", "[tool.poetry.scripts]\nprocess = \"processor.run:cli\"\n")
+	write(t, dir, "node_modules/x/pyproject.toml", "[project.scripts]\nvendored = \"x:y\"\n")
+	snap, _, err := New().Scan(context.Background(), dir, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var runs, sources []string
+	for _, c := range snap.Commands {
+		runs = append(runs, c.Run)
+		sources = append(sources, filepath.ToSlash(c.Source))
+	}
+	if strings.Join(runs, ",") != "analyze,process" {
+		t.Fatalf("commands = %v, want [analyze process] (lexical module order)", runs)
+	}
+	if sources[0] != "analyzer/pyproject.toml" || sources[1] != "processor/pyproject.toml" {
+		t.Errorf("sources = %v, want module-relative manifest paths", sources)
+	}
+	// Frameworks must surface from module manifests despite a bare root.
+	got := strings.Join(snap.Repo.Frameworks, ",")
+	for _, want := range []string{"Python", "Celery"} {
+		if !strings.Contains(got, want) {
+			t.Errorf("frameworks = %v, missing %s", snap.Repo.Frameworks, want)
+		}
+	}
+}
