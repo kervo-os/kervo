@@ -105,3 +105,19 @@ func TestFromEnv(t *testing.T) {
 		t.Errorf("trailing slash not trimmed: %q", p.BaseURL)
 	}
 }
+
+// Field regression (local gpt-oss-120b): trailing commas in the JSON array.
+func TestProposeToleratesTrailingCommas(t *testing.T) {
+	var req map[string]any
+	var auth string
+	srv := fake(t, 200, `[{"slot":"goal","body":"X. Evidence: commits.",},]`, &req, &auth)
+	defer srv.Close()
+	p := &Provider{BaseURL: srv.URL, Model: "m"}
+	es, err := p.Propose(context.Background(), "s", fact.Snapshot{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(es) != 1 || es[0].Body != "X. Evidence: commits." {
+		t.Fatalf("proposals = %+v", es)
+	}
+}

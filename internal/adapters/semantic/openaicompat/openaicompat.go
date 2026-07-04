@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 
@@ -149,6 +150,8 @@ Rules:
    Allowed slots: goal, summaries, risks, decisions. 1 to 4 items. Each body under 500 characters.`
 }
 
+var trailingCommaRe = regexp.MustCompile(`,\s*([\]}])`)
+
 // parseProposals tolerates prose/code-fence wrapping around the JSON array —
 // backends differ in how strictly they honor "JSON only".
 func (p *Provider) parseProposals(content string) ([]artifact.Enhancement, error) {
@@ -161,8 +164,15 @@ func (p *Provider) parseProposals(content string) ([]artifact.Enhancement, error
 		Slot string `json:"slot"`
 		Body string `json:"body"`
 	}
-	if err := json.Unmarshal([]byte(content[i:j+1]), &items); err != nil {
-		return nil, fmt.Errorf("openaicompat: proposal JSON invalid: %w", err)
+	raw := content[i : j+1]
+	if err := json.Unmarshal([]byte(raw), &items); err != nil {
+		// Field finding (local gpt-oss-120b): models emit trailing commas.
+		// Try strict first so valid bodies are never rewritten; only on
+		// failure strip ",]" / ",}" and retry once.
+		relaxed := trailingCommaRe.ReplaceAllString(raw, "$1")
+		if err2 := json.Unmarshal([]byte(relaxed), &items); err2 != nil {
+			return nil, fmt.Errorf("openaicompat: proposal JSON invalid: %w", err)
+		}
 	}
 	if len(items) > maxProposals {
 		items = items[:maxProposals]

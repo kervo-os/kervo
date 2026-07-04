@@ -25,6 +25,7 @@
 
 ## Recent Changes
 
+- `ec25e11` 2026-07-04 prepare for public: Apache-2.0 license + real README
 - `0ab4acf` 2026-07-04 semantic: Mode 3 backend via any OpenAI-compatible endpoint
 - `2546883` 2026-07-04 i18n: artifact language setting — en default, ko/ja supported
 - `134ae46` 2026-07-04 compile: minimal Mode 2 semantic path (file-transport proposals)
@@ -44,8 +45,8 @@
 - internal/core/compiler/compiler_test.go (4)
 - .gitignore (3)
 - internal/core/compiler/testdata/skeleton.golden.md (3)
-- internal/adapters/consumer/claudecode/inject.go (2)
-- internal/adapters/consumer/claudecode/inject_test.go (2)
+- .kervo/artifact.md (2)
+- CLAUDE.md (2)
 
 ## Open Tasks
 
@@ -60,7 +61,7 @@ _No TODO/FIXME comments found._
 
 ## Workspace Facts
 
-- Commits analyzed: 8 (complete)
+- Commits analyzed: 9 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 4
 - Docs captured: 1
@@ -68,7 +69,8 @@ _No TODO/FIXME comments found._
 ## Possible Current Goal
 
 <!-- kervo:slot:goal:begin -->
-_No proposal yet. A confirmed goal becomes the first Verified observation._
+**[generated — backend:openai/gpt-oss-120b]**
+Potential goal: prepare the project for public release by adding an Apache-2.0 license, a real README, and expanding semantic support to Mode 3 (any OpenAI‑compatible endpoint). Evidence: recent commits ec25e11 (license+README) and 0ab4acf (Mode 3 backend).
 <!-- kervo:slot:goal:end -->
 
 ## Known Decisions
@@ -80,13 +82,15 @@ _None proposed yet. Semantic providers (Mode 2/3) attach labeled observations he
 ## Known Risks
 
 <!-- kervo:slot:risks:begin -->
-_None proposed yet. Semantic providers (Mode 2/3) attach labeled observations here._
+**[generated — backend:openai/gpt-oss-120b]**
+Possible risks include dependence on external OpenAI‑compatible endpoints for Mode 3 functionality, which may affect availability and security. Additionally, the test suite appears limited to a few core files, potentially missing broader coverage. Evidence: commit 0ab4acf (Mode 3 backend) and Frequently Changed Files showing only a handful of test files.
 <!-- kervo:slot:risks:end -->
 
 ## Doc Summaries
 
 <!-- kervo:slot:summaries:begin -->
-_None proposed yet. Semantic providers (Mode 2/3) attach labeled observations here._
+**[generated — backend:openai/gpt-oss-120b]**
+The repository implements a deterministic context compiler in Go, exposing build/test commands. Recent changes focus on licensing, documentation, i18n defaults, and adding generic LLM backend support (Mode 3). Files under internal/adapters/source/files and core/compiler are most frequently modified. Evidence: recent commits list and Frequently Changed Files section.
 <!-- kervo:slot:summaries:end -->
 
 ## Deprecated / Stale Notes
