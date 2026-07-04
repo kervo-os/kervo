@@ -3,14 +3,8 @@ package cli
 import (
 	"context"
 	"fmt"
-	"os"
-	"path/filepath"
 	"time"
 
-	"github.com/kervo-os/kervo/internal/adapters/consumer/claudecode"
-	"github.com/kervo-os/kervo/internal/adapters/source/files"
-	"github.com/kervo-os/kervo/internal/adapters/source/gitexec"
-	"github.com/kervo-os/kervo/internal/core/compiler"
 	"github.com/kervo-os/kervo/internal/core/fact"
 )
 
@@ -32,44 +26,15 @@ func runInit(args []string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), initBudget)
 	defer cancel()
 
-	snap, cursor, err := gitexec.New().Scan(ctx, *dir, "")
+	// init is always Mode 1 — the first experience must never depend on a
+	// semantic provider (PRD §6: onboarding = mode order).
+	snap, cursor, skeleton, err := buildSkeleton(ctx, *dir)
 	if err != nil {
 		return err
 	}
-	fsnap, _, err := files.New().Scan(ctx, *dir, "")
-	if err != nil {
+	if err := writeOutputs(ctx, *dir, skeleton, cursor); err != nil {
 		return err
 	}
-	snap = mergeSnapshots(snap, fsnap)
-
-	skeleton, err := compiler.BuildSkeleton(snap)
-	if err != nil {
-		return err
-	}
-
-	// Stage the injection before any write: a corrupt CLAUDE.md must fail
-	// the whole run, not leave a half-applied .kervo/ behind.
-	injector := claudecode.Injector{}
-	injPath, injContent, err := injector.Render(*dir, skeleton)
-	if err != nil {
-		return err
-	}
-
-	stateDir := filepath.Join(*dir, ".kervo")
-	if err := os.MkdirAll(stateDir, 0o755); err != nil {
-		return err
-	}
-	if err := os.WriteFile(filepath.Join(stateDir, "artifact.md"), []byte(skeleton), 0o644); err != nil {
-		return err
-	}
-	if err := os.WriteFile(filepath.Join(stateDir, "cursor"), []byte(cursor+"\n"), 0o644); err != nil {
-		return err
-	}
-
-	if err := injector.Apply(injPath, injContent); err != nil {
-		return err
-	}
-
 	fmt.Print(renderColdStart(newUI(), snap, Version))
 	return nil
 }

@@ -184,6 +184,21 @@ func TestTestFilesAndTestdataSkipped(t *testing.T) {
 	}
 }
 
+// Regression: a CLAUDE.md that is only our injected block (created by init
+// in a repo that had none) must not count as a captured doc — otherwise
+// init changes its own next scan.
+func TestMarkerOnlyClaudeMdNotADoc(t *testing.T) {
+	dir := t.TempDir()
+	write(t, dir, "CLAUDE.md", "<!-- kervo:begin -->\nartifact body\n<!-- kervo:end -->\n")
+	snap, _, err := New().Scan(context.Background(), dir, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(snap.Docs) != 0 {
+		t.Errorf("marker-only CLAUDE.md captured as doc: %+v", snap.Docs)
+	}
+}
+
 func TestBinaryFilesSkipped(t *testing.T) {
 	dir := t.TempDir()
 	write(t, dir, "bin.dat", "TODO\x00binary")

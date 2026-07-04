@@ -66,6 +66,12 @@ func (s *Scanner) readDocs(dir string) []fact.DocSummaryInput {
 		if name == "CLAUDE.md" {
 			// Never feed our own injected block back in (feedback loop).
 			content = stripMarkerBlock(content)
+			// A CLAUDE.md that is nothing but our block carries zero human
+			// context — counting it as a captured doc makes init change its
+			// own next scan (caught by the compile==init byte test).
+			if strings.TrimSpace(content) == "" {
+				continue
+			}
 		}
 		docs = append(docs, fact.DocSummaryInput{
 			Path:    name,

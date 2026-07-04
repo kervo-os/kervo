@@ -2,3 +2,4 @@
 /dist/
 .kervo/cache/
 .kervo/cursor
+.DS_Store
