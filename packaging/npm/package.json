@@ -1,0 +1,31 @@
+{
+  "name": "kervo",
+  "version": "0.0.1",
+  "description": "Deterministic context compiler for AI agents — compiles your repo into a trust-labeled Context Artifact injected into CLAUDE.md. This package will become the npx wrapper for the Go binary; for now install from GitHub.",
+  "bin": {
+    "kervo": "bin/kervo.js"
+  },
+  "files": [
+    "bin/"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kervo-os/kervo.git"
+  },
+  "homepage": "https://github.com/kervo-os/kervo#readme",
+  "bugs": "https://github.com/kervo-os/kervo/issues",
+  "keywords": [
+    "ai",
+    "context",
+    "claude",
+    "agents",
+    "cli",
+    "context-engineering",
+    "claude-code",
+    "memory"
+  ],
+  "license": "Apache-2.0"
+}
