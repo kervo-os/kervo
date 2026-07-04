@@ -92,6 +92,7 @@ func runHook(args []string) error {
 				"prompt_words":     len(strings.Fields(prompt)),
 				"artifact_present": present,
 				"artifact_bytes":   artifactBytes,
+				"artifact_known":   true, // live observation — enters the A/B sides
 			})
 			if err == nil {
 				if _, err := store.Append(context.Background(), event.Event{

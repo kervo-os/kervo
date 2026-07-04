@@ -69,23 +69,24 @@ func monthFile(t *testing.T, dir string) string {
 }
 
 func TestAggregateMetricsABSides(t *testing.T) {
-	mk := func(session string, chars int, present bool) event.Event {
-		p, _ := json.Marshal(promptMetric{Session: session, PromptChars: chars, ArtifactPresent: present})
+	mk := func(session string, chars int, present, known bool) event.Event {
+		p, _ := json.Marshal(promptMetric{Session: session, PromptChars: chars, ArtifactPresent: present, ArtifactKnown: known})
 		return event.Event{Type: "metric:prompt", Kind: event.KindFact, Payload: p}
 	}
 	r := aggregateMetrics([]event.Event{
-		mk("a", 1000, true), // session a: first prompt 1000, with artifact
-		mk("a", 200, true),
-		mk("b", 3000, false), // session b: first prompt 3000, without
-		mk("b", 400, false),
-		mk("b", 400, false),
+		mk("a", 1000, true, true), // session a: first prompt 1000, with artifact
+		mk("a", 200, true, true),
+		mk("b", 3000, false, true), // session b: first prompt 3000, without
+		mk("b", 400, false, true),
+		mk("b", 400, false, true),
+		mk("c", 900, false, false), // session c: retroactive import — unknown
 	})
-	with, without := r.sides()
-	if with.sessions != 1 || without.sessions != 1 {
-		t.Fatalf("sides = %+v / %+v", with, without)
+	with, without, unknown := r.sides()
+	if with.sessions != 1 || without.sessions != 1 || unknown.sessions != 1 {
+		t.Fatalf("sides = %+v / %+v / %+v", with, without, unknown)
 	}
-	if with.firstSum != 1000 || without.firstSum != 3000 {
-		t.Errorf("first prompt sums: with=%d without=%d", with.firstSum, without.firstSum)
+	if with.firstSum != 1000 || without.firstSum != 3000 || unknown.firstSum != 900 {
+		t.Errorf("first prompt sums: with=%d without=%d unknown=%d", with.firstSum, without.firstSum, unknown.firstSum)
 	}
 	if with.promptSum != 2 || without.promptSum != 3 {
 		t.Errorf("prompt counts: with=%d without=%d", with.promptSum, without.promptSum)

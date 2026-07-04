@@ -22,6 +22,10 @@ type promptMetric struct {
 	PromptWords     int    `json:"prompt_words"`
 	ArtifactPresent bool   `json:"artifact_present"`
 	ArtifactBytes   int    `json:"artifact_bytes"`
+	// ArtifactKnown separates live hook samples (true — the A/B variable
+	// was observed) from retroactive imports (false — unknown state must
+	// not silently count as "without artifact").
+	ArtifactKnown bool `json:"artifact_known"`
 }
 
 type sessionAgg struct {
@@ -29,6 +33,7 @@ type sessionAgg struct {
 	prompts  int
 	chars    int
 	artifact bool
+	known    bool
 }
 
 type h3Report struct {
@@ -53,7 +58,7 @@ func aggregateMetrics(events []event.Event) h3Report {
 		if s == nil {
 			// The first prompt of the session carries the A/B variable and
 			// the First Prompt Size KPI.
-			s = &sessionAgg{first: m.PromptChars, artifact: m.ArtifactPresent}
+			s = &sessionAgg{first: m.PromptChars, artifact: m.ArtifactPresent, known: m.ArtifactKnown}
 			r.Sessions[key] = s
 		}
 		s.prompts++
@@ -66,18 +71,21 @@ type h3Side struct {
 	sessions, firstSum, promptSum, charSum int
 }
 
-func (r h3Report) sides() (with, without h3Side) {
+func (r h3Report) sides() (with, without, unknown h3Side) {
 	for _, s := range r.Sessions {
-		side := &without
-		if s.artifact {
-			side = &with
+		side := &unknown
+		if s.known {
+			side = &without
+			if s.artifact {
+				side = &with
+			}
 		}
 		side.sessions++
 		side.firstSum += s.first
 		side.promptSum += s.prompts
 		side.charSum += s.chars
 	}
-	return with, without
+	return with, without, unknown
 }
 
 func runMetrics(args []string) error {
@@ -94,7 +102,7 @@ func runMetrics(args []string) error {
 		return err
 	}
 	r := aggregateMetrics(events)
-	with, without := r.sides()
+	with, without, unknown := r.sides()
 
 	fmt.Printf("H3 counters — prompt sizes by artifact presence (A/B)\n")
 	fmt.Printf("Sessions measured: %d\n\n", len(r.Sessions))
@@ -105,6 +113,11 @@ func runMetrics(args []string) error {
 	row("  ≈ tokens", avg(with.firstSum/4, with.sessions), avg(without.firstSum/4, without.sessions))
 	row("avg prompts / session", avg(with.promptSum, with.sessions), avg(without.promptSum, without.sessions))
 	row("avg chars / session", avg(with.charSum, with.sessions), avg(without.charSum, without.sessions))
+	if unknown.sessions > 0 {
+		fmt.Printf("\nExcluded from A/B — artifact state unknown (retroactive import):\n")
+		fmt.Printf("  %d session(s), avg first prompt %s chars, avg %s prompts/session\n",
+			unknown.sessions, avg(unknown.firstSum, unknown.sessions), avg(unknown.promptSum, unknown.sessions))
+	}
 	fmt.Printf("\nNote: explanation-message ratio requires content classification\n")
 	fmt.Printf("(semantic) — raw sizes are recorded so it can be derived later.\n")
 	return nil
