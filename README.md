@@ -128,9 +128,11 @@ n = 24):
   truth that lives outside the code** — decisions, constraints, context. The
   weaker the consumer, the larger the protection.
 
-Full protocol, artifacts, and per-response grades publish after the
-human-grading replication completes (in progress). Scores so far are
-agent-judged under a pre-registered rubric.
+Full protocol, pre-registration, arm artifacts, and all 54 raw responses:
+[docs/experiments/h4](docs/experiments/h4/). Grades are agent-judged under
+a pre-registered rubric by structurally blinded judges; a human-grading
+replication kit is included but has not been run — the limitation is
+stated, not hidden.
 
 ## Capture: wire the hooks
 
