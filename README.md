@@ -15,6 +15,8 @@
 [![Go](https://img.shields.io/badge/Go-1.23+-00ADD8?logo=go&logoColor=white)](go.mod)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 
+**English** | [한국어](README.ko.md) | [日本語](README.ja.md)
+
 [Quickstart](#quickstart) ·
 [How it works](#how-it-works) ·
 [Trust labels](#why-trust-labels) ·
