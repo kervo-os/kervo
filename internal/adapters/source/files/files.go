@@ -168,6 +168,7 @@ func (s *Scanner) scanTodos(ctx context.Context, dir string) ([]fact.Todo, bool)
 	if max <= 0 {
 		max = DefaultMaxTodos
 	}
+	ignores := loadIgnorePrefixes(dir)
 	var todos []fact.Todo
 	truncated := false
 
@@ -184,6 +185,9 @@ func (s *Scanner) scanTodos(ctx context.Context, dir string) ([]fact.Todo, bool)
 				return nil
 			}
 			if skipDirs[name] || strings.HasPrefix(name, ".") {
+				return filepath.SkipDir
+			}
+			if rel, err := filepath.Rel(dir, path); err == nil && ignoredPath(ignores, rel) {
 				return filepath.SkipDir
 			}
 			return nil
@@ -203,6 +207,9 @@ func (s *Scanner) scanTodos(ctx context.Context, dir string) ([]fact.Todo, bool)
 		if err != nil {
 			return nil
 		}
+		if ignoredPath(ignores, rel) {
+			return nil
+		}
 		found, hitCap := scanFileTodos(path, rel, max-len(todos))
 		todos = append(todos, found...)
 		if hitCap {
@@ -212,6 +219,36 @@ func (s *Scanner) scanTodos(ctx context.Context, dir string) ([]fact.Todo, bool)
 		return nil
 	})
 	return todos, truncated
+}
+
+// loadIgnorePrefixes reads .kervoignore — one path prefix per line, '#'
+// comments. It excludes archival material from the TODO scan (field
+// evidence: published experiment transcripts under docs/ quote TODO
+// comments that are not open tasks of the repo that archives them).
+func loadIgnorePrefixes(dir string) []string {
+	raw, err := os.ReadFile(filepath.Join(dir, ".kervoignore"))
+	if err != nil {
+		return nil
+	}
+	var out []string
+	for _, line := range strings.Split(string(raw), "\n") {
+		t := strings.TrimSpace(line)
+		if t == "" || strings.HasPrefix(t, "#") {
+			continue
+		}
+		out = append(out, strings.TrimSuffix(filepath.ToSlash(t), "/"))
+	}
+	return out
+}
+
+func ignoredPath(prefixes []string, rel string) bool {
+	rel = filepath.ToSlash(rel)
+	for _, p := range prefixes {
+		if rel == p || strings.HasPrefix(rel, p+"/") {
+			return true
+		}
+	}
+	return false
 }
 
 func scanFileTodos(path, rel string, budget int) ([]fact.Todo, bool) {

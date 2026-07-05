@@ -18,10 +18,12 @@
 **English** | [한국어](README.ko.md) | [日本語](README.ja.md)
 
 [Quickstart](#quickstart) ·
+[Team use](#in-a-team-repo) ·
 [How it works](#how-it-works) ·
 [Trust labels](#why-trust-labels) ·
 [Measured](#measured-not-claimed) ·
-[Capture](#capture-wire-the-hooks)
+[Capture](#capture-wire-the-hooks) ·
+[Commands](#commands)
 
 </div>
 
@@ -52,7 +54,40 @@ hand is preserved byte-for-byte.
 targets, npm scripts, docker-compose services, pyproject scripts, justfile
 recipes) · recent changes with merge noise excluded · open TODO/FIXME tasks ·
 module layout, including per-module `CLAUDE.md`/`README.md` in monorepos —
-plus trust-labeled slots for goal / decisions / risks / summaries.
+plus trust-labeled slots for goal / decisions / risks / summaries. Archival
+material (quoted transcripts, vendored docs) can be excluded from the TODO
+scan via `.kervoignore` — one path prefix per line.
+
+## In a team repo
+
+The split between committed truth and derived state is what makes the
+context travel:
+
+| State | Path | In git? |
+|---|---|---|
+| Event ledger — the truth | `.kervo/events/*.jsonl` | **yes** — append-only, `merge=union`: branch merges union the ledgers |
+| Artifact language | `.kervo/lang` | **yes** |
+| Injected context block | `CLAUDE.md` | **yes** |
+| Compiled artifact | `.kervo/artifact.md` | no — derived, rebuilt by `compile` |
+| Index & cache | `.kervo/index.db`, `.kervo/cache/` | no — derived |
+
+The lifecycle:
+
+1. **First adoption** — one person runs `kervo init` once and commits the
+   result (ledger, `.kervo/lang`, injected `CLAUDE.md`, gitignore entries).
+2. **A teammate clones** — the context is already live: `CLAUDE.md` carries
+   the last-compiled block and the full ledger came with the clone. An AI
+   session reads it with **zero commands**, and `kervo status` / `metrics`
+   work immediately against the cloned ledger.
+3. **Going live** — install the binary and run `kervo compile` (not `init`
+   again) to rescan and refresh the facts. `init` is idempotent too, so
+   running it out of habit breaks nothing.
+4. **Hooks** — commit `.claude/settings.json` and capture fires for every
+   teammate automatically, as soon as `kervo` is on their PATH.
+
+Verified on a fresh clone of this repository: `compile` replayed the
+committed ledger (112 events, 4 observations), trust states and language
+intact, artifact regenerated.
 
 ## How it works
 
@@ -169,6 +204,21 @@ kervo status                                             # one-screen trust view
 kervo metrics                                            # prompt sizes: with vs without artifact
 kervo import claude                                      # back-fill from past Claude Code sessions
 ```
+
+## Commands
+
+| Command | Does |
+|---|---|
+| `kervo init` | First-time: scan → artifact → inject `CLAUDE.md` (idempotent) |
+| `kervo compile [--lang en\|ko\|ja]` | Incremental rescan + recompile; Mode 3 → 2 → 1 fallback |
+| `kervo capture -type <t> -body <text>` | Record an observation into the ledger |
+| `kervo trust -id <prefix> -to verified\|stale\|deprecated -reason <r>` | Judge an observation |
+| `kervo status` | One-screen ledger + trust view |
+| `kervo metrics` | Prompt sizes with vs without the artifact (built-in A/B counters) |
+| `kervo import claude` | Back-fill the ledger from Claude Code transcripts (sizes only) |
+| `kervo hook` | Consumer hook entry point (stdin JSON, millisecond budget) |
+| `kervo mcp` | stdio MCP server — facts out, observations in |
+| `kervo version` | Print version |
 
 ## Design guarantees
 

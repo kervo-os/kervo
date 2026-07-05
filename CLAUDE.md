@@ -10,7 +10,7 @@
 
 - Name: kervo
 - Branch: main
-- Languages: Go, Markdown, JavaScript
+- Languages: Markdown, Go, JavaScript
 - Frameworks: Go
 - Docs: README.md
 
@@ -26,6 +26,17 @@
 
 ## Recent Changes
 
+- `f8f7a44` 2026-07-04 docs: publish the H4 experiment package — receipts, not claims
+- `76e05d8` 2026-07-04 readme: Korean and Japanese editions with language switcher
+- `655d2e3` 2026-07-04 readme: modern layout + measured-results section
+- `1227d0b` 2026-07-04 scan: monorepo + Python/Docker ecosystem support (field findings from a real 12-module repo)
+- `11ed656` 2026-07-04 ledger: H4 confirmatory run passed — trust treatment verified
+- `0c07727` 2026-07-04 ledger: H4 final verdict captured — partial pass, mechanism confirmed
+- `e46eae4` 2026-07-04 ledger: H4 run-1 interim result captured
+- `30c1611` 2026-07-04 import: back-fill the ledger from Claude Code transcripts
+- `37597be` 2026-07-04 docs: hook wiring for live capture and H3 counters
+- `ab0bea4` 2026-07-04 metrics: H3 counters ride the hook path — sizes in, content never
+- `70c9ef3` 2026-07-04 trust: the engine — replayed states, human judgment, honest demotion
 - `1ed8e65` 2026-07-04 capture: event ledger + manual capture + consumer hook (H2' spike, build side)
 - `990755f` 2026-07-04 event: adopt Actor value convention from planning-session skeleton
 - `307b330` 2026-07-04 storage: adopt RFC-0005 layout — events are truth, artifacts are derived
@@ -35,25 +46,21 @@
 - `ec25e11` 2026-07-04 prepare for public: Apache-2.0 license + real README
 - `0ab4acf` 2026-07-04 semantic: Mode 3 backend via any OpenAI-compatible endpoint
 - `2546883` 2026-07-04 i18n: artifact language setting — en default, ko/ja supported
-- `134ae46` 2026-07-04 compile: minimal Mode 2 semantic path (file-transport proposals)
-- `ce0bad5` 2026-07-03 ci: enforce the release gates on every push
-- `d92f04c` 2026-07-03 track the compiled artifact (PRD §8 primitive team sharing)
-- `32e0bf1` 2026-07-03 skeleton: add Commands section (workspace-declared entry points)
-- `72ca9b4` 2026-07-03 fix scanner noise and marker impersonation found by dogfooding
-- `e6a0d98` 2026-07-03 kervo v0: deterministic context compiler — Phase 1 complete
+
+_Showing 20 of 26 analyzed commits._
 
 ### Frequently Changed Files
 
-- internal/cli/compile.go (5)
+- .kervo/events/2026-07.jsonl (7)
+- README.md (6)
+- internal/cli/compile.go (6)
+- internal/core/compiler/compiler.go (6)
+- internal/core/compiler/compiler_test.go (6)
+- CLAUDE.md (5)
+- internal/adapters/source/files/files.go (5)
+- internal/adapters/source/files/files_test.go (5)
 - .gitignore (4)
 - .kervo/artifact.md (4)
-- CLAUDE.md (4)
-- internal/adapters/source/files/files.go (4)
-- internal/adapters/source/files/files_test.go (4)
-- internal/cli/init.go (4)
-- internal/core/compiler/compiler.go (4)
-- internal/core/compiler/compiler_test.go (4)
-- internal/core/event/event.go (4)
 
 ## Open Tasks
 
@@ -64,14 +71,15 @@ _No TODO/FIXME comments found._
 - .github/ (1 files)
 - assets/ (1 files)
 - cmd/ (1 files)
-- internal/ (44 files)
+- docs/ (60 files)
+- internal/ (52 files)
 - packaging/ (3 files)
 
 ## Workspace Facts
 
-- Commits analyzed: 15 (complete)
+- Commits analyzed: 26 (complete)
 - Open tasks (TODO/FIXME): 0
-- Top-level modules: 5
+- Top-level modules: 6
 - Docs captured: 1
 
 ## Possible Current Goal
@@ -97,6 +105,15 @@ _None proposed yet. Semantic providers (Mode 2/3) attach labeled observations he
 <!-- kervo:slot:summaries:begin -->
 **[verified — human:refuse1993]**
 Phase 3 spike: JSONL ledger + capture/hook landed
+
+**[observed — human:refuse1993]**
+H4 run1 (n=15, agent-judged): S1+S3 primary — A(kervo)=100%, B(no-label)=90%, C(unmanaged)=80%. A-C=20%p, exactly at pass threshold; interim pass, run2 needed. Mechanism confirmed: unlabeled arms rejected TRUE facts after finding one poison (guilt-by-association); labels compartmentalized contamination. Details: EXPER/h4-kit/RESULTS-run1.md
+
+**[observed — human:refuse1993]**
+H4 final (n=30, 2 runs, agent-judged): primary S1+S3 A=100% B=90% C=85% — A-C 15%p, below the 20%p pre-registered bar: PARTIAL PASS (direction confirmed, effect size short; ceiling on S1 due to repo access). Mechanism reproduced 2/2 runs: unlabeled arms reject true facts after one poison (guilt-by-association); labels compartmentalize. Exploratory subset (code-unverifiable facts T3+T5): A=100% vs C=58% (41.7%p) — labels matter most exactly where code cannot refute. Next: confirmatory run (no-repo-access or unverifiable-fact tasks, human judging, second model). Details: EXPER/h4-kit/RESULTS-final.md
+
+**[observed — human:refuse1993]**
+H4 confirmatory run (pre-registered, n=24, no-repo-access, sonnet+haiku): composite A=91.7% B=91.7% C=62.5% — A-C=29.2%p >= 20%p bar: PASS. First real poisoning events of the program: all 3 in C-haiku (bound to dead RabbitMQ, asserted single-region, 95%-asserted disputed refund claim); same model defended in A/B. Interpretation: treatment table (stale segregation/deprecated exclusion) is the main effect, labels add anti-contagion robustness in mixed conditions; protection strongest for weaker consumers. H4 program verdict: SUPPORTED (A unbeaten across 54 responses). Remaining: human-judged replication before public claims. Details: EXPER/h4-kit/RESULTS-confirm.md
 <!-- kervo:slot:summaries:end -->
 
 ## Deprecated / Stale Notes

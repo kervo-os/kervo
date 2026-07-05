@@ -324,6 +324,7 @@ func replaceSlot(doc, slot, content string) (string, error) {
 var (
 	paragraphSplitRe = regexp.MustCompile(`\n\s*\n`)
 	htmlTagRe        = regexp.MustCompile(`<[^>]*>`)
+	codeFenceRe      = regexp.MustCompile("(?s)```.*?(```|\\z)")
 	mdImageRe        = regexp.MustCompile(`!\[[^\]]*\]\([^)]*\)`)
 	mdLinkRe         = regexp.MustCompile(`\[([^\]]*)\]\(([^)]*)\)`) // keep link text
 )
@@ -339,6 +340,9 @@ const minExcerptLen = 20
 // prose. Purely extractive — deterministic (summarizing is Semantic).
 func firstParagraph(content string) string {
 	content = strings.ReplaceAll(content, "\r\n", "\n")
+	// Fenced code is never prose — a README opening with an ASCII-art logo
+	// block otherwise becomes the "excerpt" (found by self-scan).
+	content = codeFenceRe.ReplaceAllString(content, "\n\n")
 	for _, block := range paragraphSplitRe.Split(content, -1) {
 		text := strings.Join(strings.Fields(block), " ") // collapse whitespace
 		if text == "" || strings.HasPrefix(text, "#") {

@@ -284,3 +284,21 @@ func TestDocsLineCapped(t *testing.T) {
 		t.Error("docs beyond the cap leaked into the summary line")
 	}
 }
+
+// A README opening with an ASCII-art logo in a code fence must not have
+// the fence become its "excerpt" (found by self-scan after the readme
+// redesign) — the first real prose paragraph wins.
+func TestExcerptSkipsCodeFences(t *testing.T) {
+	s := fixture()
+	s.Docs = []fact.DocSummaryInput{{Path: "README.md", Content: "<div align=\"center\">\n\n```\n|X| ascii logo art\n```\n\n### Tagline heading\n\n**Stop re-explaining your project to AI. Run it once.**\n\n</div>\n"}}
+	got, err := BuildSkeleton(s, i18n.EN)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(got, "ascii logo") {
+		t.Error("code fence leaked into the excerpt")
+	}
+	if !strings.Contains(got, "Stop re-explaining your project") {
+		t.Errorf("first prose paragraph not excerpted:\n%s", got)
+	}
+}

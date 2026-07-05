@@ -438,3 +438,25 @@ func TestModulePyprojectScripts(t *testing.T) {
 		}
 	}
 }
+
+// .kervoignore excludes archival material from the TODO scan (found by
+// self-scan: published experiment transcripts quoted TODO comments that
+// showed up as open tasks).
+func TestKervoignoreExcludesTodoScan(t *testing.T) {
+	dir := t.TempDir()
+	write(t, dir, ".kervoignore", "# archive\ndocs/experiments/\n")
+	write(t, dir, "docs/experiments/resp.md", "// TODO: quoted from an experiment response\n")
+	write(t, dir, "docs/guide.md", "<!-- TODO: real doc task -->\n")
+	write(t, dir, "main.go", "// TODO: real code task\n")
+	snap, _, err := New().Scan(context.Background(), dir, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var paths []string
+	for _, td := range snap.Todos {
+		paths = append(paths, filepath.ToSlash(td.Path))
+	}
+	if strings.Join(paths, ",") != "docs/guide.md,main.go" {
+		t.Fatalf("todos = %v, want ignored dir excluded but siblings kept", paths)
+	}
+}
