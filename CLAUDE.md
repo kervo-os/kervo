@@ -26,6 +26,8 @@
 
 ## Recent Changes
 
+- `b9d7447` 2026-07-06 dash: judged records stay visible — the ledger never hides history
+- `5b38a0f` 2026-07-06 inject: opt-in import mode — one @-line for clean-CLAUDE.md teams
 - `17ea7bc` 2026-07-06 dash: user-switchable language — in-page selector, choice persists
 - `d40e267` 2026-07-06 dash: speak the user's language — en/ko/ja chrome from the i18n tables
 - `d67c5e1` 2026-07-06 ledger: session hook events
@@ -44,23 +46,21 @@
 - `41f958c` 2026-07-06 ledger: session hook events
 - `c80b3a0` 2026-07-06 flywheel: the write-back protocol — artifacts instruct their consumers
 - `19958ed` 2026-07-06 ledger: agentOS-class direction — the write-back flywheel (proposal)
-- `d0d27d8` 2026-07-06 scan: declared pytest runners (real-repo eval field finding)
-- `72216b9` 2026-07-06 review: the verifier's surface — triage queue over pending judgments
 
-_Showing 20 of 54 analyzed commits._
+_Showing 20 of 56 analyzed commits._
 
 ### Frequently Changed Files
 
-- .kervo/events/2026-07.jsonl (35)
-- CLAUDE.md (18)
-- README.md (16)
-- README.ja.md (12)
-- README.ko.md (12)
-- internal/cli/compile.go (9)
+- .kervo/events/2026-07.jsonl (37)
+- CLAUDE.md (19)
+- README.md (17)
+- README.ja.md (13)
+- README.ko.md (13)
+- internal/cli/compile.go (10)
 - internal/adapters/source/files/files.go (8)
 - internal/adapters/source/files/files_test.go (8)
 - internal/core/compiler/compiler.go (8)
-- internal/core/compiler/compiler_test.go (7)
+- internal/cli/dashpage.go (7)
 
 ## Open Tasks
 
@@ -72,12 +72,12 @@ _No TODO/FIXME comments found._
 - assets/ (1 files)
 - cmd/ (1 files)
 - docs/ (60 files)
-- internal/ (61 files)
+- internal/ (62 files)
 - packaging/ (3 files)
 
 ## Workspace Facts
 
-- Commits analyzed: 54 (complete)
+- Commits analyzed: 56 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 6
 - Docs captured: 1
@@ -124,6 +124,10 @@ Evidence: user requests 2026-07-06: clean-CLAUDE.md thread, separate-DB thread, 
 **[verified — human:refuse1993]**
 review -web bar raised (refines 01KWTVKV): the batch surface must be a 2026-grade triage dashboard — keyboard-first (j/k/v/s/d/x, ? help), single-item focus flow with queue rail, live progress and per-state counters, optimistic UI with toasts, dark-first — while keeping zero dependencies (hand-written CSS/JS embedded in the binary, no build step, no CDN).
 Evidence: user directive 2026-07-06: '그 페이지는 2026 sota급 대시보드여야한다'
+
+**[generated — agent:claude-code]**
+H5 trigger is volume-based, not calendar-based (proposal). Agent-velocity development voids the two-week frame: today alone this repo accrued ~400 ledger events. Re-run the real-repo A/B once the adopted workspace accumulates >=10 artifact-present sessions and >=10 write-back proposals judged — at agent pace that is days, possibly hours.
+Evidence: user challenge 2026-07-06: 'ai agent로 개발중인데 2주뒤에 뭐 볼게 있나'; kervo ledger: 400 events in one day
 <!-- kervo:slot:decisions:end -->
 
 ## Known Risks

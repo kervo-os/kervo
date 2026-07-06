@@ -9,6 +9,7 @@ import "html/template"
 var dashTmpl = template.Must(template.New("dash").Parse(`<!doctype html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>kervo dash</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='112' fill='%231d2b3a'/%3E%3Crect x='96' y='120' width='34' height='272' rx='17' fill='%232ab7a9'/%3E%3Cg fill='%23eef2f6'%3E%3Crect x='170' y='104' width='92' height='304' rx='24'/%3E%3Cg transform='rotate(-46 262 256)'%3E%3Crect x='236' y='210' width='210' height='92' rx='24'/%3E%3C/g%3E%3Cg transform='rotate(46 262 256)'%3E%3Crect x='236' y='210' width='210' height='92' rx='24'/%3E%3C/g%3E%3C/g%3E%3Ccircle cx='400' cy='400' r='74' fill='%23f5a623'/%3E%3Cpath d='M368 402 l22 22 44 -50' fill='none' stroke='%231d2b3a' stroke-width='20' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <style>
 :root{
   --bg:#0a0c10;--panel:#101318;--card:#14181e;--card2:#171c23;--line:#242b35;--line2:#2f3846;
@@ -125,7 +126,7 @@ main{max-width:66rem;margin:0 auto;padding:1.6rem 1.4rem 3rem}
 .empty{color:var(--muted);text-align:center;padding:3rem 0}
 </style></head><body>
 <header>
-  <div class="mark"></div>
+  <svg viewBox="0 0 512 512" width="22" height="22" style="border-radius:6px;flex:none" aria-hidden="true"><rect width="512" height="512" rx="112" fill="#1d2b3a"/><rect x="96" y="120" width="34" height="272" rx="17" fill="#2ab7a9"/><g fill="#eef2f6"><rect x="170" y="104" width="92" height="304" rx="24"/><g transform="rotate(-46 262 256)"><rect x="236" y="210" width="210" height="92" rx="24"/></g><g transform="rotate(46 262 256)"><rect x="236" y="210" width="210" height="92" rx="24"/></g></g><circle cx="400" cy="400" r="74" fill="#f5a623"/><path d="M368 402 l22 22 44 -50" fill="none" stroke="#1d2b3a" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/></svg>
   <div class="brand">kervo <em>dash</em></div>
   <div class="spacer"></div>
   <div class="progress"><i id="pbar"></i></div>

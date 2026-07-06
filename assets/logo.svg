@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- kervo logo. Teal echoes = the append-only ledger accumulating;
+       the amber check in a punched-out ring = human verification.
+       The ring is transparent (masked), so the mark sits on any background. -->
+  <defs>
+    <mask id="joint">
+      <rect width="512" height="512" fill="#fff"/>
+      <circle cx="318" cy="298" r="62" fill="#000"/>
+    </mask>
+  </defs>
+  <rect x="66" y="140" width="30" height="260" rx="15" fill="#2ab7a9" opacity=".55"/>
+  <rect x="112" y="112" width="30" height="308" rx="15" fill="#2ab7a9"/>
+  <g mask="url(#joint)" fill="#1d2b3a">
+    <rect x="158" y="76" width="118" height="360" rx="28"/>
+    <g transform="rotate(-48 296 298)"><rect x="262" y="250" width="270" height="96" rx="26"/></g>
+    <g transform="rotate(48 296 298)"><rect x="262" y="250" width="270" height="96" rx="26"/></g>
+  </g>
+  <path d="M294 300 l17 17 36 -42" fill="none" stroke="#f5a623" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

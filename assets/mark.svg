@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- kervo small mark — favicon and header tile. The full logo's check
+       ring cannot survive 16px, so here the check is a corner badge and
+       the K stays solid. -->
+  <rect width="512" height="512" rx="112" fill="#1d2b3a"/>
+  <rect x="96" y="120" width="34" height="272" rx="17" fill="#2ab7a9"/>
+  <g fill="#eef2f6">
+    <rect x="170" y="104" width="92" height="304" rx="24"/>
+    <g transform="rotate(-46 262 256)"><rect x="236" y="210" width="210" height="92" rx="24"/></g>
+    <g transform="rotate(46 262 256)"><rect x="236" y="210" width="210" height="92" rx="24"/></g>
+  </g>
+  <circle cx="400" cy="400" r="74" fill="#f5a623"/>
+  <path d="M368 402 l22 22 44 -50" fill="none" stroke="#1d2b3a" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
