@@ -94,6 +94,11 @@ func TestInitEndToEnd(t *testing.T) {
 		}
 	}
 
+	// AGENTS.md is opt-in by presence — init must never create it.
+	if _, err := os.Stat(filepath.Join(dir, "AGENTS.md")); !os.IsNotExist(err) {
+		t.Error("AGENTS.md was created uninvited")
+	}
+
 	// Re-running init on an unchanged workspace must be byte-idempotent —
 	// the determinism contract, observed end-to-end.
 	if err := runInit([]string{"-dir", dir}); err != nil {
@@ -106,6 +111,61 @@ func TestInitEndToEnd(t *testing.T) {
 	claude2, _ := os.ReadFile(filepath.Join(dir, "CLAUDE.md"))
 	if string(claude) != string(claude2) {
 		t.Error("CLAUDE.md differs across identical runs")
+	}
+}
+
+// Field evidence 2026-07-06 (codex A/B): AGENTS.md readers get zero context
+// from CLAUDE.md. An existing AGENTS.md opts the workspace into a second
+// injection target under the same marker contract.
+func TestInitInjectsExistingAgentsMd(t *testing.T) {
+	dir := t.TempDir()
+	git(t, dir, "init", "-q", "-b", "main")
+	writeFile(t, dir, "README.md", "# demo\n")
+	writeFile(t, dir, "AGENTS.md", "# Codex rules\n\nbe terse\n")
+	git(t, dir, "add", ".")
+	git(t, dir, "commit", "-q", "-m", "x")
+
+	if err := runInit([]string{"-dir", dir}); err != nil {
+		t.Fatal(err)
+	}
+	agents, err := os.ReadFile(filepath.Join(dir, "AGENTS.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{"# Codex rules", "be terse", "<!-- kervo:begin -->", "<!-- kervo:end -->", "# Context Artifact"} {
+		if !strings.Contains(string(agents), want) {
+			t.Errorf("AGENTS.md missing %q", want)
+		}
+	}
+
+	// Idempotency holds across both consumer files.
+	if err := runInit([]string{"-dir", dir}); err != nil {
+		t.Fatal(err)
+	}
+	agents2, _ := os.ReadFile(filepath.Join(dir, "AGENTS.md"))
+	if string(agents) != string(agents2) {
+		t.Error("AGENTS.md differs across identical runs")
+	}
+}
+
+// The staging invariant covers the second target too: a corrupt AGENTS.md
+// must fail the run before any write, including the CLAUDE.md injection.
+func TestInitCorruptAgentsMarkersLeavesNoPartialState(t *testing.T) {
+	dir := t.TempDir()
+	git(t, dir, "init", "-q", "-b", "main")
+	writeFile(t, dir, "main.go", "package main\n")
+	writeFile(t, dir, "AGENTS.md", "human\n<!-- kervo:begin -->\nno end marker\n")
+	git(t, dir, "add", ".")
+	git(t, dir, "commit", "-q", "-m", "x")
+
+	if err := runInit([]string{"-dir", dir}); err == nil {
+		t.Fatal("expected corrupt-marker error")
+	}
+	if _, err := os.Stat(filepath.Join(dir, ".kervo")); !os.IsNotExist(err) {
+		t.Error(".kervo was created despite the failed injection (partial state)")
+	}
+	if _, err := os.Stat(filepath.Join(dir, "CLAUDE.md")); !os.IsNotExist(err) {
+		t.Error("CLAUDE.md was written despite the failed AGENTS.md staging")
 	}
 }
 

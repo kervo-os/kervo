@@ -53,6 +53,11 @@ toolchain needed. First run on a real repository takes well under a second
 `<!-- kervo:end -->` in `CLAUDE.md` is ever touched — everything you wrote by
 hand is preserved byte-for-byte.
 
+Using Codex or another agent that reads `AGENTS.md`? If the file exists at
+the repo root, kervo injects the same marker block there too, under the same
+contract. Presence is the opt-in — `touch AGENTS.md` — and kervo never
+creates the file on its own.
+
 **What the artifact covers:** repository summary · declared commands (Makefile
 targets, npm scripts, docker-compose services, pyproject scripts, justfile
 recipes) · recent changes with merge noise excluded · open TODO/FIXME tasks ·

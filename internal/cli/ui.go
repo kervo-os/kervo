@@ -63,7 +63,7 @@ const rule = "──────────────────────
 
 // renderColdStart is the `kervo init` result screen (PRD §11 Cold Start UX:
 // facts asserted plainly, first impressions are the product).
-func renderColdStart(u ui, s fact.Snapshot, version string) string {
+func renderColdStart(u ui, s fact.Snapshot, version string, injected []string) string {
 	var b strings.Builder
 	b.WriteString(u.banner(version))
 	b.WriteString("\n")
@@ -104,6 +104,6 @@ func renderColdStart(u ui, s fact.Snapshot, version string) string {
 	row("Tasks", strconv.Itoa(len(s.Todos))+" open · "+strconv.Itoa(len(s.Modules))+" modules")
 	b.WriteString(u.dim(rule) + "\n")
 	row("Artifact", u.bold(".kervo/artifact.md")+"  "+u.dim("(Mode 1 — Fact-only)"))
-	row("Injected", "CLAUDE.md  "+u.dim("(marker block)"))
+	row("Injected", strings.Join(injected, ", ")+"  "+u.dim("(marker block)"))
 	return b.String()
 }

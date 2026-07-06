@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/kervo-os/kervo/internal/adapters/consumer/claudecode"
@@ -121,11 +122,12 @@ func runCompile(args []string) error {
 		return err
 	}
 
-	if err := writeOutputs(ctx, *dir, rendered, cursor, lang); err != nil {
+	injected, err := writeOutputs(ctx, *dir, rendered, cursor, lang)
+	if err != nil {
 		return err
 	}
 	fmt.Printf("Artifact: .kervo/artifact.md (%s · ledger: %d live, %d stale)\n", mode, len(enh), len(staleNotes))
-	fmt.Println("Injected: CLAUDE.md (marker block)")
+	fmt.Printf("Injected: %s (marker block)\n", strings.Join(injected, ", "))
 	return nil
 }
 
@@ -282,32 +284,53 @@ func buildSkeleton(ctx context.Context, dir string, lang i18n.Lang) (fact.Snapsh
 	return snap, cursor, skeleton, nil
 }
 
-// writeOutputs stages the injection before any write (no partial state),
-// then persists artifact, cursor, language, the consumer file, and the
-// RFC-0005 ignore rules (derived state never gets committed).
-func writeOutputs(ctx context.Context, dir, rendered, cursor string, lang i18n.Lang) error {
+// writeOutputs stages every injection before any write (no partial state),
+// then persists artifact, cursor, language, the consumer files, and the
+// RFC-0005 ignore rules (derived state never gets committed). Returns the
+// consumer files that received the block.
+func writeOutputs(ctx context.Context, dir, rendered, cursor string, lang i18n.Lang) ([]string, error) {
 	injector := claudecode.Injector{}
 	injPath, injContent, err := injector.Render(dir, rendered)
 	if err != nil {
-		return err
+		return nil, err
+	}
+	injected := []string{"CLAUDE.md"}
+	// AGENTS.md is the second consumer surface (Codex and other AGENTS.md
+	// readers get zero context from CLAUDE.md). File presence is the opt-in:
+	// kervo injects into an existing AGENTS.md but never creates one.
+	var agentsPath, agentsContent string
+	if _, statErr := os.Stat(filepath.Join(dir, "AGENTS.md")); statErr == nil {
+		agentsPath, agentsContent, err = claudecode.Injector{FileName: "AGENTS.md"}.Render(dir, rendered)
+		if err != nil {
+			return nil, err
+		}
+		injected = append(injected, "AGENTS.md")
 	}
 	stateDir := filepath.Join(dir, ".kervo")
 	if err := os.MkdirAll(filepath.Join(stateDir, "cache"), 0o755); err != nil {
-		return err
+		return nil, err
 	}
 	if err := os.WriteFile(filepath.Join(stateDir, "artifact.md"), []byte(rendered), 0o644); err != nil {
-		return err
+		return nil, err
 	}
 	// Incremental scan cursor lives under cache/ (RFC-0005 §2.1 layout).
 	if err := os.WriteFile(filepath.Join(stateDir, "cache", "cursor"), []byte(cursor+"\n"), 0o644); err != nil {
-		return err
+		return nil, err
 	}
 	// lang is a workspace choice (not derivable) — stays committable.
 	if err := os.WriteFile(filepath.Join(stateDir, "lang"), []byte(string(lang)+"\n"), 0o644); err != nil {
-		return err
+		return nil, err
 	}
 	if err := ensureGitignore(dir); err != nil {
-		return err
+		return nil, err
 	}
-	return injector.Apply(injPath, injContent)
+	if err := injector.Apply(injPath, injContent); err != nil {
+		return nil, err
+	}
+	if agentsPath != "" {
+		if err := injector.Apply(agentsPath, agentsContent); err != nil {
+			return nil, err
+		}
+	}
+	return injected, nil
 }

@@ -26,6 +26,7 @@
 
 ## Recent Changes
 
+- `39c1a0f` 2026-07-06 ledger: propose AGENTS.md injection target (codex A/B field evidence)
 - `404c54c` 2026-07-06 ledger: propose inject-mode option (agent proposal, awaiting judgment)
 - `4754cc8` 2026-07-06 scan: strip block-comment closers from TODO text
 - `619a7df` 2026-07-06 ledger: live hook events from the v0.1.1 release session
@@ -45,15 +46,14 @@
 - `70c9ef3` 2026-07-04 trust: the engine — replayed states, human judgment, honest demotion
 - `1ed8e65` 2026-07-04 capture: event ledger + manual capture + consumer hook (H2' spike, build side)
 - `990755f` 2026-07-04 event: adopt Actor value convention from planning-session skeleton
-- `307b330` 2026-07-04 storage: adopt RFC-0005 layout — events are truth, artifacts are derived
 
-_Showing 20 of 32 analyzed commits._
+_Showing 20 of 33 analyzed commits._
 
 ### Frequently Changed Files
 
-- .kervo/events/2026-07.jsonl (13)
+- .kervo/events/2026-07.jsonl (14)
+- CLAUDE.md (8)
 - README.md (8)
-- CLAUDE.md (7)
 - internal/adapters/source/files/files.go (7)
 - internal/adapters/source/files/files_test.go (7)
 - internal/core/compiler/compiler.go (7)
@@ -77,7 +77,7 @@ _No TODO/FIXME comments found._
 
 ## Workspace Facts
 
-- Commits analyzed: 32 (complete)
+- Commits analyzed: 33 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 6
 - Docs captured: 1
@@ -91,11 +91,14 @@ _No proposal yet. A confirmed goal becomes the first Verified observation._
 ## Known Decisions
 
 <!-- kervo:slot:decisions:begin -->
+**[verified — human:refuse1993]**
+AGENTS.md injection target: field evidence from codex-cli 0.142.5 A/B test (2026-07-06) — with CLAUDE.md only codex answered NO CONTEXT LOADED; with the same block copied to AGENTS.md it correctly answered from a trust-labeled risk observation without opening files. Proposal: inject the marker block into AGENTS.md when the file already exists; creating it is opt-in.
+
 **[generated — agent:claude-code]**
 inject mode option (v1.x candidate): default stays full-block in CLAUDE.md (zero-command clone is the product's proof); add opt-in '@.kervo/artifact.md' import mode for clean-CLAUDE.md users — trade-off: fresh clones see nothing until 'kervo compile'. Gate: field demand from real adopters.
 
 **[generated — agent:claude-code]**
-AGENTS.md injection target: field evidence from codex-cli 0.142.5 A/B test (2026-07-06) — with CLAUDE.md only codex answered NO CONTEXT LOADED; with the same block copied to AGENTS.md it correctly answered from a trust-labeled risk observation without opening files. Proposal: inject the marker block into AGENTS.md when the file already exists; creating it is opt-in.
+kervo review (v1.x candidate): interactive triage inbox over pending observations (generated + conflict + stale candidates) with per-item verify/edit/stale/deprecate/skip — nobody should memorize ULIDs. Product surface becomes init/compile/status/review; capture/trust stay as scriptable primitives. Stays CLI (no server/daemon guarantee intact); consistent with the 2026-07-04 HTML-report demotion whose reopening direction is trust triage, not a reading wiki. Gate: friction evidence from real team usage (the adopted repo).
 <!-- kervo:slot:decisions:end -->
 
 ## Known Risks

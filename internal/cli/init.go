@@ -37,10 +37,11 @@ func runInit(args []string) error {
 	if err != nil {
 		return err
 	}
-	if err := writeOutputs(ctx, *dir, skeleton, cursor, lang); err != nil {
+	injected, err := writeOutputs(ctx, *dir, skeleton, cursor, lang)
+	if err != nil {
 		return err
 	}
-	fmt.Print(renderColdStart(newUI(), snap, Version))
+	fmt.Print(renderColdStart(newUI(), snap, Version, injected))
 	return nil
 }
 

@@ -25,13 +25,13 @@ func sampleSnap() fact.Snapshot {
 }
 
 func TestRenderColdStartPlain(t *testing.T) {
-	out := renderColdStart(ui{}, sampleSnap(), "dev")
+	out := renderColdStart(ui{}, sampleSnap(), "dev", []string{"CLAUDE.md", "AGENTS.md"})
 	for _, want := range []string{
 		logoLines[0], tagline, "dev",
 		"Workspace Found", "✓ Git", "✓ CLAUDE.md", "✓ README",
 		"3 analyzed", "(partial — scan capped)",
 		"Go, Markdown", "2 open · 1 modules",
-		".kervo/artifact.md", "(Mode 1 — Fact-only)", "CLAUDE.md  (marker block)",
+		".kervo/artifact.md", "(Mode 1 — Fact-only)", "CLAUDE.md, AGENTS.md  (marker block)",
 	} {
 		if !strings.Contains(out, want) {
 			t.Errorf("missing %q in:\n%s", want, out)
@@ -43,7 +43,7 @@ func TestRenderColdStartPlain(t *testing.T) {
 }
 
 func TestRenderColdStartColor(t *testing.T) {
-	out := renderColdStart(ui{color: true}, sampleSnap(), "dev")
+	out := renderColdStart(ui{color: true}, sampleSnap(), "dev", []string{"CLAUDE.md"})
 	if !strings.Contains(out, "\x1b[36m") || !strings.Contains(out, "\x1b[32m") {
 		t.Error("color mode missing cyan logo / green checks")
 	}
@@ -55,7 +55,7 @@ func TestRenderColdStartColor(t *testing.T) {
 func TestRenderColdStartMissingDocs(t *testing.T) {
 	s := sampleSnap()
 	s.Docs = nil
-	out := renderColdStart(ui{}, s, "dev")
+	out := renderColdStart(ui{}, s, "dev", []string{"CLAUDE.md"})
 	for _, want := range []string{"– CLAUDE.md", "– README"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("missing-doc marker %q not shown", want)
