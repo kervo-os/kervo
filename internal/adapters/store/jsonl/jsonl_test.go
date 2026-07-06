@@ -126,3 +126,22 @@ func TestCorruptLineFailsLoudly(t *testing.T) {
 		t.Fatal("corrupt ledger line must fail replay loudly")
 	}
 }
+
+// Same-millisecond appends must sort exactly as appended — replay folds in
+// ID order, and an agent's capture → trust → capture happens well inside
+// one millisecond. (Regression: random per-call entropy let a transition
+// sort before the observation it referenced, silently dropping it.)
+func TestULIDMonotonicWithinMillisecond(t *testing.T) {
+	at := time.Date(2026, 7, 6, 12, 0, 0, 0, time.UTC)
+	prev := ""
+	for i := 0; i < 5000; i++ {
+		id, err := newULID(at)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if id <= prev {
+			t.Fatalf("ULID %d not monotonic: %s after %s", i, id, prev)
+		}
+		prev = id
+	}
+}

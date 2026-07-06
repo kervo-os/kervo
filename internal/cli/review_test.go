@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/kervo-os/kervo/internal/adapters/store/jsonl"
 	"github.com/kervo-os/kervo/internal/core/trust"
@@ -15,9 +14,6 @@ func captureFor(t *testing.T, dir, typ, body string) {
 	if err := runCapture([]string{"-dir", dir, "-type", typ, "-body", body, "-actor", "agent:test"}); err != nil {
 		t.Fatal(err)
 	}
-	// ULIDs sharing a millisecond sort by random entropy — space captures
-	// out so the queue order matches capture order deterministically.
-	time.Sleep(2 * time.Millisecond)
 }
 
 func reviewStates(t *testing.T, dir string) map[string]trust.State {

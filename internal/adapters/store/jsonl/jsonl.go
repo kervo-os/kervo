@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/kervo-os/kervo/internal/core/event"
@@ -130,8 +131,20 @@ func (s *Store) Replay(ctx context.Context, fromID string, fn func(event.Event) 
 // crockford is the ULID alphabet (no I, L, O, U).
 const crockford = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
 
+// ulidMu guards the monotonic state below.
+var (
+	ulidMu      sync.Mutex
+	ulidLastMS  uint64
+	ulidLastRnd [10]byte
+)
+
 // newULID builds a spec-shaped ULID: 48-bit millisecond timestamp +
 // 80 random bits, Crockford base32, 26 chars, lexicographically sortable.
+// Within one process the entropy is monotonic inside a millisecond
+// (previous entropy + 1, not a re-roll): replay folds in ID order, so a
+// rapid same-process sequence — an agent's capture → trust → capture —
+// must sort exactly as appended or a transition can fold before the
+// observation it references and silently vanish.
 func newULID(t time.Time) (string, error) {
 	var b [16]byte
 	ms := uint64(t.UnixMilli())
@@ -141,9 +154,23 @@ func newULID(t time.Time) (string, error) {
 	b[3] = byte(ms >> 16)
 	b[4] = byte(ms >> 8)
 	b[5] = byte(ms)
-	if _, err := rand.Read(b[6:]); err != nil {
-		return "", err
+	ulidMu.Lock()
+	if ms == ulidLastMS {
+		for i := len(ulidLastRnd) - 1; i >= 0; i-- {
+			ulidLastRnd[i]++
+			if ulidLastRnd[i] != 0 {
+				break
+			}
+		}
+	} else {
+		if _, err := rand.Read(ulidLastRnd[:]); err != nil {
+			ulidMu.Unlock()
+			return "", err
+		}
+		ulidLastMS = ms
 	}
+	copy(b[6:], ulidLastRnd[:])
+	ulidMu.Unlock()
 	// 16 bytes = 128 bits → 26 base32 chars (130 bits, top 2 bits zero).
 	dst := make([]byte, 26)
 	var acc uint32
