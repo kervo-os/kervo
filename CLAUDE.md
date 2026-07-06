@@ -10,7 +10,7 @@
 
 - Name: kervo
 - Branch: main
-- Languages: Markdown, Go, JavaScript
+- Languages: Go, Markdown, JavaScript
 - Frameworks: Go
 - Docs: README.md
 
@@ -26,6 +26,7 @@
 
 ## Recent Changes
 
+- `b06ce83` 2026-07-06 readme: the story banner — regenerated art with exact product strings
 - `bdf0f0f` 2026-07-06 ledger: kervo.dev purchased — launch deferred until H5 numbers
 - `5d74768` 2026-07-06 readme: lead with what the product means, then how it works
 - `354ce04` 2026-07-06 ledger: queue cleared — eight judgments with conversational provenance
@@ -45,17 +46,16 @@
 - `757172b` 2026-07-06 dash: the buttons now explain themselves — judgment semantics in the UI
 - `6e1dda5` 2026-07-06 ledger: write-back pilot on the real repo — 5.5 to 9.5 at one call
 - `1022166` 2026-07-06 ledger: session hook events
-- `deaf0a1` 2026-07-06 ledger: consolidation summary
 
-_Showing 20 of 79 analyzed commits._
+_Showing 20 of 80 analyzed commits._
 
 ### Frequently Changed Files
 
-- .kervo/events/2026-07.jsonl (59)
-- CLAUDE.md (34)
-- README.md (26)
-- README.ja.md (22)
-- README.ko.md (22)
+- .kervo/events/2026-07.jsonl (60)
+- CLAUDE.md (35)
+- README.md (27)
+- README.ja.md (23)
+- README.ko.md (23)
 - internal/core/i18n/i18n.go (13)
 - internal/cli/dash.go (12)
 - internal/cli/dashpage.go (12)
@@ -69,17 +69,16 @@ _No TODO/FIXME comments found._
 ## Related Modules
 
 - .github/ (2 files)
-- assets/ (5 files)
+- assets/ (7 files)
 - cmd/ (1 files)
-- docs/ (60 files)
 - internal/ (64 files)
 - packaging/ (3 files)
 
 ## Workspace Facts
 
-- Commits analyzed: 79 (complete)
+- Commits analyzed: 80 (complete)
 - Open tasks (TODO/FIXME): 0
-- Top-level modules: 6
+- Top-level modules: 5
 - Docs captured: 1
 
 ## Possible Current Goal
@@ -164,6 +163,10 @@ Evidence: user 2026-07-06: '일단 샀어'
 **[verified — human:refuse1993]**
 Hero art adopted (user-regenerated 2026-07-06 with the exact strings requested: 'kervo compile', real pipeline step names, kervo:begin/end markers). assets/hero-story.jpg leads the READMEs right after the positioning sentence; the mermaid loop moved into How it works; both dash screenshots sit in the dash section. assets/loop-poster.jpg (the full-system poster with 'Agents discover and propose. Humans judge once.') is reserved for the kervo.dev landing kit - three raster images at the top of a README is too heavy. The pixel cat is the story/illustration brand element; the K mark stays the product/favicon element.
 Evidence: user-supplied regenerated images 2026-07-06 21:45/21:47; JPEG 339KB/396KB after texture-aware conversion
+
+**[verified — human:refuse1993]**
+Evidence lives in its own repo: kervo-os/experiments (h4 moved there with provenance kervo@f8f7a44; H5 lands there too). The product repo's docs/ was 60/60 experiment files - research corpora polluted the artifact's module facts and once injected fake TODOs. Three-repo structure now: kervo (product) / experiments (evidence) / kervo.dev (landing, later); READMEs link the receipts one click away. .kervoignore file removed from this repo (nothing left to exclude; the feature stays documented and tested).
+Evidence: user 2026-07-06: '그렇게 하자'; docs/experiments was 516KB, 60 files = 100% of docs/
 <!-- kervo:slot:decisions:end -->
 
 ## Known Risks

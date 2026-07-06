@@ -219,7 +219,7 @@ artifact), **B**(같은 내용, 트러스트 라벨 제거), **C**(관리 없는
   보호 효과는 커집니다.
 
 전체 프로토콜·사전 등록·암 artifact·원문 응답 54개:
-[docs/experiments/h4](docs/experiments/h4/). 채점은 구조적으로 블라인드된
+[kervo-os/experiments/h4](https://github.com/kervo-os/experiments/tree/main/h4). 채점은 구조적으로 블라인드된
 심판의 에이전트 채점(사전 등록 루브릭)이며, 사람 채점 복제 킷은 포함되어
 있으나 실행하지 않았습니다 — 한계는 숨기지 않고 명시합니다.
 

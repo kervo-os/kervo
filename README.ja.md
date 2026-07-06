@@ -234,7 +234,7 @@ n = 24):
   弱いほど、保護効果は大きくなります。
 
 完全なプロトコル・事前登録・アーム artifact・生の応答 54 件:
-[docs/experiments/h4](docs/experiments/h4/)。採点は構造的にブラインド
+[kervo-os/experiments/h4](https://github.com/kervo-os/experiments/tree/main/h4)。採点は構造的にブラインド
 された審判によるエージェント採点(事前登録ルーブリック)です。人間採点の
 レプリケーションキットは同梱していますが、未実施です — 限界は隠さず
 明記します。

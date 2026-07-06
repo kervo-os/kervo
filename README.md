@@ -235,7 +235,7 @@ n = 24):
   weaker the consumer, the larger the protection.
 
 Full protocol, pre-registration, arm artifacts, and all 54 raw responses:
-[docs/experiments/h4](docs/experiments/h4/). Grades are agent-judged under
+[kervo-os/experiments/h4](https://github.com/kervo-os/experiments/tree/main/h4). Grades are agent-judged under
 a pre-registered rubric by structurally blinded judges; a human-grading
 replication kit is included but has not been run — the limitation is
 stated, not hidden.
