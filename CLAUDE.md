@@ -26,6 +26,8 @@
 
 ## Recent Changes
 
+- `41f958c` 2026-07-06 ledger: session hook events
+- `c80b3a0` 2026-07-06 flywheel: the write-back protocol — artifacts instruct their consumers
 - `19958ed` 2026-07-06 ledger: agentOS-class direction — the write-back flywheel (proposal)
 - `d0d27d8` 2026-07-06 scan: declared pytest runners (real-repo eval field finding)
 - `72216b9` 2026-07-06 review: the verifier's surface — triage queue over pending judgments
@@ -44,23 +46,21 @@
 - `11ed656` 2026-07-04 ledger: H4 confirmatory run passed — trust treatment verified
 - `0c07727` 2026-07-04 ledger: H4 final verdict captured — partial pass, mechanism confirmed
 - `e46eae4` 2026-07-04 ledger: H4 run-1 interim result captured
-- `30c1611` 2026-07-04 import: back-fill the ledger from Claude Code transcripts
-- `37597be` 2026-07-04 docs: hook wiring for live capture and H3 counters
 
-_Showing 20 of 37 analyzed commits._
+_Showing 20 of 39 analyzed commits._
 
 ### Frequently Changed Files
 
-- .kervo/events/2026-07.jsonl (18)
-- CLAUDE.md (12)
-- README.md (10)
+- .kervo/events/2026-07.jsonl (20)
+- CLAUDE.md (13)
+- README.md (11)
 - internal/adapters/source/files/files.go (8)
 - internal/adapters/source/files/files_test.go (8)
+- internal/core/compiler/compiler.go (8)
+- README.ja.md (7)
+- README.ko.md (7)
 - internal/cli/compile.go (7)
-- internal/core/compiler/compiler.go (7)
 - internal/core/compiler/compiler_test.go (7)
-- README.ja.md (6)
-- README.ko.md (6)
 
 ## Open Tasks
 
@@ -77,7 +77,7 @@ _No TODO/FIXME comments found._
 
 ## Workspace Facts
 
-- Commits analyzed: 37 (complete)
+- Commits analyzed: 39 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 6
 - Docs captured: 1
@@ -109,6 +109,9 @@ Post-commit auto-compile (proposal): a 2-line git post-commit hook running 'kerv
 
 **[generated — agent:claude-code]**
 Uncommitted-work visibility (proposal, low priority): eval noted WIP is invisible. A 'N files modified' fact would cover it without content leakage but churns CLAUDE.md mid-work and strains byte-determinism. Defer unless demand repeats.
+
+**[generated — agent:claude-code]**
+Phase B refinement (fact-wiki design): the accreted wiki renders verified observations grouped into stable sections, each fact carrying an evidence anchor (file path / commit hash) that GitHub renders as a clickable link. kervo links to code, never copies it — code browsing and search stay with the consumer (agent, IDE, GitHub); the artifact is the map that tells them where to look for zero calls.
 <!-- kervo:slot:decisions:end -->
 
 ## Known Risks
