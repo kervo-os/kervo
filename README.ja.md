@@ -143,6 +143,10 @@ hardening… Evidence: Recent Changes 05-28..06-28.
 ときは、黙って勝者を選ぶ代わりに `⚠ conflict` と表示します。Stale 項目は
 黙って消える代わりに、除外理由とともに列挙されます。
 
+役割分担は意図された設計です: **エージェントがキャプチャ・提案・管理し、
+人間は判定だけを行います。** `kervo review` がその判定サーフェスです —
+決定を待つすべてを一つずつ見せるレビューキュー。
+
 ## 主張ではなく計測
 
 これは本当に、汚染されたコンテキストからエージェントを守るのか?仮説を
@@ -206,7 +210,8 @@ n = 24):
 
 ```bash
 kervo capture -type decision -body "JWT over sessions"   # 手で記録
-kervo trust -id 01KWP -to verified -reason "team agreed" # 判定
+kervo review                                             # レビューキュー: 提案を一つずつ判定
+kervo trust -id 01KWP -to verified -reason "team agreed" # ID で判定 (スクリプト用)
 kervo status                                             # 1 画面のトラストビュー
 kervo metrics                                            # プロンプトサイズ: artifact 有/無の比較
 kervo import claude                                      # 過去の Claude Code セッションをバックフィル
@@ -219,7 +224,8 @@ kervo import claude                                      # 過去の Claude Code
 | `kervo init` | 初回のみ: スキャン → artifact → `CLAUDE.md` 注入(冪等) |
 | `kervo compile [--lang en\|ko\|ja]` | 増分再スキャン + 再コンパイル; Mode 3 → 2 → 1 フォールバック |
 | `kervo capture -type <t> -body <本文>` | 観察を台帳に記録 |
-| `kervo trust -id <接頭辞> -to verified\|stale\|deprecated -reason <理由>` | 観察を判定 |
+| `kervo trust -id <接頭辞> -to verified\|stale\|deprecated -reason <理由>` | ID で観察を判定 (スクリプト用プリミティブ) |
+| `kervo review` | レビューキュー — generated 提案と ⚠ 衝突を ID なしで一つずつ判定 |
 | `kervo status` | 1 画面の台帳 + トラストビュー |
 | `kervo metrics` | artifact 有/無のプロンプトサイズ(内蔵 A/B カウンタ) |
 | `kervo import claude` | Claude Code トランスクリプトから台帳をバックフィル(サイズのみ) |

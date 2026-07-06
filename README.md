@@ -145,6 +145,10 @@ disagree, the entry is marked `⚠ conflict` instead of silently picking a
 winner. Stale entries are listed with their exclusion reason instead of being
 silently dropped.
 
+The division of labor is deliberate: **agents capture, propose, and manage;
+the human only judges.** `kervo review` is that judging surface — a triage
+queue over everything awaiting a decision, one item at a time.
+
 ## Measured, not claimed
 
 Does any of this actually protect an agent from poisoned context? We
@@ -208,7 +212,8 @@ your machine or enter git history.
 
 ```bash
 kervo capture -type decision -body "JWT over sessions"   # record by hand
-kervo trust -id 01KWP -to verified -reason "team agreed" # judge
+kervo review                                             # triage queue: judge proposals one by one
+kervo trust -id 01KWP -to verified -reason "team agreed" # judge by ID (scripts)
 kervo status                                             # one-screen trust view
 kervo metrics                                            # prompt sizes: with vs without artifact
 kervo import claude                                      # back-fill from past Claude Code sessions
@@ -221,7 +226,8 @@ kervo import claude                                      # back-fill from past C
 | `kervo init` | First-time: scan → artifact → inject `CLAUDE.md` (idempotent) |
 | `kervo compile [--lang en\|ko\|ja]` | Incremental rescan + recompile; Mode 3 → 2 → 1 fallback |
 | `kervo capture -type <t> -body <text>` | Record an observation into the ledger |
-| `kervo trust -id <prefix> -to verified\|stale\|deprecated -reason <r>` | Judge an observation |
+| `kervo trust -id <prefix> -to verified\|stale\|deprecated -reason <r>` | Judge an observation by ID (the scriptable primitive) |
+| `kervo review` | Triage queue — judge generated proposals and ⚠ conflicts one by one, no IDs |
 | `kervo status` | One-screen ledger + trust view |
 | `kervo metrics` | Prompt sizes with vs without the artifact (built-in A/B counters) |
 | `kervo import claude` | Back-fill the ledger from Claude Code transcripts (sizes only) |

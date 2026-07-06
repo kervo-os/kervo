@@ -42,27 +42,34 @@ func runTrust(args []string) error {
 	if !trust.CanTransition(obs.State, target) {
 		return fmt.Errorf("trust: %s → %s is not a legal transition (current state: %s)", obs.State, target, obs.State)
 	}
-	payload, err := json.Marshal(map[string]string{"to": string(target), "reason": *reason})
-	if err != nil {
-		return err
-	}
-	abs, err := filepath.Abs(*dir)
-	if err != nil {
-		return err
-	}
-	if _, err := store.Append(context.Background(), event.Event{
-		Kind:    event.KindTransition,
-		Type:    "transition",
-		Repo:    filepath.Base(abs),
-		Actor:   resolveActor(*actor, *dir),
-		Source:  "human",
-		Ref:     obs.ID,
-		Payload: json.RawMessage(payload),
-	}); err != nil {
+	if err := appendTransition(store, *dir, *actor, obs, target, *reason); err != nil {
 		return err
 	}
 	fmt.Printf("%s: %s → %s\n", shortID(obs.ID), obs.State, target)
 	return nil
+}
+
+// appendTransition records a human judgment in the ledger — shared by
+// `trust` (by-ID primitive) and `review` (triage queue).
+func appendTransition(store *jsonl.Store, dir, actorFlag string, obs trust.Observation, target trust.State, reason string) error {
+	payload, err := json.Marshal(map[string]string{"to": string(target), "reason": reason})
+	if err != nil {
+		return err
+	}
+	abs, err := filepath.Abs(dir)
+	if err != nil {
+		return err
+	}
+	_, err = store.Append(context.Background(), event.Event{
+		Kind:    event.KindTransition,
+		Type:    "transition",
+		Repo:    filepath.Base(abs),
+		Actor:   resolveActor(actorFlag, dir),
+		Source:  "human",
+		Ref:     obs.ID,
+		Payload: json.RawMessage(payload),
+	})
+	return err
 }
 
 // runStatus is the one-screen human surface: ledger size, state counts,
@@ -89,8 +96,18 @@ func runStatus(args []string) error {
 		counts[o.State]++
 	}
 	fmt.Printf("Ledger: %d events · %d observations\n", events, len(obs))
-	fmt.Printf("  generated %d · observed %d · verified %d · stale %d · deprecated %d\n\n",
+	fmt.Printf("  generated %d · observed %d · verified %d · stale %d · deprecated %d\n",
 		counts[trust.Generated], counts[trust.Observed], counts[trust.Verified], counts[trust.Stale], counts[trust.Deprecated])
+	pending := 0
+	for _, o := range obs {
+		if o.State == trust.Generated || o.Conflict {
+			pending++
+		}
+	}
+	if pending > 0 {
+		fmt.Printf("  %d awaiting judgment — `kervo review`\n", pending)
+	}
+	fmt.Println()
 	for _, o := range obs {
 		mark := ""
 		if o.Conflict {
