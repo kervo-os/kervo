@@ -170,6 +170,25 @@ func TestTodoRequiresCommentMarker(t *testing.T) {
 	}
 }
 
+func TestTodoStripsBlockCommentClosers(t *testing.T) {
+	dir := t.TempDir()
+	write(t, dir, "report.md", "<!-- TODO: confirm IOC list with the vendor -->\n")
+	write(t, dir, "style.css", "/* FIXME: contrast ratio */\n")
+	snap, _, err := New().Scan(context.Background(), dir, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	wants := []string{"TODO: confirm IOC list with the vendor", "FIXME: contrast ratio"}
+	if len(snap.Todos) != len(wants) {
+		t.Fatalf("todos = %+v, want %d", snap.Todos, len(wants))
+	}
+	for i, w := range wants {
+		if snap.Todos[i].Text != w {
+			t.Errorf("todo[%d] = %q, want %q", i, snap.Todos[i].Text, w)
+		}
+	}
+}
+
 func TestTestFilesAndTestdataSkipped(t *testing.T) {
 	dir := t.TempDir()
 	write(t, dir, "scan_test.go", "// TODO: fixture, not a task\n")

@@ -275,7 +275,13 @@ func scanFileTodos(path, rel string, budget int) ([]fact.Todo, bool) {
 		if m[2] == "" && (strings.HasPrefix(m[3], "/") || strings.HasPrefix(m[3], "|")) {
 			continue
 		}
-		text := strings.TrimSpace(m[1] + ": " + strings.TrimSpace(m[3]))
+		// A block-comment closer on the same line is comment syntax, not
+		// task text: `<!-- TODO: x -->` and `/* TODO: x */` end at x.
+		detail := strings.TrimSpace(m[3])
+		for _, closer := range []string{"-->", "*/"} {
+			detail = strings.TrimSpace(strings.TrimSuffix(detail, closer))
+		}
+		text := strings.TrimSpace(m[1] + ": " + detail)
 		if len(text) > maxTodoTextLen {
 			text = text[:maxTodoTextLen] + "…"
 		}
