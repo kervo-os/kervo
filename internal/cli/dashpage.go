@@ -129,6 +129,9 @@ main{max-width:66rem;margin:0 auto;padding:1.6rem 1.4rem 3rem}
 .rail .row.done:hover{background:transparent}
 .rail .st{font-size:.7rem;font-weight:700;width:5.2rem;flex:none;font-variant-numeric:tabular-nums}
 .rail .why{color:var(--faint);font-size:.74rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:18rem}
+.jhint{color:var(--faint);font-size:.74rem;line-height:1.55;margin-top:.65rem}
+#help .ht{margin:.9rem 0 .3rem;font-size:.72rem;color:var(--faint);text-transform:uppercase;letter-spacing:.09em;font-weight:650}
+#help .sem{display:block;color:var(--muted);font-size:.82rem;padding:.18rem 0}
 #toast{position:fixed;left:50%;bottom:1.4rem;transform:translateX(-50%) translateY(20px);opacity:0;
   background:var(--card);border:1px solid var(--line2);border-radius:10px;padding:.55rem 1rem;font-size:.85rem;
   transition:.25s;pointer-events:none;box-shadow:0 10px 30px rgba(0,0,0,.4)}
@@ -324,7 +327,9 @@ function renderTriage(){
     mk("bs","s",T.stale,()=>judge("stale")),
     mk("bd","d",T.deprecate,()=>judge("deprecated")),
     mk("","x",T.skip,skip));
-  c.append(a); card.append(c);
+  c.append(a);
+  c.append(el("div","jhint",T.jhint));
+  card.append(c);
   renderRails();
 }
 
@@ -404,6 +409,8 @@ function applyChrome(){
     keys.forEach(k=>{ (k==="–"||k==="/")? ks.append(document.createTextNode(" "+k+" ")) : ks.append(el("kbd","",k)) });
     d.append(ks); hr.append(d);
   }
+  hr.append(el("div","ht",T.jtitle));
+  [T.jv,T.js,T.jd,T.jx].forEach(t=>hr.append(el("span","sem",t)));
 }
 function setLang(l){
   LANG = l; T = TT[l] || TT.en;
