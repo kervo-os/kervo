@@ -26,6 +26,11 @@
 
 ## Recent Changes
 
+- `4754cc8` 2026-07-06 scan: strip block-comment closers from TODO text
+- `619a7df` 2026-07-06 ledger: live hook events from the v0.1.1 release session
+- `2c032a4` 2026-07-06 release: GoReleaser pipeline — prebuilt binaries + Homebrew tap
+- `e7fa626` 2026-07-05 ledger: first live hook events from a real session
+- `25a59c2` 2026-07-05 release prep: team workflow docs, commands reference, self-scan fixes
 - `f8f7a44` 2026-07-04 docs: publish the H4 experiment package — receipts, not claims
 - `76e05d8` 2026-07-04 readme: Korean and Japanese editions with language switcher
 - `655d2e3` 2026-07-04 readme: modern layout + measured-results section
@@ -41,24 +46,19 @@
 - `990755f` 2026-07-04 event: adopt Actor value convention from planning-session skeleton
 - `307b330` 2026-07-04 storage: adopt RFC-0005 layout — events are truth, artifacts are derived
 - `cafedbe` 2026-07-04 packaging: npm name is @kervo-os/kervo (unscoped blocked by typosquat filter)
-- `b61de3e` 2026-07-04 packaging: npm wrapper v0.0.1 (name reservation + future npx channel)
-- `92d18b3` 2026-07-04 openaicompat: tolerate trailing commas (field finding from gpt-oss-120b)
-- `ec25e11` 2026-07-04 prepare for public: Apache-2.0 license + real README
-- `0ab4acf` 2026-07-04 semantic: Mode 3 backend via any OpenAI-compatible endpoint
-- `2546883` 2026-07-04 i18n: artifact language setting — en default, ko/ja supported
 
-_Showing 20 of 26 analyzed commits._
+_Showing 20 of 31 analyzed commits._
 
 ### Frequently Changed Files
 
-- .kervo/events/2026-07.jsonl (7)
-- README.md (6)
+- .kervo/events/2026-07.jsonl (12)
+- README.md (8)
+- internal/adapters/source/files/files.go (7)
+- internal/adapters/source/files/files_test.go (7)
+- internal/core/compiler/compiler.go (7)
+- internal/core/compiler/compiler_test.go (7)
+- CLAUDE.md (6)
 - internal/cli/compile.go (6)
-- internal/core/compiler/compiler.go (6)
-- internal/core/compiler/compiler_test.go (6)
-- CLAUDE.md (5)
-- internal/adapters/source/files/files.go (5)
-- internal/adapters/source/files/files_test.go (5)
 - .gitignore (4)
 - .kervo/artifact.md (4)
 
@@ -68,7 +68,7 @@ _No TODO/FIXME comments found._
 
 ## Related Modules
 
-- .github/ (1 files)
+- .github/ (2 files)
 - assets/ (1 files)
 - cmd/ (1 files)
 - docs/ (60 files)
@@ -77,7 +77,7 @@ _No TODO/FIXME comments found._
 
 ## Workspace Facts
 
-- Commits analyzed: 26 (complete)
+- Commits analyzed: 31 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 6
 - Docs captured: 1
@@ -91,7 +91,8 @@ _No proposal yet. A confirmed goal becomes the first Verified observation._
 ## Known Decisions
 
 <!-- kervo:slot:decisions:begin -->
-_None proposed yet. Semantic providers (Mode 2/3) attach labeled observations here._
+**[generated — agent:claude-code]**
+inject mode option (v1.x candidate): default stays full-block in CLAUDE.md (zero-command clone is the product's proof); add opt-in '@.kervo/artifact.md' import mode for clean-CLAUDE.md users — trade-off: fresh clones see nothing until 'kervo compile'. Gate: field demand from real adopters.
 <!-- kervo:slot:decisions:end -->
 
 ## Known Risks
