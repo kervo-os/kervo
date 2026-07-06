@@ -15,6 +15,7 @@ import (
 
 	"github.com/kervo-os/kervo/internal/adapters/store/jsonl"
 	"github.com/kervo-os/kervo/internal/core/event"
+	"github.com/kervo-os/kervo/internal/core/i18n"
 	"github.com/kervo-os/kervo/internal/core/trust"
 )
 
@@ -26,7 +27,12 @@ import (
 func runDash(args []string) error {
 	fs := newFlagSet("dash")
 	actor := fs.String("actor", "", `who is judging (default "human:<git user.name>")`)
+	langFlag := fs.String("lang", "", "dash language: en, ko, ja (default: $LANG)")
 	if err := fs.Parse(args); err != nil {
+		return err
+	}
+	lang, err := dashLang(*langFlag)
+	if err != nil {
 		return err
 	}
 	paths := registeredWorkspaces()
@@ -34,7 +40,7 @@ func runDash(args []string) error {
 		fmt.Println("no kervo workspaces registered on this machine — run `kervo compile` in a repo first")
 		return nil
 	}
-	srv, err := newDashServer(paths, *actor)
+	srv, err := newDashServer(paths, *actor, lang)
 	if err != nil {
 		return err
 	}
@@ -77,6 +83,7 @@ type dashRepo struct {
 type dashServer struct {
 	mu     sync.Mutex
 	actor  string
+	lang   i18n.Lang
 	repos  []*dashRepo
 	byPath map[string]*dashRepo
 	judged int
@@ -84,8 +91,43 @@ type dashServer struct {
 	once   sync.Once
 }
 
-func newDashServer(paths []string, actorFlag string) (*dashServer, error) {
-	s := &dashServer{actor: actorFlag, byPath: map[string]*dashRepo{}, done: make(chan struct{})}
+// dashLang: the dash is a user surface spanning many repos, so its language
+// is the USER's — flag first, then $LC_ALL/$LANG — not any one workspace's.
+func dashLang(flagVal string) (i18n.Lang, error) {
+	if flagVal != "" {
+		return i18n.Parse(flagVal)
+	}
+	for _, env := range []string{"LC_ALL", "LANG"} {
+		if v := os.Getenv(env); len(v) >= 2 {
+			if l, err := i18n.Parse(v[:2]); err == nil {
+				return l, nil
+			}
+		}
+	}
+	return i18n.EN, nil
+}
+
+// dashKeys lists every UI string the page needs; trust-state and type
+// tokens are deliberately NOT localized — they are ledger vocabulary and
+// must read identically in the CLI, the artifact, and the page.
+var dashKeys = []string{
+	"workspaces", "totals", "localnote", "finish", "keys", "awaiting", "clear",
+	"events", "emptyledger", "queue", "pos", "cleared", "reasonph",
+	"verify", "stale", "deprecate", "skip", "back", "donetitle", "donenote",
+	"evidence", "justnow", "minago", "hourago", "dayago",
+	"helptitle", "hopen", "hmove", "hjudge", "hskip", "hreason", "hback",
+}
+
+func dashStrings(l i18n.Lang) map[string]string {
+	out := make(map[string]string, len(dashKeys))
+	for _, k := range dashKeys {
+		out[k] = i18n.T(l, "dash."+k)
+	}
+	return out
+}
+
+func newDashServer(paths []string, actorFlag string, lang i18n.Lang) (*dashServer, error) {
+	s := &dashServer{actor: actorFlag, lang: lang, byPath: map[string]*dashRepo{}, done: make(chan struct{})}
 	for _, p := range paths {
 		store := jsonl.Open(p)
 		folder := trust.NewFolder()
@@ -182,8 +224,13 @@ func (s *dashServer) page(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	strs, err := json.Marshal(dashStrings(s.lang))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	_ = dashTmpl.Execute(w, struct{ FleetJS template.JS }{template.JS(fleet)})
+	_ = dashTmpl.Execute(w, struct{ FleetJS, TJS template.JS }{template.JS(fleet), template.JS(strs)})
 }
 
 // judge writes the human's decision to the TARGET repo's own ledger — the

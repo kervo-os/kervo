@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/kervo-os/kervo/internal/adapters/store/jsonl"
+	"github.com/kervo-os/kervo/internal/core/i18n"
 	"github.com/kervo-os/kervo/internal/core/trust"
 )
 
@@ -65,6 +66,51 @@ func TestCompileRegistersWorkspace(t *testing.T) {
 	t.Fatalf("init did not register %s", abs)
 }
 
+// The dash is a user surface spanning repos, so its chrome speaks the
+// user's language ($LANG / -lang) while trust-state and type tokens stay
+// English — they are ledger vocabulary shared with the CLI and artifact.
+func TestDashKoreanChrome(t *testing.T) {
+	dir := t.TempDir()
+	if _, _, err := captureObservation(dir, "decision", "한국어 제안", "", "agent:test"); err != nil {
+		t.Fatal(err)
+	}
+	srv, err := newDashServer([]string{dir}, "human:tester", i18n.KO)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ts := httptest.NewServer(srv.handler())
+	defer ts.Close()
+	res, err := http.Get(ts.URL + "/")
+	if err != nil {
+		t.Fatal(err)
+	}
+	page, _ := io.ReadAll(res.Body)
+	res.Body.Close()
+	for _, want := range []string{"판정 대기", "워크스페이스", "승인"} {
+		if !strings.Contains(string(page), want) {
+			t.Errorf("Korean chrome missing %q", want)
+		}
+	}
+}
+
+func TestDashLangDetection(t *testing.T) {
+	t.Setenv("LC_ALL", "")
+	t.Setenv("LANG", "ko_KR.UTF-8")
+	if l, err := dashLang(""); err != nil || l != i18n.KO {
+		t.Errorf("dashLang from $LANG = %v/%v, want ko", l, err)
+	}
+	if l, err := dashLang("ja"); err != nil || l != i18n.JA {
+		t.Errorf("dashLang flag override = %v/%v, want ja", l, err)
+	}
+	if _, err := dashLang("xx"); err == nil {
+		t.Error("unsupported -lang must error")
+	}
+	t.Setenv("LANG", "fr_FR.UTF-8")
+	if l, _ := dashLang(""); l != i18n.EN {
+		t.Errorf("unsupported $LANG must fall back to en, got %v", l)
+	}
+}
+
 func TestDashFleetAndCrossRepoJudge(t *testing.T) {
 	a, b := t.TempDir(), t.TempDir()
 	if _, _, err := captureObservation(a, "decision", "alpha fact <b>x</b>", "ran it", "agent:test"); err != nil {
@@ -73,7 +119,7 @@ func TestDashFleetAndCrossRepoJudge(t *testing.T) {
 	if _, _, err := captureObservation(b, "risk", "beta fact", "", "agent:test"); err != nil {
 		t.Fatal(err)
 	}
-	srv, err := newDashServer([]string{a, b}, "human:tester")
+	srv, err := newDashServer([]string{a, b}, "human:tester", i18n.EN)
 	if err != nil {
 		t.Fatal(err)
 	}

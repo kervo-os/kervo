@@ -123,18 +123,18 @@ main{max-width:66rem;margin:0 auto;padding:1.6rem 1.4rem 3rem}
   <div class="brand">kervo <em>dash</em></div>
   <div class="spacer"></div>
   <div class="progress"><i id="pbar"></i></div>
-  <span class="hint"><kbd>?</kbd> keys</span>
-  <button class="primary" onclick="finish()">Finish</button>
+  <span class="hint"><kbd>?</kbd> <span id="keysHint"></span></span>
+  <button class="primary" id="finishBtn" onclick="finish()"></button>
 </header>
 <main>
   <section id="fleet">
-    <div class="page-head"><h1>Workspaces</h1><div class="sub" id="totals"></div>
-      <div class="hint">everything below is local — no server, no account</div></div>
+    <div class="page-head"><h1 id="wtitle"></h1><div class="sub" id="totals"></div>
+      <div class="hint" id="localnote"></div></div>
     <div class="grid" id="grid"></div>
   </section>
   <section id="triage">
     <div class="tri-head">
-      <button onclick="showFleet()">← fleet <kbd>Esc</kbd></button>
+      <button onclick="showFleet()"><span id="backLbl"></span> <kbd>Esc</kbd></button>
       <h2 id="tname"></h2><div class="sub" id="tsub"></div>
     </div>
     <div id="tcard"></div>
@@ -142,16 +142,12 @@ main{max-width:66rem;margin:0 auto;padding:1.6rem 1.4rem 3rem}
   </section>
 </main>
 <div id="toast"></div>
-<div id="help"><div class="box"><h3>Keys</h3>
-  <div><span>open repo</span><span><kbd>1</kbd>–<kbd>9</kbd></span></div>
-  <div><span>next / prev item</span><span><kbd>j</kbd> / <kbd>k</kbd></span></div>
-  <div><span>verify · stale · deprecate</span><span><kbd>v</kbd> <kbd>s</kbd> <kbd>d</kbd></span></div>
-  <div><span>skip</span><span><kbd>x</kbd></span></div>
-  <div><span>reason field</span><span><kbd>r</kbd></span></div>
-  <div><span>back / close</span><span><kbd>Esc</kbd></span></div>
-</div></div>
+<div id="help"><div class="box"><h3 id="helpTitle"></h3><div id="helpRows"></div></div></div>
 <script>
 const FLEET = {{.FleetJS}};
+const T = {{.TJS}};
+// %[1]d-style verbs come straight from the Go string tables.
+const F = (s,...a)=>s.replace(/%\[(\d+)\]d/g,(_,n)=>a[n-1]);
 FLEET.forEach(r=>{ r.Items = r.Items || []; r.Counts = r.Counts || {} });
 const STATES = ["verified","observed","generated","stale","deprecated"];
 const SC = {verified:"var(--v)",observed:"var(--o)",generated:"var(--g)",stale:"var(--s)",deprecated:"var(--d)"};
@@ -160,15 +156,14 @@ const total0 = FLEET.reduce((n,r)=>n+r.Items.length,0);
 const el = (t,cls,txt)=>{const e=document.createElement(t); if(cls)e.className=cls; if(txt!==undefined)e.textContent=txt; return e};
 
 function hue(s){ let h=0; for(const c of s) h=(h*31+c.codePointAt(0))>>>0; return h%360 }
-function rel(iso){ if(!iso) return "empty ledger";
+function rel(iso){ if(!iso) return T.emptyledger;
   const s=(Date.now()-Date.parse(iso))/1e3;
-  if(s<90) return "just now"; if(s<5400) return Math.round(s/60)+"m ago";
-  if(s<129600) return Math.round(s/3600)+"h ago"; return Math.round(s/86400)+"d ago" }
+  if(s<90) return T.justnow; if(s<5400) return F(T.minago,Math.round(s/60));
+  if(s<129600) return F(T.hourago,Math.round(s/3600)); return F(T.dayago,Math.round(s/86400)) }
 
 function totals(){
   const pend = FLEET.reduce((n,r)=>n+r.Items.length,0);
-  document.getElementById("totals").textContent =
-    FLEET.length+" workspaces · "+pend+" awaiting judgment";
+  document.getElementById("totals").textContent = F(T.totals, FLEET.length, pend);
   document.getElementById("pbar").style.width = total0? (100*judged/total0)+"%" : "100%";
 }
 
@@ -187,7 +182,7 @@ function renderFleet(){
     const pend = r.Items.length;
     const attn = el("div","attn "+(pend?"hot":"ok"));
     attn.append(el("span","n", pend? String(pend) : "✓"),
-                el("span","lbl", pend? "awaiting judgment" : "all clear"));
+                el("span","lbl", pend? T.awaiting : T.clear));
     c.append(attn);
     const totalObs = STATES.reduce((n,st)=>n+(r.Counts[st]||0),0);
     if(totalObs){
@@ -203,7 +198,7 @@ function renderFleet(){
     }
     const foot = el("div","foot");
     const fresh = r.LastEvent && (Date.now()-Date.parse(r.LastEvent))<36e5;
-    foot.append(el("span","",r.Events+" events"),
+    foot.append(el("span","",F(T.events,r.Events)),
                 el("span",fresh?"pulse":"", (fresh?"● ":"")+rel(r.LastEvent)));
     c.append(foot);
     c.onclick = ()=>openRepo(i);
@@ -226,11 +221,11 @@ function renderTriage(){
   document.getElementById("tname").textContent = repo.Name;
   const card = document.getElementById("tcard"); card.textContent="";
   if(!repo.Items.length){
-    document.getElementById("tsub").textContent = "all clear";
-    card.append(el("div","empty","All judged here — Esc back to the fleet."));
+    document.getElementById("tsub").textContent = T.clear;
+    card.append(el("div","empty",T.cleared));
     document.getElementById("rail").textContent=""; return }
   if(idx>=repo.Items.length) idx=repo.Items.length-1;
-  document.getElementById("tsub").textContent = (idx+1)+" / "+repo.Items.length+" · j/k to move";
+  document.getElementById("tsub").textContent = F(T.pos, idx+1, repo.Items.length);
   const o = repo.Items[idx];
   const c = el("div","item");
   const m = el("div","meta");
@@ -245,18 +240,18 @@ function renderTriage(){
   else if(col > 0 && col < 90){ head = o.Body.slice(0,col); rest = o.Body.slice(col+1).trim() }
   c.append(el("div","body-title",head));
   if(rest) c.append(el("div","body",rest));
-  if(o.Evidence) c.append(el("div","evid","evidence: "+o.Evidence));
+  if(o.Evidence) c.append(el("div","evid",T.evidence+o.Evidence));
   const a = el("div","actions");
-  const reason = el("input"); reason.id="reason"; reason.placeholder="reason (optional) — r to focus";
+  const reason = el("input"); reason.id="reason"; reason.placeholder=T.reasonph;
   const mk=(cls,key,label,fn)=>{const b=el("button",cls); b.append(el("b","",key),document.createTextNode(label)); b.onclick=fn; return b};
   a.append(reason,
-    mk("bv","v","verify",()=>judge("verified")),
-    mk("bs","s","stale",()=>judge("stale")),
-    mk("bd","d","deprecate",()=>judge("deprecated")),
-    mk("","x","skip",skip));
+    mk("bv","v",T.verify,()=>judge("verified")),
+    mk("bs","s",T.stale,()=>judge("stale")),
+    mk("bd","d",T.deprecate,()=>judge("deprecated")),
+    mk("","x",T.skip,skip));
   c.append(a); card.append(c);
   const rail = document.getElementById("rail"); rail.textContent="";
-  rail.append(el("div","rail-label","queue"));
+  rail.append(el("div","rail-label",T.queue));
   repo.Items.forEach((it,i)=>{
     const row = el("div","row"+(i===idx?" cur":""));
     row.append(el("span","idx",String(i+1)), el("span","tag "+it.Type,it.Type), el("span","txt",it.Body));
@@ -282,8 +277,10 @@ function toast(msg,color){ const t=document.getElementById("toast");
   clearTimeout(tmr); tmr=setTimeout(()=>t.classList.remove("show"),1800) }
 
 function finish(){ fetch("/quit",{method:"POST"}).finally(()=>{
-  document.body.innerHTML="<div class='empty' style='padding-top:5rem'><h2>Done — "+judged+" judged.</h2>"+
-  "<p>Run <code>kervo compile</code> in the affected repos, then close this tab.</p></div>"}) }
+  document.body.textContent="";
+  const box = el("div","empty"); box.style.paddingTop="5rem";
+  box.append(el("h2","",F(T.donetitle,judged)), el("p","",T.donenote));
+  document.body.append(box)}) }
 
 document.addEventListener("keydown",e=>{
   const typing = e.target.tagName==="INPUT";
@@ -299,6 +296,19 @@ document.addEventListener("keydown",e=>{
   else if(e.key==="x") skip();
   else if(e.key==="r"){ e.preventDefault(); document.getElementById("reason")?.focus() }
 });
+// Static chrome + help overlay, all from the string table.
+for(const [id,key] of [["wtitle","workspaces"],["localnote","localnote"],
+  ["keysHint","keys"],["finishBtn","finish"],["backLbl","back"],["helpTitle","helptitle"]])
+  document.getElementById(id).textContent = T[key];
+const rows = [[T.hopen,["1","–","9"]],[T.hmove,["j","/","k"]],[T.hjudge,["v","s","d"]],
+  [T.hskip,["x"]],[T.hreason,["r"]],[T.hback,["Esc"]]];
+const hr = document.getElementById("helpRows");
+for(const [label,keys] of rows){
+  const d = el("div"); d.append(el("span","",label));
+  const ks = el("span");
+  keys.forEach(k=>{ (k==="–"||k==="/")? ks.append(document.createTextNode(" "+k+" ")) : ks.append(el("kbd","",k)) });
+  d.append(ks); hr.append(d);
+}
 renderFleet();
 // Deep link: #2 opens the second repo — refresh keeps your place.
 const h = location.hash.match(/^#(\d+)$/);
