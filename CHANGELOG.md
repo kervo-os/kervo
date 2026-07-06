@@ -3,6 +3,16 @@
 All notable changes, newest first. Versions are git tags; every release
 ships prebuilt binaries and a Homebrew cask (`brew install kervo-os/tap/kervo`).
 
+## v0.19.0 — 2026-07-06
+
+- Facts describe the repo that exists: Focus, coupling, and hot files
+  drop paths that only history knows (repos extracted from a parent
+  directory carry the old prefix in pre-split commits).
+- Observation bodies read like documents: the dash renders a minimal
+  markdown subset (XSS-impossible by construction), literal backslash-n
+  from shell-quoted captures displays as real newlines, and the protocol
+  now asks for markdown bodies.
+
 ## v0.18.0 — 2026-07-06
 
 - Interactive init completes the wizard: after the consumer question it
