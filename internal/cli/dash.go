@@ -68,6 +68,7 @@ func runDash(args []string) error {
 type dashItem struct {
 	ID, ShortID, Type, State, Actor, Body string
 	Evidence                              string `json:",omitempty"`
+	Reason                                string `json:",omitempty"`
 	Conflict                              bool   `json:",omitempty"`
 }
 
@@ -76,8 +77,9 @@ type dashRepo struct {
 	DisplayPath      string // Path with $HOME shortened to ~ — for humans
 	Events           int
 	Counts           map[string]int
-	LastEvent        string // RFC3339, "" if the ledger is empty
-	Items            []dashItem
+	LastEvent        string     // RFC3339, "" if the ledger is empty
+	Items            []dashItem // awaiting judgment
+	History          []dashItem // already judged — newest first, reasons shown
 }
 
 type dashServer struct {
@@ -120,7 +122,7 @@ func dashLang(flagVal string) (i18n.Lang, error) {
 // must read identically in the CLI, the artifact, and the page.
 var dashKeys = []string{
 	"workspaces", "totals", "localnote", "finish", "keys", "awaiting", "clear",
-	"events", "emptyledger", "queue", "pos", "cleared", "reasonph",
+	"events", "emptyledger", "queue", "records", "pos", "cleared", "reasonph",
 	"verify", "stale", "deprecate", "skip", "back", "donetitle", "donenote",
 	"evidence", "justnow", "minago", "hourago", "dayago",
 	"helptitle", "hopen", "hmove", "hjudge", "hskip", "hreason", "hback",
@@ -157,19 +159,29 @@ func newDashServer(paths []string, actorFlag string, lang i18n.Lang) (*dashServe
 			Events:      events, Counts: map[string]int{},
 			// Never nil: a clear repo must marshal as [], not null — the
 			// page reads .Items.length on every repo before rendering.
-			Items: []dashItem{},
+			Items: []dashItem{}, History: []dashItem{},
 		}
 		if !last.IsZero() {
 			repo.LastEvent = last.UTC().Format(time.RFC3339)
 		}
 		for _, o := range folder.Observations() {
 			repo.Counts[string(o.State)]++
-			if o.State == trust.Generated || o.Conflict {
-				repo.Items = append(repo.Items, dashItem{
-					ID: o.ID, ShortID: shortID(o.ID), Type: o.Type, State: string(o.State),
-					Actor: o.Actor, Body: o.Body, Evidence: o.Evidence, Conflict: o.Conflict,
-				})
+			it := dashItem{
+				ID: o.ID, ShortID: shortID(o.ID), Type: o.Type, State: string(o.State),
+				Actor: o.Actor, Body: o.Body, Evidence: o.Evidence, Reason: o.Reason,
+				Conflict: o.Conflict,
 			}
+			if o.State == trust.Generated || o.Conflict {
+				repo.Items = append(repo.Items, it)
+			} else {
+				// Judged records stay visible with their reasons — the
+				// ledger never hides history, so neither does the page.
+				repo.History = append(repo.History, it)
+			}
+		}
+		// Newest judgments first.
+		for i, j := 0, len(repo.History)-1; i < j; i, j = i+1, j-1 {
+			repo.History[i], repo.History[j] = repo.History[j], repo.History[i]
 		}
 		s.repos = append(s.repos, repo)
 		s.byPath[p] = repo
@@ -324,6 +336,8 @@ func (s *dashServer) judge(w http.ResponseWriter, r *http.Request) {
 	repo.Counts[it.State]--
 	repo.Counts[req.To]++
 	repo.Items = append(repo.Items[:idx], repo.Items[idx+1:]...)
+	it.State, it.Reason = req.To, req.Reason
+	repo.History = append([]dashItem{it}, repo.History...)
 	s.judged++
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write([]byte(`{"ok":true}`))

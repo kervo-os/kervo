@@ -110,6 +110,10 @@ main{max-width:66rem;margin:0 auto;padding:1.6rem 1.4rem 3rem}
 .rail .row.cur{background:var(--card);color:var(--fg);border-left-color:var(--v)}
 .rail .idx{color:var(--faint);font:.72rem ui-monospace,monospace;width:1.3rem;text-align:right;flex:none}
 .rail .txt{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.rail .row.done{cursor:default;opacity:.85}
+.rail .row.done:hover{background:transparent}
+.rail .st{font-size:.7rem;font-weight:700;width:5.2rem;flex:none;font-variant-numeric:tabular-nums}
+.rail .why{color:var(--faint);font-size:.74rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:18rem}
 #toast{position:fixed;left:50%;bottom:1.4rem;transform:translateX(-50%) translateY(20px);opacity:0;
   background:var(--card);border:1px solid var(--line2);border-radius:10px;padding:.55rem 1rem;font-size:.85rem;
   transition:.25s;pointer-events:none;box-shadow:0 10px 30px rgba(0,0,0,.4)}
@@ -155,7 +159,7 @@ let LANG = "{{.Lang}}";
 let T = TT[LANG] || TT.en;
 // %[1]d-style verbs come straight from the Go string tables.
 const F = (s,...a)=>s.replace(/%\[(\d+)\]d/g,(_,n)=>a[n-1]);
-FLEET.forEach(r=>{ r.Items = r.Items || []; r.Counts = r.Counts || {} });
+FLEET.forEach(r=>{ r.Items = r.Items || []; r.History = r.History || []; r.Counts = r.Counts || {} });
 const STATES = ["verified","observed","generated","stale","deprecated"];
 const SC = {verified:"var(--v)",observed:"var(--o)",generated:"var(--g)",stale:"var(--s)",deprecated:"var(--d)"};
 let repo = null, idx = 0, judged = 0;
@@ -230,7 +234,7 @@ function renderTriage(){
   if(!repo.Items.length){
     document.getElementById("tsub").textContent = T.clear;
     card.append(el("div","empty",T.cleared));
-    document.getElementById("rail").textContent=""; return }
+    renderRails(); return }
   if(idx>=repo.Items.length) idx=repo.Items.length-1;
   document.getElementById("tsub").textContent = F(T.pos, idx+1, repo.Items.length);
   const o = repo.Items[idx];
@@ -257,14 +261,30 @@ function renderTriage(){
     mk("bd","d",T.deprecate,()=>judge("deprecated")),
     mk("","x",T.skip,skip));
   c.append(a); card.append(c);
+  renderRails();
+}
+
+function renderRails(){
   const rail = document.getElementById("rail"); rail.textContent="";
-  rail.append(el("div","rail-label",T.queue));
-  repo.Items.forEach((it,i)=>{
-    const row = el("div","row"+(i===idx?" cur":""));
-    row.append(el("span","idx",String(i+1)), el("span","tag "+it.Type,it.Type), el("span","txt",it.Body));
-    row.onclick=()=>{idx=i; renderTriage()};
-    rail.append(row);
-  });
+  if(repo.Items.length){
+    rail.append(el("div","rail-label",T.queue));
+    repo.Items.forEach((it,i)=>{
+      const row = el("div","row"+(i===idx?" cur":""));
+      row.append(el("span","idx",String(i+1)), el("span","tag "+it.Type,it.Type), el("span","txt",it.Body));
+      row.onclick=()=>{idx=i; renderTriage()};
+      rail.append(row);
+    });
+  }
+  if(repo.History.length){
+    rail.append(el("div","rail-label",T.records));
+    repo.History.forEach(it=>{
+      const row = el("div","row done");
+      const st = el("span","st",it.State); st.style.color = SC[it.State]||"var(--muted)";
+      row.append(st, el("span","tag "+it.Type,it.Type), el("span","txt",it.Body));
+      if(it.Reason) row.append(el("span","why","· "+it.Reason));
+      rail.append(row);
+    });
+  }
 }
 
 async function judge(to){
@@ -274,6 +294,7 @@ async function judge(to){
     body:JSON.stringify({Workspace:repo.Path,ID:o.ID,To:to,Reason:reason})});
   if(!res.ok){ toast(await res.text(), "var(--d)"); return }
   repo.Items.splice(idx,1); repo.Counts[o.State]--; repo.Counts[to]=(repo.Counts[to]||0)+1; judged++;
+  repo.History.unshift(Object.assign({},o,{State:to,Reason:reason}));
   toast(o.ShortID+" → "+to, SC[to]); totals(); renderTriage();
 }
 function skip(){ if(idx<repo.Items.length-1) idx++; renderTriage() }
