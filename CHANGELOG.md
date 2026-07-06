@@ -3,6 +3,14 @@
 All notable changes, newest first. Versions are git tags; every release
 ships prebuilt binaries and a Homebrew cask (`brew install kervo-os/tap/kervo`).
 
+## v0.18.0 — 2026-07-06
+
+- Interactive init completes the wizard: after the consumer question it
+  offers to wire Claude Code capture hooks (`-hooks yes|no` for scripts) —
+  created once, never rewriting an existing settings file. Codex-only
+  choices get a stated fact instead of a fake: no per-repo hook system
+  exists there; AGENTS.md carries the write-back protocol regardless.
+
 ## v0.17.0 — 2026-07-06
 
 - The Brief: artifacts open with deterministic orientation — where recent

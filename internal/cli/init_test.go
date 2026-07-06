@@ -306,3 +306,73 @@ func TestInitCorruptMarkersLeavesNoPartialState(t *testing.T) {
 		t.Error(".kervo was created despite the failed injection (partial state)")
 	}
 }
+
+// -hooks yes writes the documented settings block once; a settings file
+// that carries someone else's config is never rewritten.
+func TestInitWiresClaudeHooks(t *testing.T) {
+	dir := t.TempDir()
+	git(t, dir, "init", "-q", "-b", "main")
+	writeFile(t, dir, "README.md", "# demo\n")
+	git(t, dir, "add", ".")
+	git(t, dir, "commit", "-q", "-m", "x")
+
+	if err := runInit([]string{"-dir", dir, "-hooks", "yes"}); err != nil {
+		t.Fatal(err)
+	}
+	p := filepath.Join(dir, ".claude", "settings.json")
+	raw, err := os.ReadFile(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, ev := range []string{"UserPromptSubmit", "SessionStart", "PostToolUse", "kervo hook || true"} {
+		if !strings.Contains(string(raw), ev) {
+			t.Errorf("settings missing %q", ev)
+		}
+	}
+	// Idempotent: second run leaves the file byte-identical.
+	if err := runInit([]string{"-dir", dir, "-hooks", "yes"}); err != nil {
+		t.Fatal(err)
+	}
+	raw2, _ := os.ReadFile(p)
+	if string(raw) != string(raw2) {
+		t.Error("re-wiring rewrote an already-wired settings file")
+	}
+
+	// Someone else's config is not ours to rewrite.
+	custom := t.TempDir()
+	git(t, custom, "init", "-q", "-b", "main")
+	writeFile(t, custom, "README.md", "# demo\n")
+	writeFile(t, custom, ".claude/settings.json", `{"permissions":{"allow":["Read"]}}`)
+	git(t, custom, "add", ".")
+	git(t, custom, "commit", "-q", "-m", "x")
+	if err := runInit([]string{"-dir", custom, "-hooks", "yes"}); err != nil {
+		t.Fatal(err)
+	}
+	kept, _ := os.ReadFile(filepath.Join(custom, ".claude", "settings.json"))
+	if string(kept) != `{"permissions":{"allow":["Read"]}}` {
+		t.Error("existing user settings were modified")
+	}
+
+	// Codex-only consumers have nothing to wire — explicit yes must error.
+	codex := t.TempDir()
+	git(t, codex, "init", "-q", "-b", "main")
+	writeFile(t, codex, "README.md", "# demo\n")
+	git(t, codex, "add", ".")
+	git(t, codex, "commit", "-q", "-m", "x")
+	if err := runInit([]string{"-dir", codex, "-consumers", "codex", "-hooks", "yes"}); err == nil {
+		t.Error("hooks=yes with codex-only consumers must error")
+	}
+
+	// Non-TTY default: no prompt, no wiring — CI behavior unchanged.
+	plain := t.TempDir()
+	git(t, plain, "init", "-q", "-b", "main")
+	writeFile(t, plain, "README.md", "# demo\n")
+	git(t, plain, "add", ".")
+	git(t, plain, "commit", "-q", "-m", "x")
+	if err := runInit([]string{"-dir", plain}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(filepath.Join(plain, ".claude")); !os.IsNotExist(err) {
+		t.Error(".claude created without being asked (non-TTY must stay silent)")
+	}
+}

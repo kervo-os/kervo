@@ -23,6 +23,7 @@ func runInit(args []string) error {
 	langFlag := fs.String("lang", "", "artifact language: en, ko, ja (default: en)")
 	injectFlag := fs.String("inject", "", "consumer-file injection: block (full artifact) or import (one @-line)")
 	consumersFlag := fs.String("consumers", "", "consumer targets: claude,codex,both,auto (default: ask on TTY, else auto)")
+	hooksFlag := fs.String("hooks", "", "wire Claude Code capture hooks: yes|no (default: ask on TTY)")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
@@ -35,6 +36,10 @@ func runInit(args []string) error {
 		return err
 	}
 	consumers, err := resolveConsumersForInit(*dir, *consumersFlag)
+	if err != nil {
+		return err
+	}
+	wantHooks, err := resolveHooksWiring(*hooksFlag, consumers)
 	if err != nil {
 		return err
 	}
@@ -52,6 +57,22 @@ func runInit(args []string) error {
 		return err
 	}
 	fmt.Print(renderColdStart(newUI(), snap, Version, injected))
+	if wantHooks {
+		status, err := wireClaudeHooks(*dir)
+		if err != nil {
+			return err
+		}
+		fmt.Println("  " + "Hooks      .claude/settings.json — " + status)
+	}
+	codexOnly := true
+	for _, c := range injected {
+		if c == consumerClaude {
+			codexOnly = false
+		}
+	}
+	if codexOnly {
+		fmt.Println("  Codex      AGENTS.md carries the context and the write-back protocol; optional MCP: add kervo to ~/.codex/config.toml")
+	}
 	return nil
 }
 

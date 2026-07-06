@@ -253,8 +253,9 @@ The pre-registered full re-run happens at a volume gate (10 sessions +
 
 ## Capture: wire the hooks
 
-Live capture feeds the ledger and the built-in measurement counters. For
-Claude Code, add to your project's `.claude/settings.json` (hooks run in the
+Live capture feeds the ledger and the built-in measurement counters.
+An interactive `kervo init` offers to wire this for you (`-hooks yes` in
+scripts); or add to your project's `.claude/settings.json` (hooks run in the
 project directory, so `kervo` just needs to be on PATH):
 
 ```json
