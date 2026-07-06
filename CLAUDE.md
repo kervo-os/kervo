@@ -26,6 +26,7 @@
 
 ## Recent Changes
 
+- `d0d27d8` 2026-07-06 scan: declared pytest runners (real-repo eval field finding)
 - `72216b9` 2026-07-06 review: the verifier's surface — triage queue over pending judgments
 - `70639d4` 2026-07-06 consumer: AGENTS.md as a second injection target (opt-in by presence)
 - `39c1a0f` 2026-07-06 ledger: propose AGENTS.md injection target (codex A/B field evidence)
@@ -45,17 +46,16 @@
 - `30c1611` 2026-07-04 import: back-fill the ledger from Claude Code transcripts
 - `37597be` 2026-07-04 docs: hook wiring for live capture and H3 counters
 - `ab0bea4` 2026-07-04 metrics: H3 counters ride the hook path — sizes in, content never
-- `70c9ef3` 2026-07-04 trust: the engine — replayed states, human judgment, honest demotion
 
-_Showing 20 of 35 analyzed commits._
+_Showing 20 of 36 analyzed commits._
 
 ### Frequently Changed Files
 
-- .kervo/events/2026-07.jsonl (16)
-- CLAUDE.md (10)
+- .kervo/events/2026-07.jsonl (17)
+- CLAUDE.md (11)
 - README.md (10)
-- internal/adapters/source/files/files.go (7)
-- internal/adapters/source/files/files_test.go (7)
+- internal/adapters/source/files/files.go (8)
+- internal/adapters/source/files/files_test.go (8)
 - internal/cli/compile.go (7)
 - internal/core/compiler/compiler.go (7)
 - internal/core/compiler/compiler_test.go (7)
@@ -77,7 +77,7 @@ _No TODO/FIXME comments found._
 
 ## Workspace Facts
 
-- Commits analyzed: 35 (complete)
+- Commits analyzed: 36 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 6
 - Docs captured: 1
@@ -85,7 +85,8 @@ _No TODO/FIXME comments found._
 ## Possible Current Goal
 
 <!-- kervo:slot:goal:begin -->
-_No proposal yet. A confirmed goal becomes the first Verified observation._
+**[generated — agent:claude-code]**
+AgentOS-class direction (proposal, 2026-07-06): close the write-back loop. The injected block carries a contributing-back protocol — any consumer that learns a durable fact the artifact lacks (how-to-run, component roles, internals) captures it as a proposal; humans judge via review; every later session (any agent, any teammate) gets it for zero calls with a trust label. Exploration cost amortizes across the team. Phases: A write-back protocol in the artifact; B accreted wiki from verified observations (vs openwiki generation — no hallucination, staleness via trust lifecycle); C memory bus — personal agent memories sync in via import/MCP, team-shareable knowledge passes through review (vs agentmemory — shared and judged); D session handoff notes for WIP. Success metric (H5, pre-registerable): re-run the real-repo A/B after 2 weeks of write-back use — artifact-only score rises from 5.5/10 toward 10 at ~1 tool call.
 <!-- kervo:slot:goal:end -->
 
 ## Known Decisions
