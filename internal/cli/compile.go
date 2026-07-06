@@ -212,8 +212,13 @@ func renderView(folder *trust.Folder) ([]artifact.Enhancement, []compiler.StaleN
 	for _, o := range folder.Observations() {
 		switch o.State {
 		case trust.Verified, trust.Observed, trust.Generated:
+			body := o.Body
+			// Evidence travels with the claim so any reader can re-check it.
+			if o.Evidence != "" {
+				body += "\nEvidence: " + o.Evidence
+			}
 			enh = append(enh, artifact.Enhancement{
-				Slot: slotForType(o.Type), Body: o.Body,
+				Slot: slotForType(o.Type), Body: body,
 				State: o.State, Source: o.LastActor, Conflict: o.Conflict,
 			})
 		case trust.Stale:

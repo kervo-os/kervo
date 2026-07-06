@@ -14,6 +14,7 @@ type Observation struct {
 	ID        string
 	Type      string // capture type: decision, risk, goal, note, summary, ...
 	Body      string
+	Evidence  string // how the proposer verified it — "" if none attached
 	At        time.Time
 	Actor     string // who proposed it
 	Source    string
@@ -32,7 +33,8 @@ type transitionPayload struct {
 }
 
 type observationPayload struct {
-	Body string `json:"body"`
+	Body     string `json:"body"`
+	Evidence string `json:"evidence"`
 }
 
 // Folder folds ledger events into current observation views.
@@ -57,7 +59,7 @@ func (f *Folder) Add(e event.Event) {
 		var p observationPayload
 		_ = json.Unmarshal(e.Payload, &p)
 		o := &Observation{
-			ID: e.ID, Type: e.Type, Body: p.Body, At: e.At,
+			ID: e.ID, Type: e.Type, Body: p.Body, Evidence: p.Evidence, At: e.At,
 			Actor: e.Actor, Source: e.Source,
 			State: initialState(e.Actor), LastActor: e.Actor,
 		}

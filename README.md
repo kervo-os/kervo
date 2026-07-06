@@ -154,8 +154,10 @@ exploration: it instructs any AI consumer to capture the durable facts it
 had to discover the hard way — how to run things, component roles,
 in-conversation decisions — as proposals. Judge them once with
 `kervo review`, and every later session — any agent, any teammate — gets
-the answer for zero tool calls. Duplicate bodies are dropped automatically,
-so the queue stays clean.
+the answer for zero tool calls. Proposals carry **evidence** — the command
+the agent ran, the doc it read — so verification labor sits with the agent
+and the human signature takes one keystroke. Duplicate bodies are dropped
+automatically, so the queue stays clean.
 
 ## Measured, not claimed
 

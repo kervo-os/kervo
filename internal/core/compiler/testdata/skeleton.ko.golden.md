@@ -90,8 +90,9 @@ _기록 없음. 낡거나 폐기된 관찰은 조용히 삭제되는 대신
 > 사실을 알게 됐다면(무언가의 실행 방법, 컴포넌트의 역할, 대화 중 내려진
 > 결정), 사람의 판정을 받도록 올려둘 것:
 >
-> `kervo capture -type decision|risk|summary|goal -actor "agent:<너>" -body "<사실>"`
+> `kervo capture -type decision|risk|summary|goal -actor "agent:<너>" -body "<사실>" -evidence "<검증 방법>"`
 >
-> 규칙: 관찰한 사실만, 추측 금지 · 사실 하나당 캡처 하나 · 이 artifact에
-> 이미 있는 내용은 생략 · 비밀값·파일 내용은 절대 넣지 말 것. 중복은
-> 자동으로 버려진다. 사람이 `kervo review`로 큐를 판정한다.
+> 규칙: 관찰한 사실만, 추측 금지 · 증거를 붙일 것 — 실행한 명령, 읽은
+> 문서 — 사람이 키 한 번으로 서명할 수 있도록 · 사실 하나당 캡처 하나 ·
+> 이 artifact에 이미 있는 내용은 생략 · 비밀값·파일 내용은 절대 넣지 말
+> 것. 중복은 자동으로 버려진다. 사람이 `kervo review`로 큐를 판정한다.

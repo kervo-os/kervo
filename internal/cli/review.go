@@ -57,6 +57,9 @@ loop:
 		}
 		fmt.Fprintf(out, "\n[%d/%d] %s · %s · %s · %s%s\n", i+1, len(queue), shortID(o.ID), o.Type, o.State, o.LastActor, mark)
 		fmt.Fprintf(out, "  %s\n", strings.ReplaceAll(strings.TrimRight(o.Body, "\n"), "\n", "\n  "))
+		if o.Evidence != "" {
+			fmt.Fprintf(out, "  evidence: %s\n", o.Evidence)
+		}
 		fmt.Fprint(out, "> ")
 		line, rerr := reader.ReadString('\n')
 

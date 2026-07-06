@@ -26,6 +26,7 @@
 
 ## Recent Changes
 
+- `dbe373d` 2026-07-06 ledger: evidence-attached proposals (LLM pre-verification, human signature)
 - `94657b1` 2026-07-06 ledger: Phase B refinement — fact-wiki links to code, never copies it
 - `41f958c` 2026-07-06 ledger: session hook events
 - `c80b3a0` 2026-07-06 flywheel: the write-back protocol — artifacts instruct their consumers
@@ -45,14 +46,13 @@
 - `655d2e3` 2026-07-04 readme: modern layout + measured-results section
 - `1227d0b` 2026-07-04 scan: monorepo + Python/Docker ecosystem support (field findings from a real 12-module repo)
 - `11ed656` 2026-07-04 ledger: H4 confirmatory run passed — trust treatment verified
-- `0c07727` 2026-07-04 ledger: H4 final verdict captured — partial pass, mechanism confirmed
 
-_Showing 20 of 40 analyzed commits._
+_Showing 20 of 41 analyzed commits._
 
 ### Frequently Changed Files
 
-- .kervo/events/2026-07.jsonl (21)
-- CLAUDE.md (14)
+- .kervo/events/2026-07.jsonl (22)
+- CLAUDE.md (15)
 - README.md (11)
 - internal/adapters/source/files/files.go (8)
 - internal/adapters/source/files/files_test.go (8)
@@ -77,7 +77,7 @@ _No TODO/FIXME comments found._
 
 ## Workspace Facts
 
-- Commits analyzed: 40 (complete)
+- Commits analyzed: 41 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 6
 - Docs captured: 1
@@ -101,6 +101,9 @@ kervo review (v1.x candidate): interactive triage inbox over pending observation
 **[verified — human:refuse1993]**
 Operating principle (user directive 2026-07-06): minimize human touch on every element — project management is agent-driven; the human's role converges to verifier. Product surface follows: agents capture, propose, and manage; humans judge, primarily via 'kervo review'.
 
+**[verified — human:refuse1993]**
+Evidence-attached proposals (Phase A extension, proposal): capture gains an optional -evidence field ('reproduced: ran cd api && pytest, 81 passed' / 'source: docs/adr-007.md'); the write-back protocol asks agents to attach reproduction evidence; review displays it under the body. Reproducible facts then arrive substantively pre-verified by the LLM and the human signs in one keystroke — verification LABOR moves to agents, the verified SIGNATURE stays human. Auto-verify policies for reproducible types stay opt-in per team, never default.
+
 **[generated — agent:claude-code]**
 inject mode option (v1.x candidate): default stays full-block in CLAUDE.md (zero-command clone is the product's proof); add opt-in '@.kervo/artifact.md' import mode for clean-CLAUDE.md users — trade-off: fresh clones see nothing until 'kervo compile'. Gate: field demand from real adopters.
 
@@ -112,9 +115,6 @@ Uncommitted-work visibility (proposal, low priority): eval noted WIP is invisibl
 
 **[generated — agent:claude-code]**
 Phase B refinement (fact-wiki design): the accreted wiki renders verified observations grouped into stable sections, each fact carrying an evidence anchor (file path / commit hash) that GitHub renders as a clickable link. kervo links to code, never copies it — code browsing and search stay with the consumer (agent, IDE, GitHub); the artifact is the map that tells them where to look for zero calls.
-
-**[generated — agent:claude-code]**
-Evidence-attached proposals (Phase A extension, proposal): capture gains an optional -evidence field ('reproduced: ran cd api && pytest, 81 passed' / 'source: docs/adr-007.md'); the write-back protocol asks agents to attach reproduction evidence; review displays it under the body. Reproducible facts then arrive substantively pre-verified by the LLM and the human signs in one keystroke — verification LABOR moves to agents, the verified SIGNATURE stays human. Auto-verify policies for reproducible types stay opt-in per team, never default.
 <!-- kervo:slot:decisions:end -->
 
 ## Known Risks
@@ -156,10 +156,11 @@ exclusion reason instead of being silently dropped._
 > fact this artifact does not carry (how to run something, what a component
 > does, a decision made in conversation), stage it for human judgment:
 >
-> `kervo capture -type decision|risk|summary|goal -actor "agent:<you>" -body "<the fact>"`
+> `kervo capture -type decision|risk|summary|goal -actor "agent:<you>" -body "<the fact>" -evidence "<how you verified it>"`
 >
-> Rules: facts you observed, not speculation · one capture per fact · skip
-> what this artifact already says · never include secrets or file contents.
-> Duplicates are dropped automatically. A human triages the queue with
-> `kervo review`.
+> Rules: facts you observed, not speculation · attach evidence — the command
+> you ran, the doc you read — so the human can sign in one keystroke · one
+> capture per fact · skip what this artifact already says · never include
+> secrets or file contents. Duplicates are dropped automatically. A human
+> triages the queue with `kervo review`.
 <!-- kervo:end -->

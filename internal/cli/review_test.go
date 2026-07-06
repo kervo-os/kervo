@@ -63,6 +63,30 @@ func TestReviewJudgesQueue(t *testing.T) {
 	}
 }
 
+// Evidence attached by the proposer must reach the judge's screen and the
+// replayed view — the human signs on the strength of it.
+func TestReviewShowsEvidence(t *testing.T) {
+	dir := t.TempDir()
+	if err := runCapture([]string{"-dir", dir, "-type", "summary", "-body", "tests run via pytest",
+		"-evidence", "ran cd api && pytest — 81 passed", "-actor", "agent:test"}); err != nil {
+		t.Fatal(err)
+	}
+	var out bytes.Buffer
+	if err := reviewLoop(dir, "human:tester", strings.NewReader("q\n"), &out); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(out.String(), "evidence: ran cd api && pytest — 81 passed") {
+		t.Errorf("evidence missing from review output:\n%s", out.String())
+	}
+	folder, err := replayFolder(jsonl.Open(dir))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if obs := folder.Observations(); obs[0].Evidence == "" {
+		t.Error("evidence not carried through replay")
+	}
+}
+
 func TestReviewQuitStopsEarly(t *testing.T) {
 	dir := t.TempDir()
 	captureFor(t, dir, "decision", "first proposal")

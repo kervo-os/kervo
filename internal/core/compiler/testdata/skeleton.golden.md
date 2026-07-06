@@ -90,9 +90,10 @@ exclusion reason instead of being silently dropped._
 > fact this artifact does not carry (how to run something, what a component
 > does, a decision made in conversation), stage it for human judgment:
 >
-> `kervo capture -type decision|risk|summary|goal -actor "agent:<you>" -body "<the fact>"`
+> `kervo capture -type decision|risk|summary|goal -actor "agent:<you>" -body "<the fact>" -evidence "<how you verified it>"`
 >
-> Rules: facts you observed, not speculation · one capture per fact · skip
-> what this artifact already says · never include secrets or file contents.
-> Duplicates are dropped automatically. A human triages the queue with
-> `kervo review`.
+> Rules: facts you observed, not speculation · attach evidence — the command
+> you ran, the doc you read — so the human can sign in one keystroke · one
+> capture per fact · skip what this artifact already says · never include
+> secrets or file contents. Duplicates are dropped automatically. A human
+> triages the queue with `kervo review`.

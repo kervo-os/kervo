@@ -21,6 +21,7 @@ func runCapture(args []string) error {
 	dir := fs.String("dir", ".", "workspace directory")
 	typ := fs.String("type", "note", "observation type: decision, note, risk, correction, goal")
 	body := fs.String("body", "", "the observation text (required)")
+	evidence := fs.String("evidence", "", "how you verified it — command run, doc read (optional)")
 	actor := fs.String("actor", "", `who is recording (default "human:<git user.name>")`)
 	if err := fs.Parse(args); err != nil {
 		return err
@@ -44,7 +45,11 @@ func runCapture(args []string) error {
 			return nil
 		}
 	}
-	payload, err := json.Marshal(map[string]string{"body": *body})
+	fields := map[string]string{"body": *body}
+	if strings.TrimSpace(*evidence) != "" {
+		fields["evidence"] = *evidence
+	}
+	payload, err := json.Marshal(fields)
 	if err != nil {
 		return err
 	}
