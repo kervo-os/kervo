@@ -26,6 +26,7 @@
 
 ## Recent Changes
 
+- `bdf0f0f` 2026-07-06 ledger: kervo.dev purchased — launch deferred until H5 numbers
 - `5d74768` 2026-07-06 readme: lead with what the product means, then how it works
 - `354ce04` 2026-07-06 ledger: queue cleared — eight judgments with conversational provenance
 - `cd67fc3` 2026-07-06 protocol: the conversation is the review — relay affirmations, question conflicts
@@ -45,14 +46,13 @@
 - `6e1dda5` 2026-07-06 ledger: write-back pilot on the real repo — 5.5 to 9.5 at one call
 - `1022166` 2026-07-06 ledger: session hook events
 - `deaf0a1` 2026-07-06 ledger: consolidation summary
-- `b8eaf90` 2026-07-06 consolidate: no new features — pay the day's debt
 
-_Showing 20 of 78 analyzed commits._
+_Showing 20 of 79 analyzed commits._
 
 ### Frequently Changed Files
 
-- .kervo/events/2026-07.jsonl (58)
-- CLAUDE.md (33)
+- .kervo/events/2026-07.jsonl (59)
+- CLAUDE.md (34)
 - README.md (26)
 - README.ja.md (22)
 - README.ko.md (22)
@@ -77,7 +77,7 @@ _No TODO/FIXME comments found._
 
 ## Workspace Facts
 
-- Commits analyzed: 78 (complete)
+- Commits analyzed: 79 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 6
 - Docs captured: 1
@@ -160,6 +160,10 @@ Evidence: user 2026-07-06: '그 문장으로 kervo.dev 랜딩 초안 만들기�
 **[verified — human:refuse1993]**
 kervo.dev purchased (2026-07-06, $12.20/yr). Landing launch stays deferred until the H5 full re-run numbers exist; interim plan is a redirect to the GitHub repo. The GoReleaser tap author email noreply@kervo.dev is now legitimate.
 Evidence: user 2026-07-06: '일단 샀어'
+
+**[verified — human:refuse1993]**
+Hero art adopted (user-regenerated 2026-07-06 with the exact strings requested: 'kervo compile', real pipeline step names, kervo:begin/end markers). assets/hero-story.jpg leads the READMEs right after the positioning sentence; the mermaid loop moved into How it works; both dash screenshots sit in the dash section. assets/loop-poster.jpg (the full-system poster with 'Agents discover and propose. Humans judge once.') is reserved for the kervo.dev landing kit - three raster images at the top of a README is too heavy. The pixel cat is the story/illustration brand element; the K mark stays the product/favicon element.
+Evidence: user-supplied regenerated images 2026-07-06 21:45/21:47; JPEG 339KB/396KB after texture-aware conversion
 <!-- kervo:slot:decisions:end -->
 
 ## Known Risks

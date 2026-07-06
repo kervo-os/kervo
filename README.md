@@ -30,6 +30,8 @@
 opening this workspace starts knowing what is true, what was decided, and
 what not to trust yet — and that memory grows with every session.
 
+<p align="center"><img src="assets/hero-story.jpg" width="880" alt="a messy repo, kervo compile, a trust-labeled Context Artifact, injected into CLAUDE.md"></p>
+
 kervo compiles your repository into a deterministic **Context Artifact** and
 injects it into `CLAUDE.md` — so every AI session starts already knowing your
 project. Facts are extracted deterministically; interpretations enter only as
@@ -38,23 +40,6 @@ their reason shown**.
 
 This repository eats its own cooking: [`CLAUDE.md`](CLAUDE.md) here is
 compiled by kervo.
-
-The loop, end to end:
-
-```mermaid
-flowchart LR
-  S[deterministic scan] --> A[Context Artifact]
-  A -->|CLAUDE.md · AGENTS.md · MCP| C[AI sessions]
-  C -->|write-back: facts + evidence| L[(event ledger · git)]
-  P[external producers] -->|proposals.json| L
-  L --> R{human review}
-  R -->|verified / deprecated + reason| L
-  L --> A
-```
-
-And `kervo dash`, one page over every workspace on the machine:
-
-<p align="center"><img src="assets/dash-fleet.png" width="860" alt="kervo dash — every workspace, pending judgments, activity"></p>
 
 ## Quickstart
 
@@ -125,6 +110,19 @@ committed ledger (112 events, 4 observations), trust states and language
 intact, artifact regenerated.
 
 ## How it works
+
+The loop, end to end:
+
+```mermaid
+flowchart LR
+  S[deterministic scan] --> A[Context Artifact]
+  A -->|CLAUDE.md · AGENTS.md · MCP| C[AI sessions]
+  C -->|write-back: facts + evidence| L[(event ledger · git)]
+  P[external producers] -->|proposals.json| L
+  L --> R{human review}
+  R -->|verified / deprecated + reason| L
+  L --> A
+```
 
 Two layers, strictly separated:
 
@@ -324,6 +322,8 @@ repo, `j`/`k` move, `v`/`s`/`d` judge, `?` for keys) that writes each
 judgment back to that repo's own ledger. Below the queue, the knowledge
 view renders every verified and observed entry in full — claim first,
 evidence attached — and retired entries keep their reasons.
+
+<p align="center"><img src="assets/dash-fleet.png" width="860" alt="kervo dash — every workspace, pending judgments, activity"></p>
 
 <p align="center"><img src="assets/dash-detail.png" width="860" alt="kervo dash — workspace detail: triage, overview, coupling"></p> Truth stays per-repo in
 git; the dashboard is a lens, not a store, and it dies with the command.
