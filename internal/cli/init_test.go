@@ -148,6 +148,65 @@ func TestInitInjectsExistingAgentsMd(t *testing.T) {
 	}
 }
 
+func TestInitConsumersCodexCreatesAgentsOnly(t *testing.T) {
+	dir := t.TempDir()
+	git(t, dir, "init", "-q", "-b", "main")
+	writeFile(t, dir, "README.md", "# demo\n")
+	git(t, dir, "add", ".")
+	git(t, dir, "commit", "-q", "-m", "x")
+
+	if err := runInit([]string{"-dir", dir, "-consumers", "codex"}); err != nil {
+		t.Fatal(err)
+	}
+	agents, err := os.ReadFile(filepath.Join(dir, "AGENTS.md"))
+	if err != nil {
+		t.Fatalf("AGENTS.md not created for codex consumer: %v", err)
+	}
+	for _, want := range []string{"<!-- kervo:begin -->", "# Context Artifact", "<!-- kervo:end -->"} {
+		if !strings.Contains(string(agents), want) {
+			t.Errorf("AGENTS.md missing %q", want)
+		}
+	}
+	if _, err := os.Stat(filepath.Join(dir, "CLAUDE.md")); !os.IsNotExist(err) {
+		t.Error("CLAUDE.md should not be created when consumers=codex")
+	}
+	saved, err := os.ReadFile(filepath.Join(dir, ".kervo", "consumers"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.TrimSpace(string(saved)) != "AGENTS.md" {
+		t.Errorf("consumer choice not persisted: %q", saved)
+	}
+
+	if err := runCompile([]string{"-dir", dir}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(filepath.Join(dir, "CLAUDE.md")); !os.IsNotExist(err) {
+		t.Error("compile ignored persisted codex-only consumer choice")
+	}
+}
+
+func TestInitConsumersBothCreatesBothFiles(t *testing.T) {
+	dir := t.TempDir()
+	git(t, dir, "init", "-q", "-b", "main")
+	writeFile(t, dir, "README.md", "# demo\n")
+	git(t, dir, "add", ".")
+	git(t, dir, "commit", "-q", "-m", "x")
+
+	if err := runInit([]string{"-dir", dir, "-consumers", "both"}); err != nil {
+		t.Fatal(err)
+	}
+	for _, name := range []string{"CLAUDE.md", "AGENTS.md"} {
+		raw, err := os.ReadFile(filepath.Join(dir, name))
+		if err != nil {
+			t.Fatalf("%s not created: %v", name, err)
+		}
+		if !strings.Contains(string(raw), "# Context Artifact") {
+			t.Errorf("%s missing artifact", name)
+		}
+	}
+}
+
 // The staging invariant covers the second target too: a corrupt AGENTS.md
 // must fail the run before any write, including the CLAUDE.md injection.
 func TestInitCorruptAgentsMarkersLeavesNoPartialState(t *testing.T) {

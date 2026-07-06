@@ -35,6 +35,7 @@ func runCompile(args []string) error {
 	dir := fs.String("dir", ".", "workspace directory")
 	langFlag := fs.String("lang", "", "artifact language: en, ko, ja (default: workspace setting or en)")
 	injectFlag := fs.String("inject", "", "consumer-file injection: block (full artifact) or import (one @-line)")
+	consumersFlag := fs.String("consumers", "", "consumer targets: claude,codex,both,auto (default: workspace setting or auto)")
 	staleAfter := fs.Duration("stale-after", 720*time.Hour, "demote generated/observed observations older than this")
 	if err := fs.Parse(args); err != nil {
 		return err
@@ -44,6 +45,10 @@ func runCompile(args []string) error {
 		return err
 	}
 	inject, err := resolveInject(*dir, *injectFlag)
+	if err != nil {
+		return err
+	}
+	consumers, err := resolveConsumersForCompile(*dir, *consumersFlag)
 	if err != nil {
 		return err
 	}
@@ -127,7 +132,7 @@ func runCompile(args []string) error {
 		return err
 	}
 
-	injected, err := writeOutputs(ctx, *dir, rendered, cursor, lang, inject)
+	injected, err := writeOutputs(ctx, *dir, rendered, cursor, lang, inject, consumers)
 	if err != nil {
 		return err
 	}
@@ -305,7 +310,7 @@ func buildSkeleton(ctx context.Context, dir string, lang i18n.Lang) (fact.Snapsh
 // then persists artifact, cursor, language, injection mode, the consumer
 // files, and the RFC-0005 ignore rules (derived state never gets
 // committed). Returns the consumer files that received the block.
-func writeOutputs(ctx context.Context, dir, rendered, cursor string, lang i18n.Lang, inject string) ([]string, error) {
+func writeOutputs(ctx context.Context, dir, rendered, cursor string, lang i18n.Lang, inject string, consumers []string) ([]string, error) {
 	// import mode: the marker block carries one @-line and the full
 	// artifact stays in .kervo/artifact.md (decision 01KWTFTX — the
 	// clean-CLAUDE.md trade: fresh clones need one `kervo compile`).
@@ -313,22 +318,22 @@ func writeOutputs(ctx context.Context, dir, rendered, cursor string, lang i18n.L
 	if inject == injectImport {
 		blockContent = importLine
 	}
-	injector := claudecode.Injector{}
-	injPath, injContent, err := injector.Render(dir, blockContent)
-	if err != nil {
-		return nil, err
+	type stagedInjection struct {
+		name    string
+		path    string
+		content string
 	}
-	injected := []string{"CLAUDE.md"}
-	// AGENTS.md is the second consumer surface (Codex and other AGENTS.md
-	// readers get zero context from CLAUDE.md). File presence is the opt-in:
-	// kervo injects into an existing AGENTS.md but never creates one.
-	var agentsPath, agentsContent string
-	if _, statErr := os.Stat(filepath.Join(dir, "AGENTS.md")); statErr == nil {
-		agentsPath, agentsContent, err = claudecode.Injector{FileName: "AGENTS.md"}.Render(dir, blockContent)
+	var staged []stagedInjection
+	for _, name := range consumers {
+		path, content, err := claudecode.Injector{FileName: name}.Render(dir, blockContent)
 		if err != nil {
 			return nil, err
 		}
-		injected = append(injected, "AGENTS.md")
+		staged = append(staged, stagedInjection{name: name, path: path, content: content})
+	}
+	injected := make([]string, 0, len(staged))
+	for _, s := range staged {
+		injected = append(injected, s.name)
 	}
 	stateDir := filepath.Join(dir, ".kervo")
 	if err := os.MkdirAll(filepath.Join(stateDir, "cache"), 0o755); err != nil {
@@ -348,16 +353,16 @@ func writeOutputs(ctx context.Context, dir, rendered, cursor string, lang i18n.L
 	if err := os.WriteFile(filepath.Join(stateDir, "inject"), []byte(inject+"\n"), 0o644); err != nil {
 		return nil, err
 	}
+	if err := os.WriteFile(filepath.Join(stateDir, "consumers"), []byte(strings.Join(consumers, "\n")+"\n"), 0o644); err != nil {
+		return nil, err
+	}
 	if err := ensureGitignore(dir); err != nil {
 		return nil, err
 	}
 	// Machine-local, path-only, best-effort — powers `kervo dash`.
 	registerWorkspace(dir)
-	if err := injector.Apply(injPath, injContent); err != nil {
-		return nil, err
-	}
-	if agentsPath != "" {
-		if err := injector.Apply(agentsPath, agentsContent); err != nil {
+	for _, s := range staged {
+		if err := (claudecode.Injector{}).Apply(s.path, s.content); err != nil {
 			return nil, err
 		}
 	}

@@ -22,6 +22,7 @@ func runInit(args []string) error {
 	dir := fs.String("dir", ".", "workspace directory")
 	langFlag := fs.String("lang", "", "artifact language: en, ko, ja (default: en)")
 	injectFlag := fs.String("inject", "", "consumer-file injection: block (full artifact) or import (one @-line)")
+	consumersFlag := fs.String("consumers", "", "consumer targets: claude,codex,both,auto (default: ask on TTY, else auto)")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
@@ -30,6 +31,10 @@ func runInit(args []string) error {
 		return err
 	}
 	inject, err := resolveInject(*dir, *injectFlag)
+	if err != nil {
+		return err
+	}
+	consumers, err := resolveConsumersForInit(*dir, *consumersFlag)
 	if err != nil {
 		return err
 	}
@@ -42,7 +47,7 @@ func runInit(args []string) error {
 	if err != nil {
 		return err
 	}
-	injected, err := writeOutputs(ctx, *dir, skeleton, cursor, lang, inject)
+	injected, err := writeOutputs(ctx, *dir, skeleton, cursor, lang, inject, consumers)
 	if err != nil {
 		return err
 	}
