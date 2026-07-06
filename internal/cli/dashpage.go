@@ -110,6 +110,7 @@ main{max-width:64rem;margin:0 auto;padding:1.2rem}
 </div></div>
 <script>
 const FLEET = {{.FleetJS}};
+FLEET.forEach(r=>{ r.Items = r.Items || []; r.Counts = r.Counts || {} });
 const STATES = ["verified","observed","generated","stale","deprecated"];
 const SC = {verified:"var(--v)",observed:"var(--o)",generated:"var(--g)",stale:"var(--s)",deprecated:"var(--d)"};
 let repo = null, idx = 0, judged = 0;

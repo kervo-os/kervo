@@ -103,6 +103,9 @@ func newDashServer(paths []string, actorFlag string) (*dashServer, error) {
 		repo := &dashRepo{
 			Path: p, Name: filepath.Base(p), Lang: workspaceLang(p),
 			Events: events, Counts: map[string]int{},
+			// Never nil: a clear repo must marshal as [], not null — the
+			// page reads .Items.length on every repo before rendering.
+			Items: []dashItem{},
 		}
 		if !last.IsZero() {
 			repo.LastEvent = last.UTC().Format(time.RFC3339)

@@ -118,6 +118,18 @@ func TestDashFleetAndCrossRepoJudge(t *testing.T) {
 		t.Errorf("pending=%d judged=%d, want 1/1", srv.pendingTotal(), srv.judgedTotal())
 	}
 
+	// Regression: a repo with nothing pending must marshal Items as [],
+	// never null — null killed the page script on its first .length read.
+	res, err = http.Get(ts.URL + "/")
+	if err != nil {
+		t.Fatal(err)
+	}
+	page, _ = io.ReadAll(res.Body)
+	res.Body.Close()
+	if strings.Contains(string(page), `"Items":null`) {
+		t.Error(`fleet JSON contains "Items":null — blank-page regression`)
+	}
+
 	// A workspace not in the fleet must be rejected — the page can only
 	// route judgments to repos it was launched over.
 	res, _ = http.Post(ts.URL+"/judge", "application/json",
