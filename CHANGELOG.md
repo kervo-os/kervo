@@ -3,6 +3,11 @@
 All notable changes, newest first. Versions are git tags; every release
 ships prebuilt binaries and a Homebrew cask (`brew install kervo-os/tap/kervo`).
 
+## v0.19.1 — 2026-07-06
+
+- The artifact opens with a session-start directive: start here, state
+  what it already answers, explore only the gaps.
+
 ## v0.19.0 — 2026-07-06
 
 - Facts describe the repo that exists: Focus, coupling, and hot files
