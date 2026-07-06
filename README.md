@@ -364,9 +364,15 @@ in whatever language their proposer wrote.
 
 ## Status
 
-v0, moving fast. Cold-start validation passed with semantic slots enabled;
-the capture → verify → stale loop is live in this repository. PRD / RFCs /
-experiment protocols will be published as they stabilize.
+v0.19.x — releases are CI-gated and cut only for a reason; `CHANGELOG.md`
+records every one. Running on production repositories: the write-back
+pilot measured onboarding answers at **5.5/10 → 9.5/10 for one tool
+call**, and the first cross-vendor write-back (a Codex session, following
+the protocol it read from `AGENTS.md`) is in a real ledger. Experiment
+protocols and raw evidence live in
+[kervo-os/experiments](https://github.com/kervo-os/experiments); the
+pre-registered flywheel re-run fires at a volume gate (10 sessions +
+10 judged write-backs), not on a calendar.
 
 ---
 
