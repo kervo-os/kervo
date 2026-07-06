@@ -26,6 +26,7 @@
 
 ## Recent Changes
 
+- `5d74768` 2026-07-06 readme: lead with what the product means, then how it works
 - `354ce04` 2026-07-06 ledger: queue cleared — eight judgments with conversational provenance
 - `cd67fc3` 2026-07-06 protocol: the conversation is the review — relay affirmations, question conflicts
 - `2ec13e5` 2026-07-06 ledger: the conversation is a review surface — a plan
@@ -45,17 +46,16 @@
 - `1022166` 2026-07-06 ledger: session hook events
 - `deaf0a1` 2026-07-06 ledger: consolidation summary
 - `b8eaf90` 2026-07-06 consolidate: no new features — pay the day's debt
-- `1cfbd6b` 2026-07-06 dash: workspace detail carries the project itself, not just the queue
 
-_Showing 20 of 77 analyzed commits._
+_Showing 20 of 78 analyzed commits._
 
 ### Frequently Changed Files
 
-- .kervo/events/2026-07.jsonl (57)
-- CLAUDE.md (32)
-- README.md (25)
-- README.ja.md (21)
-- README.ko.md (21)
+- .kervo/events/2026-07.jsonl (58)
+- CLAUDE.md (33)
+- README.md (26)
+- README.ja.md (22)
+- README.ko.md (22)
 - internal/core/i18n/i18n.go (13)
 - internal/cli/dash.go (12)
 - internal/cli/dashpage.go (12)
@@ -77,7 +77,7 @@ _No TODO/FIXME comments found._
 
 ## Workspace Facts
 
-- Commits analyzed: 77 (complete)
+- Commits analyzed: 78 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 6
 - Docs captured: 1
@@ -156,6 +156,10 @@ Evidence: user 2026-07-06: '사람이 OK 했으니까 진행된거면 그것 자
 **[verified — human:refuse1993]**
 README lead adopts the signed-memory positioning (user-directed 2026-07-06, ahead of the kervo.dev landing draft): the OK you give an agent becomes the team's signed memory; any agent opening the workspace starts knowing what is true, what was decided, and what not to trust yet - and that memory grows with every session. Value sentence leads, mechanism paragraph follows; hero imperative (Stop re-explaining) stays as the hook.
 Evidence: user 2026-07-06: '그 문장으로 kervo.dev 랜딩 초안 만들기전에 readme부터'
+
+**[verified — human:refuse1993]**
+kervo.dev purchased (2026-07-06, $12.20/yr). Landing launch stays deferred until the H5 full re-run numbers exist; interim plan is a redirect to the GitHub repo. The GoReleaser tap author email noreply@kervo.dev is now legitimate.
+Evidence: user 2026-07-06: '일단 샀어'
 <!-- kervo:slot:decisions:end -->
 
 ## Known Risks
