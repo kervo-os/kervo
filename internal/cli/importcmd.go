@@ -76,7 +76,7 @@ func runImport(args []string) error {
 			skipped++
 			continue
 		}
-		n, err := importSession(store, repo, session, path)
+		n, err := importSession(store, *dir, repo, session, path)
 		if err != nil {
 			return fmt.Errorf("import: %s: %w", filepath.Base(path), err)
 		}
@@ -99,7 +99,7 @@ type transcriptLine struct {
 	} `json:"message"`
 }
 
-func importSession(store *jsonl.Store, repo, session, path string) (int, error) {
+func importSession(store *jsonl.Store, dir, repo, session, path string) (int, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return 0, err
@@ -159,7 +159,7 @@ func importSession(store *jsonl.Store, repo, session, path string) (int, error) 
 				fileOps++
 				if in, ok := b["input"].(map[string]any); ok {
 					if fp, ok := in["file_path"].(string); ok && fp != "" {
-						filesTouched[fp] = true
+						filesTouched[workspaceRelative(dir, fp)] = true
 					}
 				}
 			}

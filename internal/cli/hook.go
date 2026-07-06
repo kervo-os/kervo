@@ -63,7 +63,7 @@ func runHook(args []string) error {
 
 	// The ledger is committed to git: payloads carry SIZES AND NAMES, never
 	// content (prompts and file bodies would leak into history otherwise).
-	reduced, err := json.Marshal(reducePayload(payload))
+	reduced, err := json.Marshal(reducePayload(*dir, payload))
 	if err != nil {
 		reduced = []byte("{}")
 	}
@@ -109,8 +109,23 @@ func runHook(args []string) error {
 	return nil
 }
 
+// workspaceRelative strips the machine from a path before it can reach a
+// committed ledger: inside the workspace → relative path; outside →
+// basename only. Absolute paths carry usernames and private tree layouts —
+// a privacy leak the moment the ledger is public (a pre-release audit
+// found 291 committed occurrences; this is that lesson).
+func workspaceRelative(dir, p string) string {
+	if abs, err := filepath.Abs(dir); err == nil {
+		if rel, err := filepath.Rel(abs, p); err == nil && !strings.HasPrefix(rel, "..") {
+			return filepath.ToSlash(rel)
+		}
+	}
+	return filepath.Base(p)
+}
+
 // reducePayload keeps only measurement-grade fields: names, paths, sizes.
-func reducePayload(payload map[string]any) map[string]any {
+// Paths are workspace-relativized — never absolute — before storage.
+func reducePayload(dir string, payload map[string]any) map[string]any {
 	out := map[string]any{}
 	for _, k := range []string{"hook_event_name", "hookEventName", "tool_name", "toolName", "session_id", "sessionId"} {
 		if v, ok := payload[k].(string); ok && v != "" {
@@ -122,7 +137,7 @@ func reducePayload(payload map[string]any) map[string]any {
 	}
 	if ti, ok := payload["tool_input"].(map[string]any); ok {
 		if fp, ok := ti["file_path"].(string); ok && fp != "" {
-			out["file_path"] = fp // paths are already public in git
+			out["file_path"] = workspaceRelative(dir, fp)
 		}
 		if c, ok := ti["content"].(string); ok {
 			out["content_chars"] = len(c)

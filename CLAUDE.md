@@ -26,6 +26,8 @@
 
 ## Recent Changes
 
+- `060205e` 2026-07-06 ledger: session hook events
+- `44e7077` 2026-07-06 repo: evidence moves out — kervo-os/experiments holds the receipts
 - `b06ce83` 2026-07-06 readme: the story banner — regenerated art with exact product strings
 - `bdf0f0f` 2026-07-06 ledger: kervo.dev purchased — launch deferred until H5 numbers
 - `5d74768` 2026-07-06 readme: lead with what the product means, then how it works
@@ -44,18 +46,16 @@
 - `59f7e17` 2026-07-06 docs: Mode 3 is a bootstrap channel, not a running mate to Mode 2
 - `8a6f3f1` 2026-07-06 changelog: v0.13.1
 - `757172b` 2026-07-06 dash: the buttons now explain themselves — judgment semantics in the UI
-- `6e1dda5` 2026-07-06 ledger: write-back pilot on the real repo — 5.5 to 9.5 at one call
-- `1022166` 2026-07-06 ledger: session hook events
 
-_Showing 20 of 80 analyzed commits._
+_Showing 20 of 82 analyzed commits._
 
 ### Frequently Changed Files
 
-- .kervo/events/2026-07.jsonl (60)
-- CLAUDE.md (35)
-- README.md (27)
-- README.ja.md (23)
-- README.ko.md (23)
+- .kervo/events/2026-07.jsonl (62)
+- CLAUDE.md (36)
+- README.md (28)
+- README.ja.md (24)
+- README.ko.md (24)
 - internal/core/i18n/i18n.go (13)
 - internal/cli/dash.go (12)
 - internal/cli/dashpage.go (12)
@@ -76,7 +76,7 @@ _No TODO/FIXME comments found._
 
 ## Workspace Facts
 
-- Commits analyzed: 80 (complete)
+- Commits analyzed: 82 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 5
 - Docs captured: 1

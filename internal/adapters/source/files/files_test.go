@@ -263,7 +263,7 @@ func TestComposeCommands(t *testing.T) {
 		"version: \"3.9\"",
 		"services:",
 		"  api:",
-		"    image: the adopted repo/api:latest  # inline comment must not leak",
+		"    image: acme/api:latest  # inline comment must not leak",
 		"    ports:",
 		"      - \"8000:8000\"",
 		"  worker:",
@@ -285,7 +285,7 @@ func TestComposeCommands(t *testing.T) {
 	if strings.Join(runs, ",") != strings.Join(want, ",") {
 		t.Fatalf("commands = %v, want %v", runs, want)
 	}
-	if snap.Commands[0].Detail != "the adopted repo/api:latest" {
+	if snap.Commands[0].Detail != "acme/api:latest" {
 		t.Errorf("api detail = %q, want image ref", snap.Commands[0].Detail)
 	}
 	// "data:" under volumes: must not leak — the services block ended.
@@ -316,12 +316,12 @@ func TestPyprojectScripts(t *testing.T) {
 		`dependencies = ["fastapi>=0.115", "celery"]`,
 		"",
 		"[project.scripts]",
-		`ingest = "the adopted repo.ingest:main"`,
+		`ingest = "acme.ingest:main"`,
 		"# a comment",
-		`serve = "the adopted repo.api:run"`,
+		`serve = "acme.api:run"`,
 		"",
 		"[tool.poetry.scripts]",
-		`report = "the adopted repo.report:cli"`,
+		`report = "acme.report:cli"`,
 		"",
 		"[tool.black]",
 		"line-length = 100",
@@ -338,7 +338,7 @@ func TestPyprojectScripts(t *testing.T) {
 	if strings.Join(runs, ",") != strings.Join(want, ",") {
 		t.Fatalf("commands = %v, want %v (file order, script sections only)", runs, want)
 	}
-	if snap.Commands[0].Detail != "the adopted repo.ingest:main" {
+	if snap.Commands[0].Detail != "acme.ingest:main" {
 		t.Errorf("ingest detail = %q", snap.Commands[0].Detail)
 	}
 	// [tool.black] entries must not count as scripts.

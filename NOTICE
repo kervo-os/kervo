@@ -1,2 +1,6 @@
 kervo
-Copyright 2026 The kervo Authors
+Copyright 2026 the kervo authors
+
+Licensed under the Apache License, Version 2.0.
+This product has no third-party dependencies; the Go standard library is
+covered by the Go project's BSD-style license.

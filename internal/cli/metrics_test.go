@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -98,7 +99,7 @@ func TestAggregateMetricsABSides(t *testing.T) {
 
 // Non-prompt hooks keep only names/paths/sizes in the ledger.
 func TestReducePayloadDropsBodies(t *testing.T) {
-	out := reducePayload(map[string]any{
+	out := reducePayload(".", map[string]any{
 		"hook_event_name": "PostToolUse",
 		"tool_name":       "Write",
 		"tool_input": map[string]any{
@@ -118,5 +119,25 @@ func TestReducePayloadDropsBodies(t *testing.T) {
 		if strings.Contains(string(raw), leak) {
 			t.Errorf("body leaked: %s", raw)
 		}
+	}
+}
+
+// Absolute paths must never reach the committed ledger: inside the
+// workspace they relativize, outside they collapse to a basename —
+// usernames and private tree layouts stay on the machine.
+func TestReducePayloadRelativizesPaths(t *testing.T) {
+	dir := t.TempDir()
+	inside := filepath.Join(dir, "internal", "cli", "hook.go")
+	out := reducePayload(dir, map[string]any{
+		"tool_input": map[string]any{"file_path": inside},
+	})
+	if out["file_path"] != "internal/cli/hook.go" {
+		t.Errorf("inside path = %v, want workspace-relative", out["file_path"])
+	}
+	out = reducePayload(dir, map[string]any{
+		"tool_input": map[string]any{"file_path": "/Users/someone/private/HANDOFF.md"},
+	})
+	if out["file_path"] != "HANDOFF.md" {
+		t.Errorf("outside path = %v, want basename only", out["file_path"])
 	}
 }
