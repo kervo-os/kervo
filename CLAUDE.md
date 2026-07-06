@@ -5,10 +5,14 @@
 > Machine-generated context for AI agents. Fact sections are deterministic;
 > slot sections carry trust-labeled observations. Regenerate with `kervo compile`
 > — do not edit by hand.
+>
+> Start from this artifact: state what it already answers for your task,
+> then explore only the gaps — and verify only what your task puts in
+> question.
 
 ## Brief
 
-- **Focus**: internal/ ×9 · assets/ ×2
+- **Focus**: internal/ ×11 · assets/ ×2
 - **Run**: `make build` · `make test` · `make arch-check`
 
 ## Repository Summary
@@ -31,6 +35,9 @@
 
 ## Recent Changes
 
+- `219a0f5` 2026-07-06 changelog: v0.19.0
+- `c1157e1` 2026-07-06 bodies read like documents — markdown display, newline restore
+- `0efc45a` 2026-07-06 facts describe the repo that exists — history-only paths stop counting
 - `9231c2c` 2026-07-06 ledger: opening-directive proposal — the protocol must govern session start, not only session end
 - `38949fe` 2026-07-06 init: the wizard wires capture — and says what codex can't have
 - `550fda5` 2026-07-06 ledger: purge + v0.17.0 recorded
@@ -48,23 +55,20 @@
 - `0273d94` 2026-07-06 ledger: the conversation is a review surface — a plan
 - `378242b` 2026-07-06 ledger: workspace-native wiki management — a plan, not code
 - `64b1852` 2026-07-06 dash: the knowledge view — judged knowledge IS the wiki
-- `993106a` 2026-07-06 ledger: llm-wiki-newsroom assessed — first producer candidate, zero code needed
-- `a16df52` 2026-07-06 registry: prune only what provably does not exist
-- `ee971fa` 2026-07-06 readme: show the product — diagram, screenshots, real-repo numbers
 
-_Showing 20 of 89 analyzed commits._
+_Showing 20 of 92 analyzed commits._
 
 ### Frequently Changed Files
 
-- .kervo/events/2026-07.jsonl (67)
-- CLAUDE.md (39)
+- .kervo/events/2026-07.jsonl (69)
+- CLAUDE.md (40)
 - README.md (29)
 - README.ja.md (25)
 - README.ko.md (25)
-- internal/core/i18n/i18n.go (14)
-- internal/cli/compile.go (12)
-- internal/cli/dash.go (12)
-- internal/cli/dashpage.go (12)
+- internal/core/i18n/i18n.go (15)
+- internal/cli/compile.go (13)
+- internal/cli/dash.go (13)
+- internal/cli/dashpage.go (13)
 - internal/core/compiler/testdata/skeleton.golden.md (10)
 
 ## Open Tasks
@@ -76,12 +80,12 @@ _No TODO/FIXME comments found._
 - .github/ (2 files)
 - assets/ (7 files)
 - cmd/ (1 files)
-- internal/ (67 files)
+- internal/ (68 files)
 - packaging/ (3 files)
 
 ## Workspace Facts
 
-- Commits analyzed: 89 (complete)
+- Commits analyzed: 92 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 5
 - Docs captured: 1
@@ -177,7 +181,7 @@ Evidence: user 2026-07-06: '그렇게 하자'; docs/experiments was 516KB, 60 fi
 History purge executed before public promotion (user-approved sequence: land parallel work, purge, release). git filter-repo rewrote all blobs across the full history - machine paths relativized, a neighbor repo's name replaced - then force-pushed with all 24+ tags; verification greps across every rev: zero occurrences. The ledger itself was KEPT: deleting it would not have removed history leaks and would have destroyed the dogfood record. Local clones require re-clone or hard reset; release assets and brew unaffected. v0.17.0 ships the Brief, consumer choice, and the privacy hardening together.
 Evidence: user 2026-07-06: 'ㅇㅋ 그 순서로 가자'; post-purge grep across git rev-list --all: 0 hits for both strings
 
-**[generated — agent:claude-code]**
+**[verified — human:refuse1993]**
 Protocol gains an opening directive (proposal): the injected block should instruct consumers at the START, not only at the end - 'Begin from this artifact: state what it already answers for your task, then explore only the gaps and verify only what your task puts in question.' Field evidence: a codex session asked to analyze a freshly-initialized repo re-derived declared facts (compose topology, TODOs, pytest presence) without referencing the loaded block; exploration itself was legitimate for an audit task, but the zero-acknowledgment start wastes the paid context and hides the product from the user watching. Companion observation: the same session exposed a thin declared fact - root pytest fails without PYTHONPATH=. - which is precisely a write-back candidate; whether the session captures it at the end is a live protocol-compliance datum for a non-hooked consumer.
 Evidence: user-pasted codex transcript 2026-07-06: rg/ls/README/compose/pytest exploration with no artifact reference; PYTHONPATH=. discovery, 22 pass / 23 skip
 <!-- kervo:slot:decisions:end -->

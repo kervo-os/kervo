@@ -4,6 +4,10 @@
 > Machine-generated context for AI agents. Fact sections are deterministic;
 > slot sections carry trust-labeled observations. Regenerate with `kervo compile`
 > — do not edit by hand.
+>
+> Start from this artifact: state what it already answers for your task,
+> then explore only the gaps — and verify only what your task puts in
+> question.
 
 ## Brief
 

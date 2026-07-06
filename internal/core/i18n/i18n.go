@@ -61,7 +61,7 @@ func Has(l Lang, key string) bool {
 
 var tables = map[Lang]map[string]string{
 	EN: {
-		"hdr.quote": "> Machine-generated context for AI agents. Fact sections are deterministic;\n> slot sections carry trust-labeled observations. Regenerate with `kervo compile`\n> — do not edit by hand.",
+		"hdr.quote": "> Machine-generated context for AI agents. Fact sections are deterministic;\n> slot sections carry trust-labeled observations. Regenerate with `kervo compile`\n> — do not edit by hand.\n>\n> Start from this artifact: state what it already answers for your task,\n> then explore only the gaps — and verify only what your task puts in\n> question.",
 
 		"sec.summary": "Repository Summary",
 
@@ -163,7 +163,7 @@ var tables = map[Lang]map[string]string{
 		"writeback.body": "> For AI consumers — close the loop. If this session taught you a durable\n> fact this artifact does not carry (how to run something, what a component\n> does, a decision made in conversation), stage it for human judgment:\n>\n> `kervo capture -type decision|risk|summary|goal -actor \"agent:<you>\" -body \"<the fact>\" -evidence \"<how you verified it>\"`\n>\n> Rules: facts you observed, not speculation · conclusions, not corpus —\n> what lives in a file agents can read stays there; cite it as evidence\n> instead of mirroring it · start the body with a\n> one-line claim, details after it · attach evidence — the command you\n> ran, the doc you read — so the human can sign in one keystroke · one\n> capture per fact · skip what this artifact already says · never include\n> secrets or file contents. Duplicates are dropped automatically.\n>\n> The conversation is the review: if the human affirmed a fact in this\n> session, relay their judgment with the capture (`kervo trust -to\n> verified -reason \"<their words>\"`) — only undiscussed facts wait in\n> the queue (`kervo review`). If evidence contradicts a verified entry,\n> raise it with the human and record their updated judgment instead of\n> re-proposing.",
 	},
 	KO: {
-		"hdr.quote": "> AI 에이전트용으로 기계 생성된 컨텍스트. Fact 섹션은 결정적으로 생성되며,\n> 슬롯 섹션에는 신뢰 라벨이 달린 관찰이 담긴다. `kervo compile`로 재생성 —\n> 손으로 수정하지 말 것.",
+		"hdr.quote": "> AI 에이전트용으로 기계 생성된 컨텍스트. Fact 섹션은 결정적으로 생성되며,\n> 슬롯 섹션에는 신뢰 라벨이 달린 관찰이 담긴다. `kervo compile`로 재생성 —\n> 손으로 수정하지 말 것.\n>\n> 이 artifact에서 시작하라: 과제에 대해 이미 답하는 것을 먼저 밝히고,\n> 빈 곳만 탐색하라 — 검증은 과제가 의심하는 것에만.",
 
 		"sec.summary": "저장소 요약",
 
@@ -265,7 +265,7 @@ var tables = map[Lang]map[string]string{
 		"writeback.body": "> AI 소비자용 — 루프를 닫을 것. 이 세션에서 이 artifact에 없는 지속적\n> 사실을 알게 됐다면(무언가의 실행 방법, 컴포넌트의 역할, 대화 중 내려진\n> 결정), 사람의 판정을 받도록 올려둘 것:\n>\n> `kervo capture -type decision|risk|summary|goal -actor \"agent:<너>\" -body \"<사실>\" -evidence \"<검증 방법>\"`\n>\n> 규칙: 관찰한 사실만, 추측 금지 · 코퍼스가 아니라 결론만 — 에이전트가\n> 읽을 수 있는 파일에 있는 내용은 거기 두고, 미러링 대신 증거로 인용할\n> 것 · 본문 첫 줄은 한 줄 주장, 세부는 마크다운으로(불릿, `코드`) · 증거를 붙일 것 — 실행한 명령, 읽은 문서 — 사람이 키 한\n> 번으로 서명할 수 있도록 · 사실 하나당 캡처 하나 · 이 artifact에 이미\n> 있는 내용은 생략 · 비밀값·파일 내용은 절대 넣지 말 것. 중복은 자동으로\n> 버려진다.\n>\n> 대화가 곧 검토다: 사람이 이 세션에서 사실에 명시적으로 동의했다면\n> 캡처와 함께 그 판정을 중계할 것(`kervo trust -to verified -reason\n> \"<동의 인용>\"`) — 논의되지 않은 사실만 큐에서 기다린다(`kervo\n> review`). verified 항목과 어긋나는 증거를 발견하면 재제안하지 말고\n> 사람에게 물어 갱신된 판정을 기록할 것.",
 	},
 	JA: {
-		"hdr.quote": "> AIエージェント向けに機械生成されたコンテキスト。Factセクションは決定的に生成され、\n> スロットセクションには信頼ラベル付きの観察が入る。`kervo compile`で再生成 —\n> 手で編集しないこと。",
+		"hdr.quote": "> AIエージェント向けに機械生成されたコンテキスト。Factセクションは決定的に生成され、\n> スロットセクションには信頼ラベル付きの観察が入る。`kervo compile`で再生成 —\n> 手で編集しないこと。\n>\n> この artifact から始めること: タスクに対して既に答えているものを先に\n> 述べ、足りない部分だけを探索する — 検証はタスクが疑問とするものだけに。",
 
 		"sec.summary": "リポジトリ概要",
 
