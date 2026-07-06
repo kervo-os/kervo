@@ -13,11 +13,8 @@ import (
 	"sync"
 	"time"
 
-	"sort"
-
 	"github.com/kervo-os/kervo/internal/adapters/store/jsonl"
 	"github.com/kervo-os/kervo/internal/core/event"
-	"github.com/kervo-os/kervo/internal/core/fact"
 	"github.com/kervo-os/kervo/internal/core/i18n"
 	"github.com/kervo-os/kervo/internal/core/trust"
 )
@@ -84,126 +81,6 @@ type dashRepo struct {
 	Items            []dashItem    // awaiting judgment
 	History          []dashItem    // already judged — newest first, reasons shown
 	Overview         *dashOverview `json:",omitempty"` // nil if the fact scan failed
-}
-
-// dashOverview is the workspace's fact skeleton, structured for the page —
-// the same deterministic scan compile runs, capped for reading. Coupling
-// pairs come from commit history (modules changed in the same commit):
-// connections kervo can prove, not narrate.
-type dashOverview struct {
-	Branch        string
-	Languages     []string
-	Frameworks    []string
-	Partial       bool
-	Commands      []dashCmd
-	TotalCommands int
-	Commits       []dashCommit
-	TotalCommits  int
-	Tasks         []dashTask
-	TotalTasks    int
-	Modules       []dashModule
-	Links         []dashLink
-}
-
-type dashCmd struct{ Run, Source string }
-type dashCommit struct{ SHA, Date, Subject string }
-type dashTask struct{ Loc, Text string }
-type dashModule struct {
-	Name  string
-	Files int
-}
-type dashLink struct {
-	A, B string
-	N    int
-}
-
-const dashOverviewCap = 8
-
-// buildOverview shapes a fact snapshot for the page.
-func buildOverview(snap fact.Snapshot) *dashOverview {
-	ov := &dashOverview{
-		Branch: snap.Repo.Branch, Partial: snap.Partial,
-		Languages:  append([]string{}, snap.Repo.Languages...),
-		Frameworks: append([]string{}, snap.Repo.Frameworks...),
-		Commands:   []dashCmd{}, Commits: []dashCommit{}, Tasks: []dashTask{},
-		Modules: []dashModule{}, Links: []dashLink{},
-		TotalCommands: len(snap.Commands), TotalCommits: len(snap.Commits), TotalTasks: len(snap.Todos),
-	}
-	for i, c := range snap.Commands {
-		if i >= dashOverviewCap {
-			break
-		}
-		ov.Commands = append(ov.Commands, dashCmd{Run: c.Run, Source: c.Source})
-	}
-	for i, c := range snap.Commits {
-		if i >= dashOverviewCap {
-			break
-		}
-		sha := c.SHA
-		if len(sha) > 7 {
-			sha = sha[:7]
-		}
-		ov.Commits = append(ov.Commits, dashCommit{SHA: sha, Date: c.At.UTC().Format("2006-01-02"), Subject: c.Subject})
-	}
-	for i, t := range snap.Todos {
-		if i >= dashOverviewCap {
-			break
-		}
-		ov.Tasks = append(ov.Tasks, dashTask{Loc: fmt.Sprintf("%s:%d", t.Path, t.Line), Text: t.Text})
-	}
-	for _, m := range snap.Modules {
-		ov.Modules = append(ov.Modules, dashModule{Name: m.Path, Files: m.Files})
-	}
-	ov.Links = coupledModules(snap.Commits)
-	return ov
-}
-
-// coupledModules counts top-level module pairs touched by the same commit.
-// Commits spanning more than 6 modules are skipped as noise (mass renames,
-// formatting sweeps). Deterministic: ties break lexically.
-func coupledModules(commits []fact.Commit) []dashLink {
-	pair := map[[2]string]int{}
-	for _, c := range commits {
-		mods := map[string]bool{}
-		for _, f := range c.Files {
-			if i := strings.IndexByte(f, '/'); i > 0 && f[0] != '.' {
-				// Dot-dirs are plumbing (.kervo travels with every commit
-				// by design, .github with releases) — coupling is about
-				// code modules.
-				mods[f[:i]] = true
-			}
-		}
-		if len(mods) < 2 || len(mods) > 6 {
-			continue
-		}
-		names := make([]string, 0, len(mods))
-		for m := range mods {
-			names = append(names, m)
-		}
-		sort.Strings(names)
-		for i := 0; i < len(names); i++ {
-			for j := i + 1; j < len(names); j++ {
-				pair[[2]string{names[i], names[j]}]++
-			}
-		}
-	}
-	out := make([]dashLink, 0, len(pair))
-	for k, n := range pair {
-		out = append(out, dashLink{A: k[0], B: k[1], N: n})
-	}
-	sort.Slice(out, func(i, j int) bool {
-		if out[i].N != out[j].N {
-			return out[i].N > out[j].N
-		}
-		if out[i].A != out[j].A {
-			return out[i].A < out[j].A
-		}
-		return out[i].B < out[j].B
-	})
-	if len(out) > 6 {
-		out = out[:6]
-	}
-	return out
 }
 
 type dashServer struct {

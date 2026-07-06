@@ -26,6 +26,8 @@
 
 ## Recent Changes
 
+- `1cfbd6b` 2026-07-06 dash: workspace detail carries the project itself, not just the queue
+- `f549544` 2026-07-06 identity: the K mark — SVG redraw of the user's logo, wired everywhere
 - `b9d7447` 2026-07-06 dash: judged records stay visible — the ledger never hides history
 - `5b38a0f` 2026-07-06 inject: opt-in import mode — one @-line for clean-CLAUDE.md teams
 - `17ea7bc` 2026-07-06 dash: user-switchable language — in-page selector, choice persists
@@ -44,23 +46,21 @@
 - `dbe373d` 2026-07-06 ledger: evidence-attached proposals (LLM pre-verification, human signature)
 - `94657b1` 2026-07-06 ledger: Phase B refinement — fact-wiki links to code, never copies it
 - `41f958c` 2026-07-06 ledger: session hook events
-- `c80b3a0` 2026-07-06 flywheel: the write-back protocol — artifacts instruct their consumers
-- `19958ed` 2026-07-06 ledger: agentOS-class direction — the write-back flywheel (proposal)
 
-_Showing 20 of 56 analyzed commits._
+_Showing 20 of 58 analyzed commits._
 
 ### Frequently Changed Files
 
-- .kervo/events/2026-07.jsonl (37)
-- CLAUDE.md (19)
-- README.md (17)
-- README.ja.md (13)
-- README.ko.md (13)
-- internal/cli/compile.go (10)
+- .kervo/events/2026-07.jsonl (39)
+- CLAUDE.md (20)
+- README.md (18)
+- README.ja.md (14)
+- README.ko.md (14)
+- internal/cli/compile.go (11)
+- internal/cli/dashpage.go (9)
 - internal/adapters/source/files/files.go (8)
 - internal/adapters/source/files/files_test.go (8)
 - internal/core/compiler/compiler.go (8)
-- internal/cli/dashpage.go (7)
 
 ## Open Tasks
 
@@ -69,7 +69,7 @@ _No TODO/FIXME comments found._
 ## Related Modules
 
 - .github/ (2 files)
-- assets/ (1 files)
+- assets/ (3 files)
 - cmd/ (1 files)
 - docs/ (60 files)
 - internal/ (62 files)
@@ -77,7 +77,7 @@ _No TODO/FIXME comments found._
 
 ## Workspace Facts
 
-- Commits analyzed: 56 (complete)
+- Commits analyzed: 58 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 6
 - Docs captured: 1

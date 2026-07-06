@@ -94,7 +94,29 @@ func registerWorkspace(dir string) {
 	if err := os.MkdirAll(filepath.Dir(p), 0o755); err != nil {
 		return
 	}
-	_ = os.WriteFile(p, raw, 0o644)
+	// Atomic replace: agent-velocity sessions compile several workspaces
+	// concurrently, and a torn write would corrupt the whole registry.
+	// A lost update is fine — the next compile re-registers.
+	tmp, err := os.CreateTemp(filepath.Dir(p), ".workspaces-*")
+	if err != nil {
+		return
+	}
+	if _, err := tmp.Write(raw); err != nil {
+		tmp.Close()
+		os.Remove(tmp.Name())
+		return
+	}
+	if err := tmp.Close(); err != nil {
+		os.Remove(tmp.Name())
+		return
+	}
+	if err := os.Chmod(tmp.Name(), 0o644); err != nil {
+		os.Remove(tmp.Name())
+		return
+	}
+	if err := os.Rename(tmp.Name(), p); err != nil {
+		os.Remove(tmp.Name())
+	}
 }
 
 // registeredWorkspaces returns registry paths that still look like kervo

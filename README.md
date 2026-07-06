@@ -273,7 +273,7 @@ in whatever language their proposer wrote.
 | Command | Does |
 |---|---|
 | `kervo init` | First-time: scan → artifact → inject `CLAUDE.md` (idempotent) |
-| `kervo compile [--lang en\|ko\|ja]` | Incremental rescan + recompile; Mode 3 → 2 → 1 fallback |
+| `kervo compile [-lang en\|ko\|ja] [-inject block\|import]` | Incremental rescan + recompile; Mode 3 → 2 → 1 fallback |
 | `kervo capture -type <t> -body <text>` | Record an observation into the ledger |
 | `kervo trust -id <prefix> -to verified\|stale\|deprecated -reason <r>` | Judge an observation by ID (the scriptable primitive) |
 | `kervo review [-web]` | Triage queue — judge proposals and ⚠ conflicts one by one; `-web` serves a one-shot local page |

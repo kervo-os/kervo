@@ -1,0 +1,117 @@
+# Changelog
+
+All notable changes, newest first. Versions are git tags; every release
+ships prebuilt binaries and a Homebrew cask (`brew install kervo-os/tap/kervo`).
+
+## Unreleased
+
+- Consolidation pass: CI runs the race detector; i18n tables are pinned
+  complete by test; the workspace registry writes atomically; command
+  tables in all three READMEs match the CLI exactly; this changelog.
+
+## v0.13.0 — 2026-07-06
+
+- `kervo dash` workspace detail gains a project overview: branch, languages,
+  declared commands, recent changes, open tasks, modules — the same
+  deterministic scan `compile` runs, capped for reading.
+- Module coupling from commit history ("change together") — connections
+  proven by commits, not narrated by a model. Dot-dirs excluded.
+
+## v0.12.0 — 2026-07-06
+
+- The K mark: `assets/logo.svg` (full lockup, background-agnostic via a
+  transparent ring punch) and `assets/mark.svg` (small tile, legible at
+  16px). README heroes, dash header, and the dash favicon use it.
+
+## v0.11.0 — 2026-07-06
+
+- Dash judged-records rail: every past judgment stays visible with its
+  state and reason — the page hides no history.
+
+## v0.10.0 — 2026-07-06
+
+- `-inject import`: opt-in one-line `@.kervo/artifact.md` block for
+  clean-CLAUDE.md teams; choice persists in `.kervo/inject` (committed).
+  Full block stays the default.
+- READMEs document the git post-commit auto-compile hook.
+
+## v0.9.0 — 2026-07-06
+
+- Dash language is user-switchable in the page; the choice persists in
+  `~/.kervo/ui-lang` and outranks `$LANG` on the next launch.
+
+## v0.8.0 — 2026-07-06
+
+- Dash chrome speaks en/ko/ja from the shared i18n tables ($LANG detection,
+  `-lang` override). Trust-state and type tokens stay English everywhere —
+  they are ledger vocabulary.
+
+## v0.7.0 — 2026-07-06
+
+- Dash redesign: per-repo monogram, headline pending count, home-shortened
+  paths, per-state legend, activity pulse, deep links (`#N`).
+- Claim-first display: the write-back protocol asks for a one-line claim
+  first; the triage card renders it as the headline.
+
+## v0.6.1 — 2026-07-06
+
+- Fix: a workspace with nothing pending marshaled `Items` as `null` and
+  blanked the dash. Now always `[]`, with a regression test.
+
+## v0.6.0 — 2026-07-06
+
+- `kervo dash`: one-shot 127.0.0.1 dashboard over every registered
+  workspace — pending judgments, trust-state bars, inline keyboard triage
+  routed to each repo's own ledger. `compile` self-registers workspace
+  paths (path only) in `~/.kervo/workspaces.json`.
+
+## v0.5.0 — 2026-07-06
+
+- `kervo mcp` is real: zero-dependency stdio JSON-RPC server with
+  `read_context`, `kervo_capture`, `review_queue`, `review_judge` —
+  judging happens in the chat, the agent only relays the human's decision.
+- `kervo review -web`: one-shot local page for batch triage.
+
+## v0.4.0 — 2026-07-06
+
+- Evidence-attached proposals: `capture -evidence` rides the ledger, shows
+  in review, renders with the claim. Verification labor moves to agents;
+  the verified signature stays human.
+- Fix: ULIDs are monotonic within a millisecond, so replay order matches
+  append order for agent-speed capture→trust→capture sequences.
+
+## v0.3.0 — 2026-07-06
+
+- The write-back protocol: every artifact ends with instructions for AI
+  consumers to capture durable facts it lacks as proposals. Duplicate
+  live bodies are dropped; re-assertion after stale/deprecated is allowed.
+
+## v0.2.1 — 2026-07-06
+
+- Declared pytest runners (`pytest.ini` / `[tool.pytest.ini_options]`)
+  surface as commands — found by a real-repo eval.
+
+## v0.2.0 — 2026-07-06
+
+- `kervo review`: triage queue over generated proposals and ⚠ conflicts,
+  no IDs to memorize. Judgments are the same transition events `trust`
+  writes.
+- AGENTS.md injection target (opt-in by file presence) — Codex and other
+  AGENTS.md readers get the same block.
+
+## v0.1.2 — 2026-07-06
+
+- Fix: block-comment closers (`-->`, `*/`) no longer leak into TODO text.
+
+## v0.1.1 — 2026-07-06
+
+- GoReleaser pipeline: prebuilt binaries for five targets and the
+  Homebrew tap.
+
+## v0.1.0 — 2026-07-05
+
+- First public release: deterministic fact skeleton (golden-tested),
+  trust-labeled slots with the generated→observed→verified→stale→deprecated
+  lifecycle, committed JSONL event ledger (`merge=union`), CLAUDE.md marker
+  injection, capture/trust/status/metrics/import/hook, en/ko/ja artifacts,
+  monorepo + Python/Docker ecosystem scanning, `.kervoignore`.

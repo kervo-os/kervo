@@ -270,7 +270,7 @@ kervo import claude                                      # 過去の Claude Code
 | コマンド | 機能 |
 |---|---|
 | `kervo init` | 初回のみ: スキャン → artifact → `CLAUDE.md` 注入(冪等) |
-| `kervo compile [--lang en\|ko\|ja]` | 増分再スキャン + 再コンパイル; Mode 3 → 2 → 1 フォールバック |
+| `kervo compile [-lang en\|ko\|ja] [-inject block\|import]` | 増分再スキャン + 再コンパイル; Mode 3 → 2 → 1 フォールバック |
 | `kervo capture -type <t> -body <本文>` | 観察を台帳に記録 |
 | `kervo trust -id <接頭辞> -to verified\|stale\|deprecated -reason <理由>` | ID で観察を判定 (スクリプト用プリミティブ) |
 | `kervo review [-web]` | レビューキュー — 提案と ⚠ 衝突を一つずつ判定; `-web` は一回限りのローカルページ |
