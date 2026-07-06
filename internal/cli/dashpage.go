@@ -109,6 +109,11 @@ main{max-width:66rem;margin:0 auto;padding:1.6rem 1.4rem 3rem}
 .tag.note,.tag.correction{background:#6b728026;color:#9aa1ac}
 .conf{color:var(--d);font-weight:700}
 .mono{font-family:ui-monospace,monospace;font-size:.72rem}
+.mdp{margin:.15rem 0}
+ul.mdl{margin:.25rem 0 .35rem;padding-left:1.15rem}
+ul.mdl li{margin:.12rem 0}
+.body code,.krest code{font:.85em ui-monospace,monospace;background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:.02em .3em}
+.body strong,.krest strong{font-weight:650}
 .body-title{font-size:1.05rem;font-weight:650;letter-spacing:-.01em;line-height:1.5;max-width:60ch;margin-bottom:.45rem}
 .body{white-space:pre-wrap;font-size:.94rem;line-height:1.75;max-width:64ch;margin-bottom:1rem;color:color-mix(in srgb,var(--fg) 82%,var(--muted))}
 .evid{font:.8rem/1.6 ui-monospace,monospace;color:var(--muted);border-left:3px solid var(--v);
@@ -195,6 +200,38 @@ const STATES = ["verified","observed","generated","stale","deprecated"];
 const SC = {verified:"var(--v)",observed:"var(--o)",generated:"var(--g)",stale:"var(--s)",deprecated:"var(--d)"};
 let repo = null, idx = 0, judged = 0;
 const total0 = FLEET.reduce((n,r)=>n+r.Items.length,0);
+// Minimal markdown for observation bodies — paragraphs, "- " bullets,
+// bold and inline code. Built entirely with createElement/textContent: data
+// can never become markup. Literal \\n from shell-quoted captures is
+// restored server-side before it reaches here.
+function md(text){
+  const frag = document.createDocumentFragment();
+  let list = null;
+  const inline = (node, str)=>{
+    const re = /(\*\*[^*]+\*\*|\x60[^\x60]+\x60)/g; let last = 0, m;
+    while((m = re.exec(str))){
+      if(m.index > last) node.append(str.slice(last, m.index));
+      const tok = m[0];
+      if(tok.startsWith("**")){ const b = document.createElement("strong"); b.textContent = tok.slice(2,-2); node.append(b); }
+      else { const c = document.createElement("code"); c.textContent = tok.slice(1,-1); node.append(c); }
+      last = m.index + tok.length;
+    }
+    if(last < str.length) node.append(str.slice(last));
+  };
+  text.split("\n").forEach(line=>{
+    const t = line.trim();
+    if(t.startsWith("- ") || t.startsWith("* ")){
+      if(!list){ list = document.createElement("ul"); list.className = "mdl"; frag.append(list); }
+      const li = document.createElement("li"); inline(li, t.slice(2)); list.append(li);
+    } else {
+      list = null;
+      if(t === "") return;
+      const p = document.createElement("div"); p.className = "mdp"; inline(p, line); frag.append(p);
+    }
+  });
+  return frag;
+}
+
 const el = (t,cls,txt)=>{const e=document.createElement(t); if(cls)e.className=cls; if(txt!==undefined)e.textContent=txt; return e};
 const svgEl = (t,attrs)=>{const e=document.createElementNS("http://www.w3.org/2000/svg",t);
   for(const k in attrs) e.setAttribute(k,attrs[k]); return e};
@@ -405,7 +442,7 @@ function renderTriage(){
   if(nl > 0){ head = o.Body.slice(0,nl); rest = o.Body.slice(nl+1).trim() }
   else if(col > 0 && col < 90){ head = o.Body.slice(0,col); rest = o.Body.slice(col+1).trim() }
   c.append(el("div","body-title",head));
-  if(rest) c.append(el("div","body",rest));
+  if(rest){ const bodyEl = el("div","body"); bodyEl.append(md(rest)); c.append(bodyEl); }
   if(o.Evidence) c.append(el("div","evid",T.evidence+o.Evidence));
   const a = el("div","actions");
   const reason = el("input"); reason.id="reason"; reason.placeholder=T.reasonph;
@@ -453,7 +490,7 @@ function renderRails(){
       if(nl > 0){ head = it.Body.slice(0,nl); rest = it.Body.slice(nl+1).trim() }
       else if(col > 0 && col < 90){ head = it.Body.slice(0,col); rest = it.Body.slice(col+1).trim() }
       k.append(el("div","khead",head));
-      if(rest) k.append(el("div","krest",rest));
+      if(rest){ const kr = el("div","krest"); kr.append(md(rest)); k.append(kr); }
       if(it.Evidence) k.append(el("div","evid",T.evidence+it.Evidence));
       rail.append(k);
     });

@@ -197,7 +197,7 @@ func newDashServer(paths []string, actorFlag string, lang i18n.Lang) (*dashServe
 			repo.Counts[string(o.State)]++
 			it := dashItem{
 				ID: o.ID, ShortID: shortID(o.ID), Type: o.Type, State: string(o.State),
-				Actor: o.Actor, Body: o.Body, Evidence: o.Evidence, Reason: o.Reason,
+				Actor: o.Actor, Body: unescapeBody(o.Body), Evidence: unescapeBody(o.Evidence), Reason: o.Reason,
 				Conflict: o.Conflict,
 			}
 			if o.State == trust.Generated || o.Conflict {

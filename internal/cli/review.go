@@ -31,6 +31,14 @@ func runReview(args []string) error {
 	return reviewLoop(*dir, *actor, os.Stdin, os.Stdout)
 }
 
+// unescapeBody restores newlines an agent passed as literal backslash-n
+// through shell quoting. Display-layer only — the ledger keeps the bytes
+// it was given; a body legitimately containing the two characters loses
+// nothing but a rare cosmetic edge.
+func unescapeBody(s string) string {
+	return strings.ReplaceAll(s, `\n`, "\n")
+}
+
 // reviewLoop takes reader/writer so the interaction is testable. EOF at any
 // prompt ends the session cleanly — a piped or CI stdin must never hang.
 func reviewLoop(dir, actorFlag string, in io.Reader, out io.Writer) error {
