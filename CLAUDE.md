@@ -26,6 +26,8 @@
 
 ## Recent Changes
 
+- `1022166` 2026-07-06 ledger: session hook events
+- `deaf0a1` 2026-07-06 ledger: consolidation summary
 - `b8eaf90` 2026-07-06 consolidate: no new features — pay the day's debt
 - `1cfbd6b` 2026-07-06 dash: workspace detail carries the project itself, not just the queue
 - `f549544` 2026-07-06 identity: the K mark — SVG redraw of the user's logo, wired everywhere
@@ -44,15 +46,13 @@
 - `ea3c874` 2026-07-06 ledger: session hook events
 - `c6e4fbe` 2026-07-06 store: monotonic ULIDs within a millisecond — replay must match append order
 - `002394e` 2026-07-06 flywheel: evidence-attached proposals — labor to agents, signature to humans
-- `dbe373d` 2026-07-06 ledger: evidence-attached proposals (LLM pre-verification, human signature)
-- `94657b1` 2026-07-06 ledger: Phase B refinement — fact-wiki links to code, never copies it
 
-_Showing 20 of 59 analyzed commits._
+_Showing 20 of 61 analyzed commits._
 
 ### Frequently Changed Files
 
-- .kervo/events/2026-07.jsonl (40)
-- CLAUDE.md (21)
+- .kervo/events/2026-07.jsonl (42)
+- CLAUDE.md (22)
 - README.md (19)
 - README.ja.md (15)
 - README.ko.md (15)
@@ -77,7 +77,7 @@ _No TODO/FIXME comments found._
 
 ## Workspace Facts
 
-- Commits analyzed: 59 (complete)
+- Commits analyzed: 61 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 6
 - Docs captured: 1
@@ -158,6 +158,10 @@ H4 confirmatory run (pre-registered, n=24, no-repo-access, sonnet+haiku): compos
 **[generated — agent:claude-code]**
 Consolidation pass (2026-07-06, no version tag by user direction): race detector in CI, i18n completeness pinned by test (both directions), atomic registry writes, README command tables verified 12/12 against the CLI in three languages, CHANGELOG.md covering v0.1.0..v0.13.0, dash_overview.go split. Dependencies: zero (stdlib-only go.mod). Known debt left on record: review -web page is a plain fallback surface (dash supersedes it visually); GitHub release notes for v0.7.0..v0.13.0 are auto-changelogs while CHANGELOG.md is now canonical.
 Evidence: go test -race ./... clean; goreleaser check clean; go.mod contains no requires
+
+**[generated — agent:claude-code]**
+Write-back pilot on the adopted real repo (2026-07-06, third-party agent session): two previously unanswerable questions went 0/2 to 2/2 after targeted captures flowed capture -> ledger -> compile -> slots -> a fresh consumer; same 5-question basis moved 5.5/10 to 9.5/10 at unchanged cost (1 tool call, 48s to 21s). Trust labels reached the consumer and changed its behavior: it flagged its own answer as [generated], not human-signed. The declared-pytest scan (v0.2.1/v0.13.0) fired on the real repo. Caveat kept honest: this is a mechanism pilot on 2 targeted questions, not the pre-registered full A/B re-run with blinded judging - that still runs at the volume gate.
+Evidence: user-pasted eval table 2026-07-06: Q3 0/2->2/2, Q4 0/2->2/2, 1 call, 48s->21s; consumer quote flagging [generated] vs Verified
 <!-- kervo:slot:summaries:end -->
 
 ## Deprecated / Stale Notes
