@@ -226,6 +226,20 @@ kervo metrics                                            # プロンプトサイ
 kervo import claude                                      # 過去の Claude Code セッションをバックフィル
 ```
 
+チャットから直接判定したいなら?MCP サーバを登録すれば会話がレビュー
+サーフェスになります — *「レビューキューを見せて」* → *「2 番を verify、
+証拠は確認した」*:
+
+```json
+{ "mcpServers": { "kervo": { "command": "kervo", "args": ["mcp"] } } }
+```
+
+ツールは 4 つ: `read_context`(事実の出力)、`kervo_capture`(write-back)、
+`review_queue` / `review_judge`(人間が述べた判定の中継 — エージェント
+自身の判断は禁止)。一括判定には `kervo review -web` が一回限りのローカル
+ページを開きます — コマンドが生きている間だけ存在し、127.0.0.1 のみに
+バインドされ、設計保証(デーモンなし・アカウントなし)をすべて守ります。
+
 ## コマンド
 
 | コマンド | 機能 |
@@ -234,12 +248,12 @@ kervo import claude                                      # 過去の Claude Code
 | `kervo compile [--lang en\|ko\|ja]` | 増分再スキャン + 再コンパイル; Mode 3 → 2 → 1 フォールバック |
 | `kervo capture -type <t> -body <本文>` | 観察を台帳に記録 |
 | `kervo trust -id <接頭辞> -to verified\|stale\|deprecated -reason <理由>` | ID で観察を判定 (スクリプト用プリミティブ) |
-| `kervo review` | レビューキュー — generated 提案と ⚠ 衝突を ID なしで一つずつ判定 |
+| `kervo review [-web]` | レビューキュー — 提案と ⚠ 衝突を一つずつ判定; `-web` は一回限りのローカルページ |
 | `kervo status` | 1 画面の台帳 + トラストビュー |
 | `kervo metrics` | artifact 有/無のプロンプトサイズ(内蔵 A/B カウンタ) |
 | `kervo import claude` | Claude Code トランスクリプトから台帳をバックフィル(サイズのみ) |
 | `kervo hook` | コンシューマフックのエントリポイント(stdin JSON、ミリ秒予算) |
-| `kervo mcp` | stdio MCP サーバ — 事実を出し、観察を受け取る |
+| `kervo mcp` | stdio MCP サーバ — コンテキスト出力、write-back 受信、チャット判定 |
 | `kervo version` | バージョン表示 |
 
 ## 設計上の保証

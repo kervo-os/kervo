@@ -229,6 +229,20 @@ kervo metrics                                            # prompt sizes: with vs
 kervo import claude                                      # back-fill from past Claude Code sessions
 ```
 
+Prefer judging from the chat? Register the MCP server and the conversation
+becomes the review surface — *"show me the review queue"* → *"verify #2,
+the evidence checks out"*:
+
+```json
+{ "mcpServers": { "kervo": { "command": "kervo", "args": ["mcp"] } } }
+```
+
+Four tools: `read_context` (facts out), `kervo_capture` (write-back in),
+`review_queue` / `review_judge` (relaying the human's stated judgment,
+never the agent's own). For batch triage, `kervo review -web` serves a
+one-shot local page — it lives only as long as the command, binds
+127.0.0.1, and keeps every design guarantee (no daemon, no account).
+
 ## Commands
 
 | Command | Does |
@@ -237,12 +251,12 @@ kervo import claude                                      # back-fill from past C
 | `kervo compile [--lang en\|ko\|ja]` | Incremental rescan + recompile; Mode 3 → 2 → 1 fallback |
 | `kervo capture -type <t> -body <text>` | Record an observation into the ledger |
 | `kervo trust -id <prefix> -to verified\|stale\|deprecated -reason <r>` | Judge an observation by ID (the scriptable primitive) |
-| `kervo review` | Triage queue — judge generated proposals and ⚠ conflicts one by one, no IDs |
+| `kervo review [-web]` | Triage queue — judge proposals and ⚠ conflicts one by one; `-web` serves a one-shot local page |
 | `kervo status` | One-screen ledger + trust view |
 | `kervo metrics` | Prompt sizes with vs without the artifact (built-in A/B counters) |
 | `kervo import claude` | Back-fill the ledger from Claude Code transcripts (sizes only) |
 | `kervo hook` | Consumer hook entry point (stdin JSON, millisecond budget) |
-| `kervo mcp` | stdio MCP server — facts out, observations in |
+| `kervo mcp` | stdio MCP server — context out, write-back in, judging from the chat |
 | `kervo version` | Print version |
 
 ## Design guarantees

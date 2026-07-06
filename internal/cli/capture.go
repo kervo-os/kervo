@@ -26,50 +26,63 @@ func runCapture(args []string) error {
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
-	if strings.TrimSpace(*body) == "" {
-		return fmt.Errorf("capture: -body is required")
-	}
-	store := jsonl.Open(*dir)
-	// Write-back guardrail: an identical live body is a duplicate, not new
-	// knowledge — agents re-reading the same session must not spam the
-	// review queue. Exit 0: a duplicate is a no-op, not an agent failure.
-	// Stale/deprecated bodies may be re-captured (re-assertion is a fresh
-	// claim for the human to judge).
-	folder, err := replayFolder(store)
+	id, dup, err := captureObservation(*dir, *typ, *body, *evidence, *actor)
 	if err != nil {
 		return err
 	}
+	if dup != nil {
+		fmt.Printf("duplicate of %s (%s) — skipped\n", shortID(dup.ID), dup.State)
+		return nil
+	}
+	fmt.Printf("captured %s (%s) → .kervo/events/\n", id, *typ)
+	return nil
+}
+
+// captureObservation is the shared write path for CLI and MCP. A non-nil
+// dup means the body already exists live and nothing was written.
+// Write-back guardrail: an identical live body is a duplicate, not new
+// knowledge — agents re-reading the same session must not spam the review
+// queue (a duplicate is a no-op, not a failure). Stale/deprecated bodies
+// may be re-captured: re-assertion is a fresh claim for the human to judge.
+func captureObservation(dir, typ, body, evidence, actorFlag string) (id string, dup *trust.Observation, err error) {
+	if strings.TrimSpace(body) == "" {
+		return "", nil, fmt.Errorf("capture: body is required")
+	}
+	store := jsonl.Open(dir)
+	folder, err := replayFolder(store)
+	if err != nil {
+		return "", nil, err
+	}
 	for _, o := range folder.Observations() {
-		if o.Body == *body && o.State != trust.Stale && o.State != trust.Deprecated {
-			fmt.Printf("duplicate of %s (%s) — skipped\n", shortID(o.ID), o.State)
-			return nil
+		if o.Body == body && o.State != trust.Stale && o.State != trust.Deprecated {
+			d := o
+			return "", &d, nil
 		}
 	}
-	fields := map[string]string{"body": *body}
-	if strings.TrimSpace(*evidence) != "" {
-		fields["evidence"] = *evidence
+	fields := map[string]string{"body": body}
+	if strings.TrimSpace(evidence) != "" {
+		fields["evidence"] = evidence
 	}
 	payload, err := json.Marshal(fields)
 	if err != nil {
-		return err
+		return "", nil, err
 	}
-	abs, err := filepath.Abs(*dir)
+	abs, err := filepath.Abs(dir)
 	if err != nil {
-		return err
+		return "", nil, err
 	}
-	id, err := store.Append(context.Background(), event.Event{
+	id, err = store.Append(context.Background(), event.Event{
 		Kind:    event.KindObservation,
-		Type:    *typ,
+		Type:    typ,
 		Repo:    filepath.Base(abs),
-		Actor:   resolveActor(*actor, *dir),
+		Actor:   resolveActor(actorFlag, dir),
 		Source:  "human",
 		Payload: json.RawMessage(payload),
 	})
 	if err != nil {
-		return err
+		return "", nil, err
 	}
-	fmt.Printf("captured %s (%s) → .kervo/events/\n", id, *typ)
-	return nil
+	return id, nil, nil
 }
 
 // resolveActor defaults to the git identity — the RFC-0005 vocabulary:

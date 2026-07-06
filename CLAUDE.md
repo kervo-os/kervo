@@ -26,6 +26,9 @@
 
 ## Recent Changes
 
+- `ea3c874` 2026-07-06 ledger: session hook events
+- `c6e4fbe` 2026-07-06 store: monotonic ULIDs within a millisecond — replay must match append order
+- `002394e` 2026-07-06 flywheel: evidence-attached proposals — labor to agents, signature to humans
 - `dbe373d` 2026-07-06 ledger: evidence-attached proposals (LLM pre-verification, human signature)
 - `94657b1` 2026-07-06 ledger: Phase B refinement — fact-wiki links to code, never copies it
 - `41f958c` 2026-07-06 ledger: session hook events
@@ -43,23 +46,20 @@
 - `25a59c2` 2026-07-05 release prep: team workflow docs, commands reference, self-scan fixes
 - `f8f7a44` 2026-07-04 docs: publish the H4 experiment package — receipts, not claims
 - `76e05d8` 2026-07-04 readme: Korean and Japanese editions with language switcher
-- `655d2e3` 2026-07-04 readme: modern layout + measured-results section
-- `1227d0b` 2026-07-04 scan: monorepo + Python/Docker ecosystem support (field findings from a real 12-module repo)
-- `11ed656` 2026-07-04 ledger: H4 confirmatory run passed — trust treatment verified
 
-_Showing 20 of 41 analyzed commits._
+_Showing 20 of 44 analyzed commits._
 
 ### Frequently Changed Files
 
-- .kervo/events/2026-07.jsonl (22)
-- CLAUDE.md (15)
-- README.md (11)
+- .kervo/events/2026-07.jsonl (25)
+- CLAUDE.md (16)
+- README.md (12)
+- README.ja.md (8)
+- README.ko.md (8)
 - internal/adapters/source/files/files.go (8)
 - internal/adapters/source/files/files_test.go (8)
+- internal/cli/compile.go (8)
 - internal/core/compiler/compiler.go (8)
-- README.ja.md (7)
-- README.ko.md (7)
-- internal/cli/compile.go (7)
 - internal/core/compiler/compiler_test.go (7)
 
 ## Open Tasks
@@ -77,7 +77,7 @@ _No TODO/FIXME comments found._
 
 ## Workspace Facts
 
-- Commits analyzed: 41 (complete)
+- Commits analyzed: 44 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 6
 - Docs captured: 1
@@ -103,6 +103,10 @@ Operating principle (user directive 2026-07-06): minimize human touch on every e
 
 **[verified — human:refuse1993]**
 Evidence-attached proposals (Phase A extension, proposal): capture gains an optional -evidence field ('reproduced: ran cd api && pytest, 81 passed' / 'source: docs/adr-007.md'); the write-back protocol asks agents to attach reproduction evidence; review displays it under the body. Reproducible facts then arrive substantively pre-verified by the LLM and the human signs in one keystroke — verification LABOR moves to agents, the verified SIGNATURE stays human. Auto-verify policies for reproducible types stay opt-in per team, never default.
+
+**[verified — human:refuse1993]**
+review web UI (supersedes the 2026-07-04 HTML-report demotion for the triage surface only): 'kervo review -web' serves a one-shot localhost page — judge with buttons, reasons inline, evidence shown — and exits with the command. Reopening gate met: repeated user demand 2026-07-06. Guarantees intact: no daemon (lives only while the command runs), no external service, no account, state stays in .kervo/. Reading-wiki surfaces stay demoted.
+Evidence: user requests 2026-07-06: clean-CLAUDE.md thread, separate-DB thread, 'review 프론트 안 만들어?'
 
 **[generated — agent:claude-code]**
 inject mode option (v1.x candidate): default stays full-block in CLAUDE.md (zero-command clone is the product's proof); add opt-in '@.kervo/artifact.md' import mode for clean-CLAUDE.md users — trade-off: fresh clones see nothing until 'kervo compile'. Gate: field demand from real adopters.
