@@ -77,8 +77,22 @@ main{max-width:66rem;margin:0 auto;padding:1.6rem 1.4rem 3rem}
   padding-top:.65rem;border-top:1px solid var(--line);font-variant-numeric:tabular-nums}
 .pulse{color:var(--v)}
 /* triage */
-#triage{display:none;max-width:52rem;margin:0 auto}
-.tri-head{display:flex;align-items:center;gap:.8rem;margin-bottom:1rem}
+#triage{display:none;grid-template-columns:minmax(0,1fr) 21rem;gap:1.3rem}
+#triage.open{display:grid}
+.tri-head{grid-column:1/-1;display:flex;align-items:center;gap:.8rem;margin-bottom:0}
+.tri-main{min-width:0}
+#overview{display:flex;flex-direction:column;gap:.8rem}
+.ov{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:.85rem 1rem}
+.ov h4{margin:0 0 .5rem;font-size:.72rem;color:var(--faint);text-transform:uppercase;letter-spacing:.09em;font-weight:650}
+.ov .li{display:flex;gap:.6rem;font-size:.78rem;padding:.14rem 0;color:var(--muted);min-width:0}
+.ov .li .m{font-family:ui-monospace,monospace;color:var(--fg);flex:none;max-width:12rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ov .li .t{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.ov .chips{display:flex;flex-wrap:wrap;gap:.35rem}
+.ov .more{color:var(--faint);font-size:.72rem;padding-top:.2rem}
+.ov .link{display:flex;gap:.5rem;align-items:center;font-size:.78rem;padding:.14rem 0;color:var(--muted)}
+.ov .link b{color:var(--fg);font-weight:600}
+.ov .link .n{margin-left:auto;color:var(--faint);font-variant-numeric:tabular-nums}
+@media(max-width:960px){#triage{grid-template-columns:1fr}}
 .tri-head h2{margin:0;font-size:1.05rem;letter-spacing:-.02em}
 .tri-head .sub{color:var(--muted);font-size:.8rem;font-variant-numeric:tabular-nums}
 .item{background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--line);
@@ -147,8 +161,11 @@ main{max-width:66rem;margin:0 auto;padding:1.6rem 1.4rem 3rem}
       <button onclick="showFleet()"><span id="backLbl"></span> <kbd>Esc</kbd></button>
       <h2 id="tname"></h2><div class="sub" id="tsub"></div>
     </div>
-    <div id="tcard"></div>
-    <div class="rail" id="rail"></div>
+    <div class="tri-main">
+      <div id="tcard"></div>
+      <div class="rail" id="rail"></div>
+    </div>
+    <aside id="overview"></aside>
   </section>
 </main>
 <div id="toast"></div>
@@ -221,13 +238,59 @@ function renderFleet(){
 
 function openRepo(i){ repo = FLEET[i]; idx = 0;
   document.getElementById("fleet").style.display="none";
-  document.getElementById("triage").style.display="block";
-  renderTriage() }
+  document.getElementById("triage").classList.add("open");
+  renderOverview(); renderTriage() }
 
 function showFleet(){ repo=null;
-  document.getElementById("triage").style.display="none";
+  document.getElementById("triage").classList.remove("open");
   document.getElementById("fleet").style.display="block";
   renderFleet() }
+
+// The workspace's fact skeleton — same deterministic scan compile runs,
+// capped for reading. Coupling pairs are proven by commit history.
+function renderOverview(){
+  const aside = document.getElementById("overview"); aside.textContent="";
+  const ov = repo.Overview; if(!ov) return;
+  const box = (title)=>{ const b=el("div","ov"); b.append(el("h4","",title)); aside.append(b); return b };
+
+  const info = box(T.overview);
+  const chips = el("div","chips");
+  const seen = new Set();
+  const chip = t=>{ if(!t||seen.has(t)) return; seen.add(t); chips.append(el("span","chip",t)) };
+  chip(ov.Branch||"?");
+  (ov.Languages||[]).forEach(chip);
+  (ov.Frameworks||[]).forEach(chip);
+  if(ov.Partial) chip(T.partialscan);
+  info.append(chips);
+
+  if((ov.Commands||[]).length){
+    const b = box(T.commands);
+    ov.Commands.forEach(c=>{ const r=el("div","li"); r.append(el("span","m",c.Run), el("span","t",c.Source)); b.append(r) });
+    if(ov.TotalCommands>ov.Commands.length) b.append(el("div","more",F(T.more,ov.TotalCommands-ov.Commands.length)));
+  }
+  if((ov.Links||[]).length){
+    const b = box(T.links);
+    ov.Links.forEach(l=>{ const r=el("div","link");
+      const pair=el("span"); pair.append(el("b","",l.A), document.createTextNode(" ↔ "), el("b","",l.B));
+      r.append(pair, el("span","n","×"+l.N)); b.append(r) });
+  }
+  if((ov.Commits||[]).length){
+    const b = box(T.recent);
+    ov.Commits.forEach(c=>{ const r=el("div","li"); r.append(el("span","m",c.Date), el("span","t",c.Subject)); b.append(r) });
+    if(ov.TotalCommits>ov.Commits.length) b.append(el("div","more",F(T.more,ov.TotalCommits-ov.Commits.length)));
+  }
+  if((ov.Tasks||[]).length){
+    const b = box(T.tasks);
+    ov.Tasks.forEach(t=>{ const r=el("div","li"); r.append(el("span","m",t.Loc), el("span","t",t.Text)); b.append(r) });
+    if(ov.TotalTasks>ov.Tasks.length) b.append(el("div","more",F(T.more,ov.TotalTasks-ov.Tasks.length)));
+  }
+  if((ov.Modules||[]).length){
+    const b = box(T.modules);
+    const mc = el("div","chips");
+    ov.Modules.forEach(m=>mc.append(el("span","chip",m.Name+"/ "+m.Files)));
+    b.append(mc);
+  }
+}
 
 function renderTriage(){
   document.getElementById("tname").textContent = repo.Name;

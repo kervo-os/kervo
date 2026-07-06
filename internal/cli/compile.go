@@ -275,18 +275,25 @@ func mustAbs(dir string) string {
 	return abs
 }
 
-// buildSkeleton runs the shared fact pipeline: scan git + files, merge,
-// render the deterministic skeleton in lang.
-func buildSkeleton(ctx context.Context, dir string, lang i18n.Lang) (fact.Snapshot, string, string, error) {
+// scanFacts runs the shared fact pipeline: scan git + files, merge.
+func scanFacts(ctx context.Context, dir string) (fact.Snapshot, string, error) {
 	snap, cursor, err := gitexec.New().Scan(ctx, dir, "")
 	if err != nil {
-		return fact.Snapshot{}, "", "", err
+		return fact.Snapshot{}, "", err
 	}
 	fsnap, _, err := files.New().Scan(ctx, dir, "")
 	if err != nil {
+		return fact.Snapshot{}, "", err
+	}
+	return mergeSnapshots(snap, fsnap), cursor, nil
+}
+
+// buildSkeleton scans and renders the deterministic skeleton in lang.
+func buildSkeleton(ctx context.Context, dir string, lang i18n.Lang) (fact.Snapshot, string, string, error) {
+	snap, cursor, err := scanFacts(ctx, dir)
+	if err != nil {
 		return fact.Snapshot{}, "", "", err
 	}
-	snap = mergeSnapshots(snap, fsnap)
 	skeleton, err := compiler.BuildSkeleton(snap, lang)
 	if err != nil {
 		return fact.Snapshot{}, "", "", err

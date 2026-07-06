@@ -234,3 +234,60 @@ func TestDashFleetAndCrossRepoJudge(t *testing.T) {
 		t.Errorf("foreign workspace status = %d, want 409", res.StatusCode)
 	}
 }
+
+// The workspace detail carries the fact skeleton — and coupling pairs are
+// proven by commit history, not narrated by a model.
+func TestDashOverviewAndCoupling(t *testing.T) {
+	dir := t.TempDir()
+	git(t, dir, "init", "-q", "-b", "main")
+	writeFile(t, dir, "Makefile", "build:\n\tgo build ./...\n")
+	writeFile(t, dir, "api/a.go", "package api\n")
+	writeFile(t, dir, "core/b.go", "package core\n")
+	git(t, dir, "add", ".")
+	git(t, dir, "commit", "-q", "-m", "first")
+	writeFile(t, dir, "api/a.go", "package api // v2\n")
+	writeFile(t, dir, "core/b.go", "package core // v2\n")
+	git(t, dir, "add", ".")
+	git(t, dir, "commit", "-q", "-m", "api+core together")
+
+	if _, _, err := captureObservation(dir, "decision", "pending one", "", "agent:test"); err != nil {
+		t.Fatal(err)
+	}
+	srv, err := newDashServer([]string{dir}, "human:tester", i18n.EN)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ov := srv.repos[0].Overview
+	if ov == nil {
+		t.Fatal("overview missing for a healthy git workspace")
+	}
+	if ov.Branch != "main" {
+		t.Errorf("branch = %q", ov.Branch)
+	}
+	found := false
+	for _, c := range ov.Commands {
+		if c.Run == "make build" {
+			found = true
+		}
+	}
+	if !found {
+		t.Errorf("commands missing make build: %+v", ov.Commands)
+	}
+	// Both commits touched api/ and core/ together.
+	if len(ov.Links) == 0 || ov.Links[0].A != "api" || ov.Links[0].B != "core" || ov.Links[0].N != 2 {
+		t.Errorf("coupling = %+v, want api<->core x2", ov.Links)
+	}
+
+	// A ledger-only workspace (no git) must still serve — overview absent.
+	plain := t.TempDir()
+	if _, _, err := captureObservation(plain, "note", "no git here", "", "agent:test"); err != nil {
+		t.Fatal(err)
+	}
+	srv2, err := newDashServer([]string{plain}, "human:tester", i18n.EN)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if srv2.repos[0].Overview != nil {
+		t.Error("overview must be nil when the scan fails")
+	}
+}
