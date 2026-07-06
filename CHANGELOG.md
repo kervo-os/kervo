@@ -3,7 +3,11 @@
 All notable changes, newest first. Versions are git tags; every release
 ships prebuilt binaries and a Homebrew cask (`brew install kervo-os/tap/kervo`).
 
-## Unreleased
+## v0.13.1 — 2026-07-06
+
+- Judgment semantics in the dash: a hint line under the actions and a
+  "what a judgment does" help section — verify is a reversible signature,
+  deprecate records why, skip stays harmlessly unverified.
 
 - Consolidation pass: CI runs the race detector; i18n tables are pinned
   complete by test; the workspace registry writes atomically; command
