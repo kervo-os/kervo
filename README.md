@@ -26,6 +26,10 @@
 
 ---
 
+**Your "OK" to an agent becomes the team's signed memory.** Any agent
+opening this workspace starts knowing what is true, what was decided, and
+what not to trust yet — and that memory grows with every session.
+
 kervo compiles your repository into a deterministic **Context Artifact** and
 injects it into `CLAUDE.md` — so every AI session starts already knowing your
 project. Facts are extracted deterministically; interpretations enter only as

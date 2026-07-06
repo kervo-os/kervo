@@ -26,6 +26,7 @@
 
 ## Recent Changes
 
+- `354ce04` 2026-07-06 ledger: queue cleared — eight judgments with conversational provenance
 - `cd67fc3` 2026-07-06 protocol: the conversation is the review — relay affirmations, question conflicts
 - `2ec13e5` 2026-07-06 ledger: the conversation is a review surface — a plan
 - `1e5d5ce` 2026-07-06 ledger: workspace-native wiki management — a plan, not code
@@ -45,14 +46,13 @@
 - `deaf0a1` 2026-07-06 ledger: consolidation summary
 - `b8eaf90` 2026-07-06 consolidate: no new features — pay the day's debt
 - `1cfbd6b` 2026-07-06 dash: workspace detail carries the project itself, not just the queue
-- `f549544` 2026-07-06 identity: the K mark — SVG redraw of the user's logo, wired everywhere
 
-_Showing 20 of 76 analyzed commits._
+_Showing 20 of 77 analyzed commits._
 
 ### Frequently Changed Files
 
-- .kervo/events/2026-07.jsonl (56)
-- CLAUDE.md (31)
+- .kervo/events/2026-07.jsonl (57)
+- CLAUDE.md (32)
 - README.md (25)
 - README.ja.md (21)
 - README.ko.md (21)
@@ -77,7 +77,7 @@ _No TODO/FIXME comments found._
 
 ## Workspace Facts
 
-- Commits analyzed: 76 (complete)
+- Commits analyzed: 77 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 6
 - Docs captured: 1
@@ -152,6 +152,10 @@ Evidence: user reframe 2026-07-06: '우리는 워크스페이스 기준으로 �
 **[verified — human:refuse1993]**
 The conversation IS a review surface (plan for judgment; user challenge 2026-07-06). Formalize what this project already practices: when a human explicitly affirms a specific claim in session, the agent records capture AND relays the verification in one motion - reason quotes the affirmation as evidence - and no queue round-trip happens. The queue does not disappear; it shrinks to its true purpose: knowledge no human has seen (unattended write-backs, external producers, other agents' sessions, Mode 3). Three boundaries hold: (1) affirmation is claim-scoped, not vibe-scoped - an OK covers what was actually put to the human; anything learned but not discussed stays generated; (2) provenance must say HOW it was verified ('user approved in session' + quote), so signatures stay auditable; (3) the self-signature ban is untouched - the agent relays the human's stated judgment, never its own. Conflict flow, protocol-level: a consumer that finds evidence contradicting a verified entry raises it with the human in conversation, then records the updated judgment (deprecate old with reason + capture new, or re-affirm) - conflicts become questions, not queue sediment. Implementation when judged: protocol text for the injected block and MCP tool descriptions; a capture sugar flag (one command for capture+relay) only if the two-command pattern shows friction.
 Evidence: user 2026-07-06: '사람이 OK 했으니까 진행된거면 그것 자체가 검증. 과거랑 다르면 다시 물어보고 팩트를 바꾸면'; this session's own practice (capture then trust with chat-quote reasons) as the working precedent
+
+**[verified — human:refuse1993]**
+README lead adopts the signed-memory positioning (user-directed 2026-07-06, ahead of the kervo.dev landing draft): the OK you give an agent becomes the team's signed memory; any agent opening the workspace starts knowing what is true, what was decided, and what not to trust yet - and that memory grows with every session. Value sentence leads, mechanism paragraph follows; hero imperative (Stop re-explaining) stays as the hook.
+Evidence: user 2026-07-06: '그 문장으로 kervo.dev 랜딩 초안 만들기전에 readme부터'
 <!-- kervo:slot:decisions:end -->
 
 ## Known Risks
