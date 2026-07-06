@@ -26,6 +26,8 @@
 
 ## Recent Changes
 
+- `ac3d8f7` 2026-07-06 registry: prune only what provably does not exist
+- `70b6ed2` 2026-07-06 readme: show the product — diagram, screenshots, real-repo numbers
 - `26d3840` 2026-07-06 dash: a visualization layer worthy of the hero shot
 - `41189a8` 2026-07-06 ledger: session hook events
 - `8661ae0` 2026-07-06 docs: external producers — publish the intake contract, don't chase formats
@@ -44,21 +46,19 @@
 - `17ea7bc` 2026-07-06 dash: user-switchable language — in-page selector, choice persists
 - `d40e267` 2026-07-06 dash: speak the user's language — en/ko/ja chrome from the i18n tables
 - `d67c5e1` 2026-07-06 ledger: session hook events
-- `eb12de9` 2026-07-06 dash: claim-first display + capture convention — lead with a one-line claim
-- `9cb11b6` 2026-07-06 dash: sellable — monogram identity, readable paths, product-grade visuals
 
-_Showing 20 of 69 analyzed commits._
+_Showing 20 of 71 analyzed commits._
 
 ### Frequently Changed Files
 
-- .kervo/events/2026-07.jsonl (49)
-- CLAUDE.md (25)
-- README.md (21)
-- README.ja.md (17)
-- README.ko.md (17)
+- .kervo/events/2026-07.jsonl (51)
+- CLAUDE.md (26)
+- README.md (22)
+- README.ja.md (18)
+- README.ko.md (18)
 - internal/cli/compile.go (11)
+- internal/cli/dash.go (11)
 - internal/cli/dashpage.go (11)
-- internal/cli/dash.go (10)
 - internal/core/i18n/i18n.go (10)
 - internal/adapters/source/files/files.go (8)
 
@@ -77,7 +77,7 @@ _No TODO/FIXME comments found._
 
 ## Workspace Facts
 
-- Commits analyzed: 69 (complete)
+- Commits analyzed: 71 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 6
 - Docs captured: 1
@@ -136,6 +136,10 @@ Evidence: user-relayed eval 2026-07-06: goal C+ (rear-view), risk D (fact->overr
 **[generated — agent:claude-code]**
 External producers integrate via the published intake contract, not per-tool importers (refines Phase C of goal 01KWTJGS). Any tool - graph builders, memory stores, wiki generators - stages .kervo/proposals.json entries [{slot, body, source}]; compile ingests them as generated with provenance, review gates them, and the absolute rule holds: no state field exists, so nothing self-promotes. Per-tool importers (graphify/openwiki/agentmemory) are built only when a real export file exists on this machine to test against - chasing N third-party formats is the losing game the scope rule forbids. Known gap for the first real producer: the proposal shape lacks an evidence field; add it when the first producer arrives. State nuance kept from PRD 7.2: your own session history imports may enter observed; generated-content tools always enter generated.
 Evidence: consumer/proposals.go: proposal{Slot,Body,Source}, no state field, RFC-0003 5; user-relayed integration proposal 2026-07-06
+
+**[generated — agent:claude-code]**
+llm-wiki-newsroom is the first concrete producer candidate - and it needs ZERO kervo code (refines 01KWVFE1). It is agent-driven (Claude Code, CLAUDE.md-operated), so its own agent can stage .kervo/proposals.json per the published contract; no 'kervo import wiki-newsroom' importer, no format chase. Mapping when adopted: contradictions -> risks (our conflict analog), cluster overviews / entities -> summaries, timelines -> summaries; never decisions (it does not produce team decisions). Everything enters [generated - llm-wiki-newsroom]. Philosophy check: it accretes at ingest (not compile-time regeneration) and separates author from reviewer - closer to kervo than the openwiki pattern; the boundary stays: kervo absorbs judgments about its output, never its graph/wiki machinery. Adoption gate: real usage in the report-archive workflow opens the first-producer items (evidence field in proposals.json).
+Evidence: README direct read 2026-07-06: 5-role newsroom, self-evolving guidelines w/ regression A/B, L2 sub-layers, /wiki-lint staleness+contradictions, WIKI_LANG=ko, MIT
 <!-- kervo:slot:decisions:end -->
 
 ## Known Risks
