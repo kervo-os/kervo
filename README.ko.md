@@ -40,12 +40,15 @@ kervo는 저장소를 결정적 **Context Artifact**로 컴파일해 `CLAUDE.md`
 ## 빠른 시작
 
 ```bash
-go install github.com/kervo-os/kervo/cmd/kervo@latest   # 또는: make build
+brew install kervo-os/tap/kervo   # macOS & Linux — 프리빌트 바이너리
+# 또는: go install github.com/kervo-os/kervo/cmd/kervo@latest
 kervo init        # 스캔 → .kervo/artifact.md → CLAUDE.md에 주입
 ```
 
-실제 저장소 기준 첫 실행은 1초 미만입니다(커밋 스캔 상한 500개, 도달 시
-`Partial` 표시). `CLAUDE.md`에서 `<!-- kervo:begin -->`과
+macOS·Linux·Windows용 프리빌트 바이너리는
+[릴리스 페이지](https://github.com/kervo-os/kervo/releases)에 있습니다 —
+Go 툴체인이 필요 없습니다. 실제 저장소 기준 첫 실행은 1초 미만입니다(커밋
+스캔 상한 500개, 도달 시 `Partial` 표시). `CLAUDE.md`에서 `<!-- kervo:begin -->`과
 `<!-- kervo:end -->` 사이 블록만 건드립니다 — 손으로 쓴 내용은
 바이트 단위로 보존됩니다.
 
@@ -75,8 +78,8 @@ kervo init        # 스캔 → .kervo/artifact.md → CLAUDE.md에 주입
 2. **팀원이 클론** — 컨텍스트는 이미 살아 있습니다: `CLAUDE.md`에 마지막
    컴파일 블록이 있고 장부 전체가 클론에 포함됩니다. AI 세션은 **명령 0개**로
    바로 읽고, `kervo status` / `metrics`도 클론된 장부에서 즉시 동작합니다.
-3. **라이브 전환** — 바이너리를 설치하고 `kervo compile`(재`init` 아님)로
-   재스캔·사실 갱신. `init`도 멱등이라 습관적으로 실행해도 깨지지 않습니다.
+3. **라이브 전환** — 바이너리를 설치하고(`brew install kervo-os/tap/kervo`)
+   `kervo compile`(재`init` 아님)로 재스캔·사실 갱신. `init`도 멱등이라 습관적으로 실행해도 깨지지 않습니다.
 4. **훅** — `.claude/settings.json`을 커밋해두면 `kervo`가 PATH에 있는
    팀원 전원에게 캡처가 자동 발화합니다.
 

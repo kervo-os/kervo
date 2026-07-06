@@ -1,0 +1,65 @@
+# Release pipeline: prebuilt binaries for every platform + Homebrew tap,
+# so teammates without a Go toolchain can still `brew install` and let the
+# committed hooks fire. Version is stamped into internal/cli.Version;
+# `go install` builds keep working via the ReadBuildInfo fallback.
+version: 2
+
+project_name: kervo
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: kervo
+    main: ./cmd/kervo
+    binary: kervo
+    env:
+      - CGO_ENABLED=0
+    ldflags:
+      - -s -w -X github.com/kervo-os/kervo/internal/cli.Version=v{{ .Version }}
+    goos: [darwin, linux, windows]
+    goarch: [amd64, arm64]
+    ignore:
+      - goos: windows
+        goarch: arm64
+
+archives:
+  - formats: [tar.gz]
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+
+checksum:
+  name_template: checksums.txt
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs"
+      - "^ci"
+      - "^ledger"
+
+# Casks are the current GoReleaser path for taps (brews is deprecated).
+# The post-install hook strips quarantine so the unsigned binary runs
+# without a Gatekeeper prompt.
+homebrew_casks:
+  - name: kervo
+    repository:
+      owner: kervo-os
+      name: homebrew-tap
+      token: "{{ .Env.TAP_GITHUB_TOKEN }}"
+    directory: Casks
+    homepage: https://github.com/kervo-os/kervo
+    description: "Deterministic context for non-deterministic agents"
+    commit_author:
+      name: kervo-release-bot
+      email: noreply@kervo.dev
+    hooks:
+      post:
+        install: |
+          if system_command("/usr/bin/xattr", args: ["-h"]).exit_status == 0
+            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/kervo"]
+          end

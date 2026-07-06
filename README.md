@@ -41,12 +41,15 @@ compiled by kervo.
 ## Quickstart
 
 ```bash
-go install github.com/kervo-os/kervo/cmd/kervo@latest   # or: make build
+brew install kervo-os/tap/kervo   # macOS & Linux — prebuilt binary
+# or: go install github.com/kervo-os/kervo/cmd/kervo@latest
 kervo init        # scan → .kervo/artifact.md → injected into CLAUDE.md
 ```
 
-First run on a real repository takes well under a second (500-commit scan cap,
-marked `Partial` when hit). Only the block between `<!-- kervo:begin -->` and
+Prebuilt binaries for macOS, Linux, and Windows are on the
+[releases page](https://github.com/kervo-os/kervo/releases) — no Go
+toolchain needed. First run on a real repository takes well under a second
+(500-commit scan cap, marked `Partial` when hit). Only the block between `<!-- kervo:begin -->` and
 `<!-- kervo:end -->` in `CLAUDE.md` is ever touched — everything you wrote by
 hand is preserved byte-for-byte.
 
@@ -79,8 +82,9 @@ The lifecycle:
    the last-compiled block and the full ledger came with the clone. An AI
    session reads it with **zero commands**, and `kervo status` / `metrics`
    work immediately against the cloned ledger.
-3. **Going live** — install the binary and run `kervo compile` (not `init`
-   again) to rescan and refresh the facts. `init` is idempotent too, so
+3. **Going live** — install the binary (`brew install kervo-os/tap/kervo`)
+   and run `kervo compile` (not `init` again) to rescan and refresh the
+   facts. `init` is idempotent too, so
    running it out of habit breaks nothing.
 4. **Hooks** — commit `.claude/settings.json` and capture fires for every
    teammate automatically, as soon as `kervo` is on their PATH.
