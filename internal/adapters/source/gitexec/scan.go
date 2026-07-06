@@ -56,6 +56,13 @@ func (s *Scanner) Scan(ctx context.Context, dir, cursor string) (fact.Snapshot, 
 
 	if branch, err := s.run(ctx, dir, "rev-parse", "--abbrev-ref", "HEAD"); err == nil {
 		snap.Repo.Branch = strings.TrimSpace(branch)
+		// Unpushed work is a state fact worth a line in the brief; no
+		// upstream (or detached) simply means 0 — never an error.
+		if n, err := s.run(ctx, dir, "rev-list", "--count", "@{upstream}..HEAD"); err == nil {
+			if v, err := strconv.Atoi(strings.TrimSpace(n)); err == nil {
+				snap.Repo.Ahead = v
+			}
+		}
 	}
 
 	if cursor != "" && !s.commitExists(ctx, dir, cursor) {

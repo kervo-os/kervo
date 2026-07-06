@@ -63,7 +63,13 @@ var tables = map[Lang]map[string]string{
 	EN: {
 		"hdr.quote": "> Machine-generated context for AI agents. Fact sections are deterministic;\n> slot sections carry trust-labeled observations. Regenerate with `kervo compile`\n> — do not edit by hand.",
 
-		"sec.summary":    "Repository Summary",
+		"sec.summary": "Repository Summary",
+
+		"brief.title":    "Brief",
+		"brief.focus":    "Focus",
+		"brief.run":      "Run",
+		"brief.edges":    "Open edges",
+		"brief.unpushed": "Unpushed commits",
 		"lbl.name":       "Name",
 		"lbl.branch":     "Branch",
 		"lbl.languages":  "Languages",
@@ -159,7 +165,13 @@ var tables = map[Lang]map[string]string{
 	KO: {
 		"hdr.quote": "> AI 에이전트용으로 기계 생성된 컨텍스트. Fact 섹션은 결정적으로 생성되며,\n> 슬롯 섹션에는 신뢰 라벨이 달린 관찰이 담긴다. `kervo compile`로 재생성 —\n> 손으로 수정하지 말 것.",
 
-		"sec.summary":    "저장소 요약",
+		"sec.summary": "저장소 요약",
+
+		"brief.title":    "브리핑",
+		"brief.focus":    "집중",
+		"brief.run":      "실행",
+		"brief.edges":    "미완의 가장자리",
+		"brief.unpushed": "미푸시 커밋",
 		"lbl.name":       "이름",
 		"lbl.branch":     "브랜치",
 		"lbl.languages":  "언어",
@@ -255,7 +267,13 @@ var tables = map[Lang]map[string]string{
 	JA: {
 		"hdr.quote": "> AIエージェント向けに機械生成されたコンテキスト。Factセクションは決定的に生成され、\n> スロットセクションには信頼ラベル付きの観察が入る。`kervo compile`で再生成 —\n> 手で編集しないこと。",
 
-		"sec.summary":    "リポジトリ概要",
+		"sec.summary": "リポジトリ概要",
+
+		"brief.title":    "ブリーフ",
+		"brief.focus":    "フォーカス",
+		"brief.run":      "実行",
+		"brief.edges":    "未完のエッジ",
+		"brief.unpushed": "未プッシュコミット",
 		"lbl.name":       "名前",
 		"lbl.branch":     "ブランチ",
 		"lbl.languages":  "言語",

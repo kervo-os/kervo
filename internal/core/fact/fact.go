@@ -41,6 +41,7 @@ type RepoInfo struct {
 	Languages  []string
 	Frameworks []string // from manifests (package.json, go.mod, ...)
 	Branch     string
+	Ahead      int // commits ahead of upstream; 0 if none or no upstream
 }
 
 type Commit struct {

@@ -5,6 +5,12 @@
 > 슬롯 섹션에는 신뢰 라벨이 달린 관찰이 담긴다. `kervo compile`로 재생성 —
 > 손으로 수정하지 말 것.
 
+## 브리핑
+
+- **집중**: mw/ ×2
+- **실행**: `make build` · `npm run test`
+- **미완의 가장자리**: 2 — mw/auth.go, main.go
+
 ## 저장소 요약
 
 - 이름: demo-api

@@ -59,6 +59,7 @@ func BuildSkeleton(s fact.Snapshot, lang i18n.Lang) (string, error) {
 	b.WriteString("# Context Artifact\n\n")
 	b.WriteString(tr("hdr.quote") + "\n\n")
 
+	writeBrief(&b, s, tr)
 	writeRepoSummary(&b, s, tr)
 	writeCommands(&b, s, tr)
 	writeRecentChanges(&b, s, tr)

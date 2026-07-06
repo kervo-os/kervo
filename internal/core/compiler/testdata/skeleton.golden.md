@@ -5,6 +5,12 @@
 > slot sections carry trust-labeled observations. Regenerate with `kervo compile`
 > — do not edit by hand.
 
+## Brief
+
+- **Focus**: mw/ ×2
+- **Run**: `make build` · `npm run test`
+- **Open edges**: 2 — mw/auth.go, main.go
+
 ## Repository Summary
 
 - Name: demo-api

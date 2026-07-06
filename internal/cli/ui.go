@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/kervo-os/kervo/internal/core/compiler"
 	"github.com/kervo-os/kervo/internal/core/fact"
 )
 
@@ -102,6 +103,7 @@ func renderColdStart(u ui, s fact.Snapshot, version string, injected []string) s
 	row("Languages", strings.Join(s.Repo.Languages, ", "))
 	row("Frameworks", strings.Join(s.Repo.Frameworks, ", "))
 	row("Tasks", strconv.Itoa(len(s.Todos))+" open · "+strconv.Itoa(len(s.Modules))+" modules")
+	row("Focus", compiler.BriefFocus(s))
 	b.WriteString(u.dim(rule) + "\n")
 	row("Artifact", u.bold(".kervo/artifact.md")+"  "+u.dim("(Mode 1 — Fact-only)"))
 	row("Injected", strings.Join(injected, ", ")+"  "+u.dim("(marker block)"))
