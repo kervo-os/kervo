@@ -26,6 +26,7 @@
 
 ## Recent Changes
 
+- `f0de3ab` 2026-07-06 ledger: llm-wiki-newsroom assessed — first producer candidate, zero code needed
 - `ac3d8f7` 2026-07-06 registry: prune only what provably does not exist
 - `70b6ed2` 2026-07-06 readme: show the product — diagram, screenshots, real-repo numbers
 - `26d3840` 2026-07-06 dash: a visualization layer worthy of the hero shot
@@ -45,14 +46,13 @@
 - `5b38a0f` 2026-07-06 inject: opt-in import mode — one @-line for clean-CLAUDE.md teams
 - `17ea7bc` 2026-07-06 dash: user-switchable language — in-page selector, choice persists
 - `d40e267` 2026-07-06 dash: speak the user's language — en/ko/ja chrome from the i18n tables
-- `d67c5e1` 2026-07-06 ledger: session hook events
 
-_Showing 20 of 71 analyzed commits._
+_Showing 20 of 72 analyzed commits._
 
 ### Frequently Changed Files
 
-- .kervo/events/2026-07.jsonl (51)
-- CLAUDE.md (26)
+- .kervo/events/2026-07.jsonl (52)
+- CLAUDE.md (27)
 - README.md (22)
 - README.ja.md (18)
 - README.ko.md (18)
@@ -77,7 +77,7 @@ _No TODO/FIXME comments found._
 
 ## Workspace Facts
 
-- Commits analyzed: 71 (complete)
+- Commits analyzed: 72 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 6
 - Docs captured: 1
@@ -140,6 +140,10 @@ Evidence: consumer/proposals.go: proposal{Slot,Body,Source}, no state field, RFC
 **[generated — agent:claude-code]**
 llm-wiki-newsroom is the first concrete producer candidate - and it needs ZERO kervo code (refines 01KWVFE1). It is agent-driven (Claude Code, CLAUDE.md-operated), so its own agent can stage .kervo/proposals.json per the published contract; no 'kervo import wiki-newsroom' importer, no format chase. Mapping when adopted: contradictions -> risks (our conflict analog), cluster overviews / entities -> summaries, timelines -> summaries; never decisions (it does not produce team decisions). Everything enters [generated - llm-wiki-newsroom]. Philosophy check: it accretes at ingest (not compile-time regeneration) and separates author from reviewer - closer to kervo than the openwiki pattern; the boundary stays: kervo absorbs judgments about its output, never its graph/wiki machinery. Adoption gate: real usage in the report-archive workflow opens the first-producer items (evidence field in proposals.json).
 Evidence: README direct read 2026-07-06: 5-role newsroom, self-evolving guidelines w/ regression A/B, L2 sub-layers, /wiki-lint staleness+contradictions, WIKI_LANG=ko, MIT
+
+**[generated — agent:claude-code]**
+Phase B MVP ships as the dash knowledge view (goal 01KWTJGS phase B, refinement 01KWTKGV). The accreted wiki is a READING of the trust ledger, not a generator: verified and observed entries render in full, claim-first, evidence attached, grouped by type in stable order; stale and deprecated stay visible under retired with their reasons. Deterministic markdown export (kervo wiki -write) is deferred until someone needs the wiki outside the dash - committing derived files needs a deliberate gesture, not a default.
+Evidence: dash knowledge view shipped 2026-07-06; screenshot-verified on this repo's 16 verified entries
 <!-- kervo:slot:decisions:end -->
 
 ## Known Risks

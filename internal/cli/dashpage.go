@@ -134,6 +134,12 @@ main{max-width:66rem;margin:0 auto;padding:1.6rem 1.4rem 3rem}
 .rail .st{font-size:.7rem;font-weight:700;width:5.2rem;flex:none;font-variant-numeric:tabular-nums}
 .rail .why{color:var(--faint);font-size:.74rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:18rem}
 .jhint{color:var(--faint);font-size:.74rem;line-height:1.55;margin-top:.65rem}
+.kcard{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:.85rem 1rem;margin:.2rem 0 .45rem}
+.kcard .meta{margin-bottom:.45rem}
+.khead{font-weight:650;font-size:.92rem;line-height:1.5;max-width:64ch}
+.krest{color:color-mix(in srgb,var(--fg) 78%,var(--muted));font-size:.85rem;line-height:1.65;
+  white-space:pre-wrap;max-width:66ch;margin-top:.25rem}
+.kcard .evid{margin:.5rem 0 0}
 #help .ht{margin:.9rem 0 .3rem;font-size:.72rem;color:var(--faint);text-transform:uppercase;letter-spacing:.09em;font-weight:650}
 #help .sem{display:block;color:var(--muted);font-size:.82rem;padding:.18rem 0}
 #toast{position:fixed;left:50%;bottom:1.4rem;transform:translateX(-50%) translateY(20px);opacity:0;
@@ -426,9 +432,36 @@ function renderRails(){
       rail.append(row);
     });
   }
-  if(repo.History.length){
-    rail.append(el("div","rail-label",T.records));
-    repo.History.forEach(it=>{
+  // Phase B: the reading surface. Live knowledge (verified + observed)
+  // renders in full, claim-first, grouped by type in a stable order —
+  // the current truth, not a chronological log. Retired entries keep
+  // their reasons below, exactly like the artifact's stale notes.
+  const TYPEORD = ["goal","decision","risk","summary","note","correction"];
+  const live = repo.History.filter(it=>it.State==="verified"||it.State==="observed");
+  if(live.length){
+    rail.append(el("div","rail-label",T.knowledge));
+    const ordered = TYPEORD.flatMap(tp=>live.filter(it=>it.Type===tp))
+      .concat(live.filter(it=>!TYPEORD.includes(it.Type)));
+    ordered.forEach(it=>{
+      const k = el("div","kcard");
+      const m = el("div","meta");
+      const st = el("span","st",it.State); st.style.color = SC[it.State]||"var(--muted)";
+      m.append(el("span","tag "+it.Type,it.Type), st, el("span","",it.Actor));
+      k.append(m);
+      const nl = it.Body.indexOf("\n"), col = it.Body.indexOf(":");
+      let head = it.Body, rest = "";
+      if(nl > 0){ head = it.Body.slice(0,nl); rest = it.Body.slice(nl+1).trim() }
+      else if(col > 0 && col < 90){ head = it.Body.slice(0,col); rest = it.Body.slice(col+1).trim() }
+      k.append(el("div","khead",head));
+      if(rest) k.append(el("div","krest",rest));
+      if(it.Evidence) k.append(el("div","evid",T.evidence+it.Evidence));
+      rail.append(k);
+    });
+  }
+  const gone = repo.History.filter(it=>it.State==="stale"||it.State==="deprecated");
+  if(gone.length){
+    rail.append(el("div","rail-label",T.retired));
+    gone.forEach(it=>{
       const row = el("div","row done");
       const st = el("span","st",it.State); st.style.color = SC[it.State]||"var(--muted)";
       row.append(st, el("span","tag "+it.Type,it.Type), el("span","txt",it.Body));

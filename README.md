@@ -311,7 +311,9 @@ activity, trust-state mix, the project overview (declared commands, recent
 changes, modules), coupling proven by commit history, and which adapters
 are actually connected — with keyboard-first inline triage (`1`–`9` open a
 repo, `j`/`k` move, `v`/`s`/`d` judge, `?` for keys) that writes each
-judgment back to that repo's own ledger.
+judgment back to that repo's own ledger. Below the queue, the knowledge
+view renders every verified and observed entry in full — claim first,
+evidence attached — and retired entries keep their reasons.
 
 <p align="center"><img src="assets/dash-detail.png" width="860" alt="kervo dash — workspace detail: triage, overview, coupling"></p> Truth stays per-repo in
 git; the dashboard is a lens, not a store, and it dies with the command.

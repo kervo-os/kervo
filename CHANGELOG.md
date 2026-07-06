@@ -3,6 +3,13 @@
 All notable changes, newest first. Versions are git tags; every release
 ships prebuilt binaries and a Homebrew cask (`brew install kervo-os/tap/kervo`).
 
+## v0.15.0 — 2026-07-06
+
+- The knowledge view: workspace detail renders every verified and observed
+  entry in full — claim first, evidence attached, grouped by type — and
+  retired entries keep their reasons. The accreted wiki, phase B MVP:
+  judged knowledge is the wiki; nothing is generated.
+
 ## v0.14.0 — 2026-07-06
 
 - Dash visualization layer: 28-day activity sparklines, trust-state donut,

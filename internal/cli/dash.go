@@ -129,7 +129,7 @@ var dashKeys = []string{
 	"events", "emptyledger", "queue", "records", "pos", "cleared", "reasonph",
 	"verify", "stale", "deprecate", "skip", "back", "donetitle", "donenote",
 	"evidence", "justnow", "minago", "hourago", "dayago",
-	"overview", "links", "more", "partialscan", "connected",
+	"overview", "links", "more", "partialscan", "connected", "knowledge", "retired",
 	"jhint", "jtitle", "jv", "js", "jd", "jx",
 	"helptitle", "hopen", "hmove", "hjudge", "hskip", "hreason", "hback",
 }
