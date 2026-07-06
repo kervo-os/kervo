@@ -46,6 +46,41 @@ func TestRegistryUpsertAndValidation(t *testing.T) {
 	}
 }
 
+// A stat failure that is NOT "does not exist" — permissions, sandboxing,
+// an unmounted volume — must never prune a registration: this process
+// being unable to see a workspace does not mean it is gone.
+func TestRegistryKeepsUnreadableEntries(t *testing.T) {
+	if os.Getuid() == 0 {
+		t.Skip("root ignores file modes")
+	}
+	t.Setenv("KERVO_STATE_DIR", t.TempDir())
+
+	locked := t.TempDir()
+	ws := filepath.Join(locked, "repo")
+	if err := os.MkdirAll(filepath.Join(ws, ".kervo"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	registerWorkspace(ws)
+	if err := os.Chmod(locked, 0o000); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = os.Chmod(locked, 0o755) })
+
+	other := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(other, ".kervo"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	registerWorkspace(other) // triggers the prune pass
+
+	abs, _ := filepath.Abs(ws)
+	for _, w := range loadRegistry().Workspaces {
+		if w.Path == abs {
+			return // still registered — correct
+		}
+	}
+	t.Fatal("unreadable workspace was pruned from the registry")
+}
+
 func TestCompileRegistersWorkspace(t *testing.T) {
 	t.Setenv("KERVO_STATE_DIR", t.TempDir())
 	dir := t.TempDir()

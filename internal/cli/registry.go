@@ -77,7 +77,11 @@ func registerWorkspace(dir string) {
 		if w.Path == abs {
 			w.LastSeen = time.Now().UTC()
 			found = true
-		} else if _, err := os.Stat(filepath.Join(w.Path, ".kervo")); err != nil {
+		} else if _, err := os.Stat(filepath.Join(w.Path, ".kervo")); os.IsNotExist(err) {
+			// Prune ONLY what provably no longer exists. Any other stat
+			// failure (permissions, sandboxing, unmounted volume) means
+			// THIS process can't see it — not that it's gone; dropping it
+			// here would erase another user context's registration.
 			continue
 		}
 		kept = append(kept, w)
@@ -120,11 +124,12 @@ func registerWorkspace(dir string) {
 }
 
 // registeredWorkspaces returns registry paths that still look like kervo
-// workspaces (a stale path is skipped, not an error — repos move).
+// workspaces. Only a provable absence excludes a path — a permission or
+// sandbox error is this process's problem, not the workspace's.
 func registeredWorkspaces() []string {
 	var out []string
 	for _, w := range loadRegistry().Workspaces {
-		if _, err := os.Stat(filepath.Join(w.Path, ".kervo")); err == nil {
+		if _, err := os.Stat(filepath.Join(w.Path, ".kervo")); !os.IsNotExist(err) {
 			out = append(out, w.Path)
 		}
 	}

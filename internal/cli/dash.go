@@ -170,7 +170,10 @@ func newDashServer(paths []string, actorFlag string, lang i18n.Lang) (*dashServe
 			folder.Add(e)
 			return nil
 		}); err != nil {
-			return nil, fmt.Errorf("dash: replay %s: %w", p, err)
+			// One unreadable workspace must not blank the whole fleet —
+			// skip it; it stays registered and returns when readable.
+			fmt.Fprintf(os.Stderr, "kervo dash: skipping %s: %v\n", p, err)
+			continue
 		}
 		repo := &dashRepo{
 			Path: p, Name: filepath.Base(p), Lang: workspaceLang(p),
