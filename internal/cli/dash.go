@@ -78,10 +78,13 @@ type dashRepo struct {
 	Events           int
 	Counts           map[string]int
 	LastEvent        string        // RFC3339, "" if the ledger is empty
+	Activity         []int         // ledger events per day, oldest→today (28 days)
 	Items            []dashItem    // awaiting judgment
 	History          []dashItem    // already judged — newest first, reasons shown
 	Overview         *dashOverview `json:",omitempty"` // nil if the fact scan failed
 }
+
+const activityDays = 28
 
 type dashServer struct {
 	mu     sync.Mutex
@@ -126,7 +129,7 @@ var dashKeys = []string{
 	"events", "emptyledger", "queue", "records", "pos", "cleared", "reasonph",
 	"verify", "stale", "deprecate", "skip", "back", "donetitle", "donenote",
 	"evidence", "justnow", "minago", "hourago", "dayago",
-	"overview", "links", "more", "partialscan",
+	"overview", "links", "more", "partialscan", "connected",
 	"jhint", "jtitle", "jv", "js", "jd", "jx",
 	"helptitle", "hopen", "hmove", "hjudge", "hskip", "hreason", "hback",
 }
@@ -154,10 +157,15 @@ func newDashServer(paths []string, actorFlag string, lang i18n.Lang) (*dashServe
 		folder := trust.NewFolder()
 		events := 0
 		var last time.Time
+		today := time.Now().UTC().Truncate(24 * time.Hour)
+		activity := make([]int, activityDays)
 		if err := store.Replay(context.Background(), "", func(e event.Event) error {
 			events++
 			if e.At.After(last) {
 				last = e.At
+			}
+			if d := int(today.Sub(e.At.UTC().Truncate(24*time.Hour)).Hours() / 24); d >= 0 && d < activityDays {
+				activity[activityDays-1-d]++
 			}
 			folder.Add(e)
 			return nil
@@ -171,6 +179,7 @@ func newDashServer(paths []string, actorFlag string, lang i18n.Lang) (*dashServe
 			// Never nil: a clear repo must marshal as [], not null — the
 			// page reads .Items.length on every repo before rendering.
 			Items: []dashItem{}, History: []dashItem{},
+			Activity: activity,
 		}
 		if !last.IsZero() {
 			repo.LastEvent = last.UTC().Format(time.RFC3339)
@@ -179,6 +188,7 @@ func newDashServer(paths []string, actorFlag string, lang i18n.Lang) (*dashServe
 		// tree) still shows its ledger — the overview is just absent.
 		if snap, _, err := scanFacts(context.Background(), p); err == nil {
 			repo.Overview = buildOverview(snap)
+			repo.Overview.Wiring = detectWiring(p, folder)
 		}
 		for _, o := range folder.Observations() {
 			repo.Counts[string(o.State)]++

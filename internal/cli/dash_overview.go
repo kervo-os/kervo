@@ -2,17 +2,65 @@ package cli
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 
 	"github.com/kervo-os/kervo/internal/core/fact"
+	"github.com/kervo-os/kervo/internal/core/trust"
 )
+
+// dashWiring is what feeds and consumes this workspace — the adapters
+// actually connected, detected from files and the ledger, never assumed.
+type dashWiring struct {
+	ClaudeMD, AgentsMD bool // consumer files carrying the marker block
+	Hooks              bool // .claude/settings.json invokes kervo hook
+	MCP                bool // .mcp.json registers the kervo server
+	Inject             string
+	Sources            []string // distinct observation actors seen in the ledger
+}
+
+// detectWiring checks which adapters are actually connected to dir.
+func detectWiring(dir string, folder *trust.Folder) dashWiring {
+	hasBlock := func(name string) bool {
+		raw, err := os.ReadFile(filepath.Join(dir, name))
+		return err == nil && strings.Contains(string(raw), "<!-- kervo:begin -->")
+	}
+	contains := func(name, needle string) bool {
+		raw, err := os.ReadFile(filepath.Join(dir, name))
+		return err == nil && strings.Contains(string(raw), needle)
+	}
+	w := dashWiring{
+		ClaudeMD: hasBlock("CLAUDE.md"),
+		AgentsMD: hasBlock("AGENTS.md"),
+		Hooks:    contains(filepath.Join(".claude", "settings.json"), "kervo hook"),
+		MCP:      contains(".mcp.json", `"kervo"`),
+		Sources:  []string{},
+	}
+	if mode, err := resolveInject(dir, ""); err == nil {
+		w.Inject = mode
+	}
+	seen := map[string]bool{}
+	for _, o := range folder.Observations() {
+		if !seen[o.Actor] {
+			seen[o.Actor] = true
+			w.Sources = append(w.Sources, o.Actor)
+		}
+	}
+	sort.Strings(w.Sources)
+	if len(w.Sources) > 6 {
+		w.Sources = w.Sources[:6]
+	}
+	return w
+}
 
 // dashOverview is the workspace's fact skeleton, structured for the page —
 // the same deterministic scan compile runs, capped for reading. Coupling
 // pairs come from commit history (modules changed in the same commit):
 // connections kervo can prove, not narrate.
 type dashOverview struct {
+	Wiring        dashWiring
 	Branch        string
 	Languages     []string
 	Frameworks    []string

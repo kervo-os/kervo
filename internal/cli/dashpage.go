@@ -68,8 +68,12 @@ main{max-width:66rem;margin:0 auto;padding:1.6rem 1.4rem 3rem}
 .attn.hot .n{color:var(--g)}
 .attn.ok .n{color:var(--v)}
 .attn .lbl{color:var(--muted);font-size:.8rem}
-.bar{display:flex;height:6px;border-radius:3px;overflow:hidden;background:var(--line);margin:0 0 .5rem}
-.bar i{display:block;height:100%}
+.spark{margin:.1rem 0 .45rem;border-bottom:1px solid var(--line)}
+.spark svg{display:block}
+.ovrow{display:flex;gap:.9rem;align-items:center;margin-bottom:.4rem}
+.chip.on{color:var(--v);border-color:rgba(52,211,153,.4)}
+.chip.off{opacity:.45}
+.srcs{display:flex;flex-wrap:wrap;gap:.3rem .7rem;margin-top:.5rem;color:var(--muted)}
 .legend{color:var(--muted);font-size:.72rem;display:flex;flex-wrap:wrap;gap:.15rem .8rem}
 .legend b{font-weight:650;font-variant-numeric:tabular-nums;color:var(--fg)}
 .dot{display:inline-block;width:7px;height:7px;border-radius:99px;margin-right:.3rem;vertical-align:1px}
@@ -186,6 +190,64 @@ const SC = {verified:"var(--v)",observed:"var(--o)",generated:"var(--g)",stale:"
 let repo = null, idx = 0, judged = 0;
 const total0 = FLEET.reduce((n,r)=>n+r.Items.length,0);
 const el = (t,cls,txt)=>{const e=document.createElement(t); if(cls)e.className=cls; if(txt!==undefined)e.textContent=txt; return e};
+const svgEl = (t,attrs)=>{const e=document.createElementNS("http://www.w3.org/2000/svg",t);
+  for(const k in attrs) e.setAttribute(k,attrs[k]); return e};
+
+// 28-day activity sparkline: area + line, all inline SVG, no libraries.
+function sparkline(data, w, h){
+  const svg = svgEl("svg",{viewBox:"0 0 "+w+" "+h, width:"100%", height:h, preserveAspectRatio:"none"});
+  const max = Math.max(1, ...data);
+  const pts = data.map((v,i)=>[(i/(data.length-1))*w, h-2-(v/max)*(h-6)]);
+  const line = pts.map(p=>p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ");
+  svg.append(svgEl("polygon",{points:"0,"+h+" "+line+" "+w+","+h, fill:"rgba(52,211,153,.14)"}));
+  svg.append(svgEl("polyline",{points:line, fill:"none", stroke:"var(--v)", "stroke-width":"1.6",
+    "stroke-linejoin":"round","stroke-linecap":"round"}));
+  const lastPt = pts[pts.length-1];
+  svg.append(svgEl("circle",{cx:lastPt[0],cy:lastPt[1],r:"2.4",fill:"var(--v)"}));
+  return svg;
+}
+
+// Trust-state donut: stroke-dash segments on a r≈15.9 circle (C=100).
+function donut(counts, size){
+  const svg = svgEl("svg",{viewBox:"0 0 42 42", width:size, height:size});
+  const total = STATES.reduce((n,s)=>n+(counts[s]||0),0);
+  if(!total){ svg.append(svgEl("circle",{cx:21,cy:21,r:15.9,fill:"none",stroke:"var(--line)","stroke-width":6})); return svg }
+  let off = 25; // start at 12 o'clock
+  STATES.forEach(s=>{ const n=counts[s]||0; if(!n) return;
+    const frac = 100*n/total;
+    svg.append(svgEl("circle",{cx:21,cy:21,r:15.9,fill:"none",stroke:SC[s],"stroke-width":6,
+      "stroke-dasharray":frac+" "+(100-frac), "stroke-dashoffset":off}));
+    off -= frac;
+  });
+  const txt = svgEl("text",{x:21,y:25,"text-anchor":"middle","font-size":"11","font-weight":"700",fill:"var(--fg)"});
+  txt.textContent = String(total); svg.append(txt);
+  return svg;
+}
+
+// Coupling ring: modules on a circle, chords weighted by co-change count.
+function couplingRing(links, size){
+  const names = [...new Set(links.flatMap(l=>[l.A,l.B]))].sort().slice(0,10);
+  if(names.length < 2) return null;
+  const svg = svgEl("svg",{viewBox:"0 0 200 200", width:"100%", height:size});
+  const cx=100, cy=100, R=72;
+  const pos = {}; names.forEach((n,i)=>{ const a = -Math.PI/2 + i*2*Math.PI/names.length;
+    pos[n]=[cx+R*Math.cos(a), cy+R*Math.sin(a), a] });
+  const max = Math.max(...links.map(l=>l.N));
+  links.forEach(l=>{ if(!(l.A in pos)||!(l.B in pos)) return;
+    const [x1,y1]=pos[l.A],[x2,y2]=pos[l.B];
+    svg.append(svgEl("path",{d:"M"+x1+" "+y1+" Q "+cx+" "+cy+" "+x2+" "+y2, fill:"none",
+      stroke:"var(--v)", "stroke-opacity":(.25+.6*l.N/max).toFixed(2),
+      "stroke-width":(1+3.4*l.N/max).toFixed(1), "stroke-linecap":"round"}));
+  });
+  names.forEach(n=>{ const [x,y,a]=pos[n];
+    svg.append(svgEl("circle",{cx:x,cy:y,r:3.4,fill:"var(--fg)"}));
+    const lx = cx+(R+12)*Math.cos(a), ly = cy+(R+12)*Math.sin(a);
+    const t = svgEl("text",{x:lx,y:ly+3,"font-size":"9.5",fill:"var(--muted)",
+      "text-anchor": Math.abs(Math.cos(a))<.35 ? "middle" : (Math.cos(a)>0?"start":"end")});
+    t.textContent = n; svg.append(t);
+  });
+  return svg;
+}
 
 function hue(s){ let h=0; for(const c of s) h=(h*31+c.codePointAt(0))>>>0; return h%360 }
 function rel(iso){ if(!iso) return T.emptyledger;
@@ -216,12 +278,11 @@ function renderFleet(){
     attn.append(el("span","n", pend? String(pend) : "✓"),
                 el("span","lbl", pend? T.awaiting : T.clear));
     c.append(attn);
+    if((r.Activity||[]).some(v=>v>0)){
+      const sp = el("div","spark"); sp.append(sparkline(r.Activity, 260, 30)); c.append(sp);
+    }
     const totalObs = STATES.reduce((n,st)=>n+(r.Counts[st]||0),0);
     if(totalObs){
-      const bar = el("div","bar");
-      STATES.forEach(st=>{ const n=r.Counts[st]||0; if(!n)return;
-        const seg=el("i"); seg.style.width=(100*n/totalObs)+"%"; seg.style.background=SC[st]; bar.append(seg) });
-      c.append(bar);
       const lg = el("div","legend");
       STATES.forEach(st=>{ const n=r.Counts[st]||0; if(!n)return;
         const it=el("span"); const dot=el("span","dot"); dot.style.background=SC[st];
@@ -257,6 +318,8 @@ function renderOverview(){
   const box = (title)=>{ const b=el("div","ov"); b.append(el("h4","",title)); aside.append(b); return b };
 
   const info = box(T.overview);
+  const irow = el("div","ovrow");
+  irow.append(donut(repo.Counts, 64));
   const chips = el("div","chips");
   const seen = new Set();
   const chip = t=>{ if(!t||seen.has(t)) return; seen.add(t); chips.append(el("span","chip",t)) };
@@ -264,7 +327,24 @@ function renderOverview(){
   (ov.Languages||[]).forEach(chip);
   (ov.Frameworks||[]).forEach(chip);
   if(ov.Partial) chip(T.partialscan);
-  info.append(chips);
+  irow.append(chips); info.append(irow);
+  if((repo.Activity||[]).some(v=>v>0)) info.append(sparkline(repo.Activity, 260, 34));
+
+  const wr = ov.Wiring;
+  if(wr){
+    const b = box(T.connected);
+    const wc = el("div","chips");
+    const witem = (on,label)=>{ const c=el("span","chip"+(on?" on":" off"), (on?"✓ ":"— ")+label); wc.append(c) };
+    witem(wr.ClaudeMD,"CLAUDE.md"); witem(wr.AgentsMD,"AGENTS.md");
+    witem(wr.Hooks,"hooks"); witem(wr.MCP,"MCP");
+    if(wr.Inject) wc.append(el("span","chip","inject: "+wr.Inject));
+    b.append(wc);
+    if((wr.Sources||[]).length){
+      const src = el("div","srcs");
+      wr.Sources.forEach(s=>src.append(el("span","mono",s)));
+      b.append(src);
+    }
+  }
 
   if((ov.Commands||[]).length){
     const b = box(T.commands);
@@ -273,6 +353,8 @@ function renderOverview(){
   }
   if((ov.Links||[]).length){
     const b = box(T.links);
+    const ring = couplingRing(ov.Links, 170);
+    if(ring) b.append(ring);
     ov.Links.forEach(l=>{ const r=el("div","link");
       const pair=el("span"); pair.append(el("b","",l.A), document.createTextNode(" ↔ "), el("b","",l.B));
       r.append(pair, el("span","n","×"+l.N)); b.append(r) });
