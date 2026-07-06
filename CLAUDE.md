@@ -26,6 +26,8 @@
 
 ## Recent Changes
 
+- `8b1fd6b` 2026-07-06 ledger: session hook events
+- `59f7e17` 2026-07-06 docs: Mode 3 is a bootstrap channel, not a running mate to Mode 2
 - `8a6f3f1` 2026-07-06 changelog: v0.13.1
 - `757172b` 2026-07-06 dash: the buttons now explain themselves — judgment semantics in the UI
 - `6e1dda5` 2026-07-06 ledger: write-back pilot on the real repo — 5.5 to 9.5 at one call
@@ -44,18 +46,16 @@
 - `1661d55` 2026-07-06 dash: a clear repo must not blank the page — Items marshals as [], never null
 - `0b283a0` 2026-07-06 ledger: session hook events
 - `614c088` 2026-07-06 dash: the fleet control tower — every workspace, one page
-- `898eaf5` 2026-07-06 dogfood: register the kervo MCP server for sessions in this repo
-- `2af8964` 2026-07-06 mcp + review -web: the conversation is the frontend
 
-_Showing 20 of 64 analyzed commits._
+_Showing 20 of 66 analyzed commits._
 
 ### Frequently Changed Files
 
-- .kervo/events/2026-07.jsonl (44)
-- CLAUDE.md (23)
-- README.md (19)
-- README.ja.md (15)
-- README.ko.md (15)
+- .kervo/events/2026-07.jsonl (46)
+- CLAUDE.md (24)
+- README.md (20)
+- README.ja.md (16)
+- README.ko.md (16)
 - internal/cli/compile.go (11)
 - internal/cli/dashpage.go (10)
 - internal/cli/dash.go (9)
@@ -77,7 +77,7 @@ _No TODO/FIXME comments found._
 
 ## Workspace Facts
 
-- Commits analyzed: 64 (complete)
+- Commits analyzed: 66 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 6
 - Docs captured: 1
@@ -132,6 +132,10 @@ Evidence: user challenge 2026-07-06: 'ai agent로 개발중인데 2주뒤에 뭐
 **[generated — agent:claude-code]**
 Mode 3 is a bootstrap channel, not a running mate to Mode 2 (field eval on the adopted real repo, 2026-07-06). With only the artifact as input (commit messages + TODO list), a local 120b produced a rear-view goal (inferred from pushed history; the real goal lived in an unpushed branch — stale, not hallucinated) and an overreaching risk (18 TODOs exist -> 'critical logic is empty'; evidence does not support the conclusion). Session-verified Mode 2 capture measured 9.5/10 the same day. The trust gate worked as designed: both weak proposals arrived as [generated] and were quarantined pending judgment. Positioning: run Mode 3 to fill empty slots at cold start; once Mode 2 capture is live, leave KERVO_SEMANTIC_URL unset (auto Mode 1) — artifact-only inference reads history, not intent, and adds review noise.
 Evidence: user-relayed eval 2026-07-06: goal C+ (rear-view), risk D (fact->overreach), 9.5s local 120b, 2 proposals; Mode 2 pilot 9.5/10 same day
+
+**[generated — agent:claude-code]**
+External producers integrate via the published intake contract, not per-tool importers (refines Phase C of goal 01KWTJGS). Any tool - graph builders, memory stores, wiki generators - stages .kervo/proposals.json entries [{slot, body, source}]; compile ingests them as generated with provenance, review gates them, and the absolute rule holds: no state field exists, so nothing self-promotes. Per-tool importers (graphify/openwiki/agentmemory) are built only when a real export file exists on this machine to test against - chasing N third-party formats is the losing game the scope rule forbids. Known gap for the first real producer: the proposal shape lacks an evidence field; add it when the first producer arrives. State nuance kept from PRD 7.2: your own session history imports may enter observed; generated-content tools always enter generated.
+Evidence: consumer/proposals.go: proposal{Slot,Body,Source}, no state field, RFC-0003 5; user-relayed integration proposal 2026-07-06
 <!-- kervo:slot:decisions:end -->
 
 ## Known Risks

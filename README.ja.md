@@ -135,6 +135,19 @@ kervo compile
 # Artifact: .kervo/artifact.md (Mode 3 — backend:openai/gpt-oss-120b)
 ```
 
+**外部プロデューサ。** リポジトリの知識を生成するどんなツールでも —
+グラフビルダー、メモリストア、Wiki 生成器 — `.kervo/proposals.json` に
+項目を置くだけで kervo に供給できます:
+
+```json
+[{ "slot": "summaries", "body": "AuthService は TokenStore に依存", "source": "graphify" }]
+```
+
+`compile` が出所付きで `generated` として台帳に取り込み、`review` が他の
+提案と同じく関門になります。この形式に state フィールドがないのは設計です:
+プロデューサは自己昇格できません — 他のツールは記憶を作り、kervo はどの
+記憶を次のセッションに持ち越すかを判定します。
+
 Artifact はデフォルトで英語でレンダリングされ、`--lang ko` / `--lang ja` で
 ローカライズされます(選択はワークスペースごとに保持)。
 

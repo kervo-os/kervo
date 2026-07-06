@@ -126,6 +126,19 @@ kervo compile
 # Artifact: .kervo/artifact.md (Mode 3 — backend:openai/gpt-oss-120b)
 ```
 
+**외부 생산자.** 레포 지식을 만들어내는 어떤 도구든 — 그래프 빌더, 메모리
+스토어, 위키 생성기 — `.kervo/proposals.json`에 항목을 적재하는 것만으로
+kervo에 공급할 수 있습니다:
+
+```json
+[{ "slot": "summaries", "body": "AuthService는 TokenStore에 의존", "source": "graphify" }]
+```
+
+`compile`이 출처를 달아 `generated`로 장부에 수용하고, `review`가 다른
+제안과 똑같이 관문이 됩니다. 이 형식에 state 필드가 없는 건 설계입니다:
+생산자는 자가 승격할 수 없습니다 — 다른 도구는 기억을 만들고, kervo는
+어떤 기억을 다음 세션에 가져갈지 판정합니다.
+
 Artifact는 기본 영어로 렌더링되며 `--lang ko` / `--lang ja`로 현지화됩니다
 (선택은 워크스페이스별로 유지).
 

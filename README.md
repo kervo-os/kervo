@@ -134,6 +134,19 @@ kervo compile
 # Artifact: .kervo/artifact.md (Mode 3 — backend:openai/gpt-oss-120b)
 ```
 
+**External producers.** Anything that generates repo knowledge — graph
+builders, memory stores, wiki generators — can feed kervo by staging
+entries in `.kervo/proposals.json`:
+
+```json
+[{ "slot": "summaries", "body": "AuthService depends on TokenStore", "source": "graphify" }]
+```
+
+`compile` ingests them into the ledger as `generated` with their source as
+provenance, and `review` gates them like any other proposal. The shape has
+no state field by design: producers cannot self-promote — other tools
+generate memory; kervo decides what memory is safe to carry forward.
+
 Artifacts render in English by default; `--lang ko` / `--lang ja` localize
 them (the choice persists per workspace).
 
