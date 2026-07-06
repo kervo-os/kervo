@@ -38,6 +38,12 @@ func runCapture(args []string) error {
 	return nil
 }
 
+// backpressureCap bounds how many UNJUDGED proposals one source may pile
+// up. Producers push conclusions, not corpus — and when the queue for a
+// source is full, the correct next step is human judgment, not more
+// proposals. Human captures enter observed and are never throttled.
+const backpressureCap = 12
+
 // captureObservation is the shared write path for CLI and MCP. A non-nil
 // dup means the body already exists live and nothing was written.
 // Write-back guardrail: an identical live body is a duplicate, not new
@@ -53,11 +59,21 @@ func captureObservation(dir, typ, body, evidence, actorFlag string) (id string, 
 	if err != nil {
 		return "", nil, err
 	}
+	actor := resolveActor(actorFlag, dir)
+	pending := 0
 	for _, o := range folder.Observations() {
 		if o.Body == body && o.State != trust.Stale && o.State != trust.Deprecated {
 			d := o
 			return "", &d, nil
 		}
+		if o.State == trust.Generated && o.Actor == actor {
+			pending++
+		}
+	}
+	if pending >= backpressureCap {
+		return "", nil, fmt.Errorf(
+			"capture: backpressure — %s already has %d proposals awaiting judgment; a human must run `kervo review` (or judge in the dash) before this source proposes more",
+			actor, pending)
 	}
 	fields := map[string]string{"body": body}
 	if strings.TrimSpace(evidence) != "" {
@@ -75,7 +91,7 @@ func captureObservation(dir, typ, body, evidence, actorFlag string) (id string, 
 		Kind:    event.KindObservation,
 		Type:    typ,
 		Repo:    filepath.Base(abs),
-		Actor:   resolveActor(actorFlag, dir),
+		Actor:   actor,
 		Source:  "human",
 		Payload: json.RawMessage(payload),
 	})

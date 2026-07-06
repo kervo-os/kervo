@@ -26,6 +26,7 @@
 
 ## Recent Changes
 
+- `412a256` 2026-07-06 dash: the knowledge view — judged knowledge IS the wiki
 - `f0de3ab` 2026-07-06 ledger: llm-wiki-newsroom assessed — first producer candidate, zero code needed
 - `ac3d8f7` 2026-07-06 registry: prune only what provably does not exist
 - `70b6ed2` 2026-07-06 readme: show the product — diagram, screenshots, real-repo numbers
@@ -45,21 +46,20 @@
 - `b9d7447` 2026-07-06 dash: judged records stay visible — the ledger never hides history
 - `5b38a0f` 2026-07-06 inject: opt-in import mode — one @-line for clean-CLAUDE.md teams
 - `17ea7bc` 2026-07-06 dash: user-switchable language — in-page selector, choice persists
-- `d40e267` 2026-07-06 dash: speak the user's language — en/ko/ja chrome from the i18n tables
 
-_Showing 20 of 72 analyzed commits._
+_Showing 20 of 73 analyzed commits._
 
 ### Frequently Changed Files
 
-- .kervo/events/2026-07.jsonl (52)
-- CLAUDE.md (27)
-- README.md (22)
-- README.ja.md (18)
-- README.ko.md (18)
+- .kervo/events/2026-07.jsonl (53)
+- CLAUDE.md (28)
+- README.md (23)
+- README.ja.md (19)
+- README.ko.md (19)
+- internal/cli/dash.go (12)
+- internal/cli/dashpage.go (12)
 - internal/cli/compile.go (11)
-- internal/cli/dash.go (11)
-- internal/cli/dashpage.go (11)
-- internal/core/i18n/i18n.go (10)
+- internal/core/i18n/i18n.go (11)
 - internal/adapters/source/files/files.go (8)
 
 ## Open Tasks
@@ -77,7 +77,7 @@ _No TODO/FIXME comments found._
 
 ## Workspace Facts
 
-- Commits analyzed: 72 (complete)
+- Commits analyzed: 73 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 6
 - Docs captured: 1
@@ -144,6 +144,10 @@ Evidence: README direct read 2026-07-06: 5-role newsroom, self-evolving guidelin
 **[generated — agent:claude-code]**
 Phase B MVP ships as the dash knowledge view (goal 01KWTJGS phase B, refinement 01KWTKGV). The accreted wiki is a READING of the trust ledger, not a generator: verified and observed entries render in full, claim-first, evidence attached, grouped by type in stable order; stale and deprecated stay visible under retired with their reasons. Deterministic markdown export (kervo wiki -write) is deferred until someone needs the wiki outside the dash - committing derived files needs a deliberate gesture, not a default.
 Evidence: dash knowledge view shipped 2026-07-06; screenshot-verified on this repo's 16 verified entries
+
+**[generated — agent:claude-code]**
+Workspace-native wiki management (plan for judgment; reframe by user 2026-07-06: kervo manages the workspace, and a wiki inside it is workspace surface to manage in place - not a corpus to copy into the ledger). Stage W1, fact scan: detect a wiki/ markdown tree and state it in the artifact and dash as facts - page counts per sub-tree, last change - declared-only (the directory structure is the declaration), deterministic, zero content copying; every session learns the wiki's existence and map for zero calls, which makes 'conclusions, not corpus' natural: the corpus is pointable. Gate: a real workspace grows a wiki (newsroom adoption). Stage W2, convention only: knowledge entries cite wiki pages as evidence anchors - already expressible, document it. Stage W3, page-level trust states (deferred, needs real design): signing a page raises the invalidation question - a signature should probably bind to a content hash, not a path - so this stage waits for demand and gets planned properly, not improvised. Boundary unchanged: wiki lint/graph stay the producer's job; kervo adds existence, scale, freshness, and the trust layer.
+Evidence: user reframe 2026-07-06: '우리는 워크스페이스 기준으로 관리하는 역할. 그 워크스페이스에 위키가 있으면 그것까지 관리하는 것'
 <!-- kervo:slot:decisions:end -->
 
 ## Known Risks

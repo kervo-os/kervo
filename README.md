@@ -161,7 +161,11 @@ entries in `.kervo/proposals.json`:
 ```
 
 `compile` ingests them into the ledger as `generated` with their source as
-provenance, and `review` gates them like any other proposal. The shape has
+provenance, and `review` gates them like any other proposal. Two norms
+keep the queue humane: **conclusions, not corpus** — what lives in files
+stays in files, cited as evidence — and **backpressure**: a source with
+12 proposals already awaiting judgment cannot add more until a human
+judges. The shape has
 no state field by design: producers cannot self-promote — other tools
 generate memory; kervo decides what memory is safe to carry forward.
 

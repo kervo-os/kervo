@@ -2,6 +2,7 @@ package cli
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"strings"
 	"testing"
@@ -158,5 +159,25 @@ func TestCaptureDedupsLiveBodies(t *testing.T) {
 	}
 	if got := len(folder.Observations()); got != 2 {
 		t.Fatalf("observations = %d, want 2 (re-assertion after deprecation allowed)", got)
+	}
+}
+
+// A source with a full queue must be told to seek judgment, not keep
+// proposing; other sources and humans stay unaffected.
+func TestCaptureBackpressure(t *testing.T) {
+	dir := t.TempDir()
+	for i := 0; i < backpressureCap; i++ {
+		if _, _, err := captureObservation(dir, "note", fmt.Sprintf("fact %d", i), "", "agent:noisy"); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if _, _, err := captureObservation(dir, "note", "one too many", "", "agent:noisy"); err == nil || !strings.Contains(err.Error(), "backpressure") {
+		t.Fatalf("13th proposal from one source must hit backpressure, got: %v", err)
+	}
+	if _, _, err := captureObservation(dir, "note", "different source", "", "agent:other"); err != nil {
+		t.Fatalf("other sources must not be throttled: %v", err)
+	}
+	if _, _, err := captureObservation(dir, "note", "human note", "", "human:mira"); err != nil {
+		t.Fatalf("humans enter observed and must never be throttled: %v", err)
 	}
 }
