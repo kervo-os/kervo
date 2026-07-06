@@ -335,7 +335,44 @@ func detectCommands(dir string) []fact.Command {
 	cmds = append(cmds, justfileCommands(dir)...)
 	cmds = append(cmds, packageJSONCommands(dir)...)
 	cmds = append(cmds, pyprojectCommands(dir)...)
+	cmds = append(cmds, pytestCommands(dir)...)
 	cmds = append(cmds, composeCommands(dir)...)
+	return cmds
+}
+
+// pytestCommands surfaces declared test runners: a pytest.ini or a
+// [tool.pytest.ini_options] section declares that `pytest` is how the tree
+// runs its tests. Field evidence: a real-repo eval scored the artifact 0/2
+// on "how do I run tests" while the answer sat declared in a module
+// pyproject — script sections alone miss it.
+func pytestCommands(dir string) []fact.Command {
+	declared := func(sub string) (source string, ok bool) {
+		if _, err := os.Stat(filepath.Join(dir, sub, "pytest.ini")); err == nil {
+			return filepath.Join(sub, "pytest.ini"), true
+		}
+		raw, err := os.ReadFile(filepath.Join(dir, sub, "pyproject.toml"))
+		if err != nil {
+			return "", false
+		}
+		for _, line := range strings.Split(string(raw), "\n") {
+			if strings.TrimSpace(line) == "[tool.pytest.ini_options]" {
+				return filepath.Join(sub, "pyproject.toml"), true
+			}
+		}
+		return "", false
+	}
+	var cmds []fact.Command
+	if src, ok := declared(""); ok {
+		cmds = append(cmds, fact.Command{Run: "pytest", Detail: "declared test runner", Source: src})
+	}
+	for _, mod := range moduleDirs(dir) {
+		if len(cmds) >= maxCommandsPerManifest {
+			break
+		}
+		if src, ok := declared(mod); ok {
+			cmds = append(cmds, fact.Command{Run: "cd " + mod + " && pytest", Detail: "declared test runner", Source: src})
+		}
+	}
 	return cmds
 }
 

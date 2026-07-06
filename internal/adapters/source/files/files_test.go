@@ -170,6 +170,30 @@ func TestTodoRequiresCommentMarker(t *testing.T) {
 	}
 }
 
+func TestPytestDeclaredRunner(t *testing.T) {
+	dir := t.TempDir()
+	write(t, dir, "pyproject.toml", "[project]\nname = \"x\"\n\n[tool.pytest.ini_options]\ntestpaths = [\"tests\"]\n")
+	write(t, dir, "worker/pytest.ini", "[pytest]\naddopts = -q\n")
+	write(t, dir, "plain/pyproject.toml", "[project]\nname = \"plain\"\n")
+	snap, _, err := New().Scan(context.Background(), dir, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := map[string]string{}
+	for _, c := range snap.Commands {
+		got[c.Run] = c.Source
+	}
+	if got["pytest"] != "pyproject.toml" {
+		t.Errorf("root pytest source = %q, want pyproject.toml", got["pytest"])
+	}
+	if got["cd worker && pytest"] != "worker/pytest.ini" {
+		t.Errorf("module pytest source = %q, want worker/pytest.ini", got["cd worker && pytest"])
+	}
+	if _, ok := got["cd plain && pytest"]; ok {
+		t.Error("plain/ has no pytest declaration — nothing must be inferred")
+	}
+}
+
 func TestTodoStripsBlockCommentClosers(t *testing.T) {
 	dir := t.TempDir()
 	write(t, dir, "report.md", "<!-- TODO: confirm IOC list with the vendor -->\n")

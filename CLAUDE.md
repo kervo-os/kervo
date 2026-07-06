@@ -26,6 +26,7 @@
 
 ## Recent Changes
 
+- `72216b9` 2026-07-06 review: the verifier's surface — triage queue over pending judgments
 - `70639d4` 2026-07-06 consumer: AGENTS.md as a second injection target (opt-in by presence)
 - `39c1a0f` 2026-07-06 ledger: propose AGENTS.md injection target (codex A/B field evidence)
 - `404c54c` 2026-07-06 ledger: propose inject-mode option (agent proposal, awaiting judgment)
@@ -45,22 +46,21 @@
 - `37597be` 2026-07-04 docs: hook wiring for live capture and H3 counters
 - `ab0bea4` 2026-07-04 metrics: H3 counters ride the hook path — sizes in, content never
 - `70c9ef3` 2026-07-04 trust: the engine — replayed states, human judgment, honest demotion
-- `1ed8e65` 2026-07-04 capture: event ledger + manual capture + consumer hook (H2' spike, build side)
 
-_Showing 20 of 34 analyzed commits._
+_Showing 20 of 35 analyzed commits._
 
 ### Frequently Changed Files
 
-- .kervo/events/2026-07.jsonl (15)
-- CLAUDE.md (9)
-- README.md (9)
+- .kervo/events/2026-07.jsonl (16)
+- CLAUDE.md (10)
+- README.md (10)
 - internal/adapters/source/files/files.go (7)
 - internal/adapters/source/files/files_test.go (7)
 - internal/cli/compile.go (7)
 - internal/core/compiler/compiler.go (7)
 - internal/core/compiler/compiler_test.go (7)
-- README.ja.md (5)
-- README.ko.md (5)
+- README.ja.md (6)
+- README.ko.md (6)
 
 ## Open Tasks
 
@@ -72,12 +72,12 @@ _No TODO/FIXME comments found._
 - assets/ (1 files)
 - cmd/ (1 files)
 - docs/ (60 files)
-- internal/ (52 files)
+- internal/ (54 files)
 - packaging/ (3 files)
 
 ## Workspace Facts
 
-- Commits analyzed: 34 (complete)
+- Commits analyzed: 35 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 6
 - Docs captured: 1
@@ -102,12 +102,19 @@ Operating principle (user directive 2026-07-06): minimize human touch on every e
 
 **[generated — agent:claude-code]**
 inject mode option (v1.x candidate): default stays full-block in CLAUDE.md (zero-command clone is the product's proof); add opt-in '@.kervo/artifact.md' import mode for clean-CLAUDE.md users — trade-off: fresh clones see nothing until 'kervo compile'. Gate: field demand from real adopters.
+
+**[generated — agent:claude-code]**
+Post-commit auto-compile (proposal): a 2-line git post-commit hook running 'kervo compile' keeps the digest current with zero human touch. Ship as README documentation first; an init flag installer only on repeat demand.
+
+**[generated — agent:claude-code]**
+Uncommitted-work visibility (proposal, low priority): eval noted WIP is invisible. A 'N files modified' fact would cover it without content leakage but churns CLAUDE.md mid-work and strains byte-determinism. Defer unless demand repeats.
 <!-- kervo:slot:decisions:end -->
 
 ## Known Risks
 
 <!-- kervo:slot:risks:begin -->
-_None proposed yet. Semantic providers (Mode 2/3) attach labeled observations here._
+**[generated — agent:claude-code]**
+In repos without a capture habit, Mode 1 leaves goal/decisions/risks empty and the artifact reads as a git digest only — the measured-protection value (H4) only materializes once slots are filled via session capture or Mode 2/3 (real-repo eval, 2026-07-06).
 <!-- kervo:slot:risks:end -->
 
 ## Doc Summaries
@@ -124,6 +131,9 @@ H4 final (n=30, 2 runs, agent-judged): primary S1+S3 A=100% B=90% C=85% — A-C 
 
 **[observed — human:refuse1993]**
 H4 confirmatory run (pre-registered, n=24, no-repo-access, sonnet+haiku): composite A=91.7% B=91.7% C=62.5% — A-C=29.2%p >= 20%p bar: PASS. First real poisoning events of the program: all 3 in C-haiku (bound to dead RabbitMQ, asserted single-region, 95%-asserted disputed refund claim); same model defended in A/B. Interpretation: treatment table (stale segregation/deprecated exclusion) is the main effect, labels add anti-contagion robustness in mixed conditions; protection strongest for weaker consumers. H4 program verdict: SUPPORTED (A unbeaten across 54 responses). Remaining: human-judged replication before public claims. Details: EXPER/h4-kit/RESULTS-confirm.md
+
+**[generated — agent:claude-code]**
+Real-repo eval (12-module Python monorepo, blind A/B, 2026-07-06): artifact-only answered 5.5/10 onboarding questions in 1 tool call / 21.2k tokens / 48s; exploration scored 10/10 in 19 calls / 33.7k tokens / 184s. Determinism held (identical hashes), zero hallucinations in both arms. Boundary confirmed: the artifact covers git-known facts; code internals stay exploration's job. The how-to-run-tests gap (0/2) was a declared pytest config the parser missed — fixed same day (pytestCommands).
 <!-- kervo:slot:summaries:end -->
 
 ## Deprecated / Stale Notes
