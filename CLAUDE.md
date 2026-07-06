@@ -26,6 +26,7 @@
 
 ## Recent Changes
 
+- `cd67fc3` 2026-07-06 protocol: the conversation is the review — relay affirmations, question conflicts
 - `2ec13e5` 2026-07-06 ledger: the conversation is a review surface — a plan
 - `1e5d5ce` 2026-07-06 ledger: workspace-native wiki management — a plan, not code
 - `412a256` 2026-07-06 dash: the knowledge view — judged knowledge IS the wiki
@@ -45,22 +46,21 @@
 - `b8eaf90` 2026-07-06 consolidate: no new features — pay the day's debt
 - `1cfbd6b` 2026-07-06 dash: workspace detail carries the project itself, not just the queue
 - `f549544` 2026-07-06 identity: the K mark — SVG redraw of the user's logo, wired everywhere
-- `b9d7447` 2026-07-06 dash: judged records stay visible — the ledger never hides history
 
-_Showing 20 of 75 analyzed commits._
+_Showing 20 of 76 analyzed commits._
 
 ### Frequently Changed Files
 
-- .kervo/events/2026-07.jsonl (55)
-- CLAUDE.md (30)
-- README.md (24)
-- README.ja.md (20)
-- README.ko.md (20)
+- .kervo/events/2026-07.jsonl (56)
+- CLAUDE.md (31)
+- README.md (25)
+- README.ja.md (21)
+- README.ko.md (21)
+- internal/core/i18n/i18n.go (13)
 - internal/cli/dash.go (12)
 - internal/cli/dashpage.go (12)
-- internal/core/i18n/i18n.go (12)
 - internal/cli/compile.go (11)
-- internal/adapters/source/files/files.go (8)
+- internal/core/compiler/testdata/skeleton.golden.md (9)
 
 ## Open Tasks
 
@@ -77,7 +77,7 @@ _No TODO/FIXME comments found._
 
 ## Workspace Facts
 
-- Commits analyzed: 75 (complete)
+- Commits analyzed: 76 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 6
 - Docs captured: 1
@@ -126,32 +126,32 @@ review -web bar raised (refines 01KWTVKV): the batch surface must be a 2026-grad
 Evidence: user directive 2026-07-06: '그 페이지는 2026 sota급 대시보드여야한다'
 
 **[verified — human:refuse1993]**
-The conversation IS a review surface (plan for judgment; user challenge 2026-07-06). Formalize what this project already practices: when a human explicitly affirms a specific claim in session, the agent records capture AND relays the verification in one motion - reason quotes the affirmation as evidence - and no queue round-trip happens. The queue does not disappear; it shrinks to its true purpose: knowledge no human has seen (unattended write-backs, external producers, other agents' sessions, Mode 3). Three boundaries hold: (1) affirmation is claim-scoped, not vibe-scoped - an OK covers what was actually put to the human; anything learned but not discussed stays generated; (2) provenance must say HOW it was verified ('user approved in session' + quote), so signatures stay auditable; (3) the self-signature ban is untouched - the agent relays the human's stated judgment, never its own. Conflict flow, protocol-level: a consumer that finds evidence contradicting a verified entry raises it with the human in conversation, then records the updated judgment (deprecate old with reason + capture new, or re-affirm) - conflicts become questions, not queue sediment. Implementation when judged: protocol text for the injected block and MCP tool descriptions; a capture sugar flag (one command for capture+relay) only if the two-command pattern shows friction.
-Evidence: user 2026-07-06: '사람이 OK 했으니까 진행된거면 그것 자체가 검증. 과거랑 다르면 다시 물어보고 팩트를 바꾸면'; this session's own practice (capture then trust with chat-quote reasons) as the working precedent
-
-**[generated — agent:claude-code]**
 H5 trigger is volume-based, not calendar-based (proposal). Agent-velocity development voids the two-week frame: today alone this repo accrued ~400 ledger events. Re-run the real-repo A/B once the adopted workspace accumulates >=10 artifact-present sessions and >=10 write-back proposals judged — at agent pace that is days, possibly hours.
 Evidence: user challenge 2026-07-06: 'ai agent로 개발중인데 2주뒤에 뭐 볼게 있나'; kervo ledger: 400 events in one day
 
-**[generated — agent:claude-code]**
+**[verified — human:refuse1993]**
 Mode 3 is a bootstrap channel, not a running mate to Mode 2 (field eval on the adopted real repo, 2026-07-06). With only the artifact as input (commit messages + TODO list), a local 120b produced a rear-view goal (inferred from pushed history; the real goal lived in an unpushed branch — stale, not hallucinated) and an overreaching risk (18 TODOs exist -> 'critical logic is empty'; evidence does not support the conclusion). Session-verified Mode 2 capture measured 9.5/10 the same day. The trust gate worked as designed: both weak proposals arrived as [generated] and were quarantined pending judgment. Positioning: run Mode 3 to fill empty slots at cold start; once Mode 2 capture is live, leave KERVO_SEMANTIC_URL unset (auto Mode 1) — artifact-only inference reads history, not intent, and adds review noise.
 Evidence: user-relayed eval 2026-07-06: goal C+ (rear-view), risk D (fact->overreach), 9.5s local 120b, 2 proposals; Mode 2 pilot 9.5/10 same day
 
-**[generated — agent:claude-code]**
+**[verified — human:refuse1993]**
 External producers integrate via the published intake contract, not per-tool importers (refines Phase C of goal 01KWTJGS). Any tool - graph builders, memory stores, wiki generators - stages .kervo/proposals.json entries [{slot, body, source}]; compile ingests them as generated with provenance, review gates them, and the absolute rule holds: no state field exists, so nothing self-promotes. Per-tool importers (graphify/openwiki/agentmemory) are built only when a real export file exists on this machine to test against - chasing N third-party formats is the losing game the scope rule forbids. Known gap for the first real producer: the proposal shape lacks an evidence field; add it when the first producer arrives. State nuance kept from PRD 7.2: your own session history imports may enter observed; generated-content tools always enter generated.
 Evidence: consumer/proposals.go: proposal{Slot,Body,Source}, no state field, RFC-0003 5; user-relayed integration proposal 2026-07-06
 
-**[generated — agent:claude-code]**
+**[verified — human:refuse1993]**
 llm-wiki-newsroom is the first concrete producer candidate - and it needs ZERO kervo code (refines 01KWVFE1). It is agent-driven (Claude Code, CLAUDE.md-operated), so its own agent can stage .kervo/proposals.json per the published contract; no 'kervo import wiki-newsroom' importer, no format chase. Mapping when adopted: contradictions -> risks (our conflict analog), cluster overviews / entities -> summaries, timelines -> summaries; never decisions (it does not produce team decisions). Everything enters [generated - llm-wiki-newsroom]. Philosophy check: it accretes at ingest (not compile-time regeneration) and separates author from reviewer - closer to kervo than the openwiki pattern; the boundary stays: kervo absorbs judgments about its output, never its graph/wiki machinery. Adoption gate: real usage in the report-archive workflow opens the first-producer items (evidence field in proposals.json).
 Evidence: README direct read 2026-07-06: 5-role newsroom, self-evolving guidelines w/ regression A/B, L2 sub-layers, /wiki-lint staleness+contradictions, WIKI_LANG=ko, MIT
 
-**[generated — agent:claude-code]**
+**[verified — human:refuse1993]**
 Phase B MVP ships as the dash knowledge view (goal 01KWTJGS phase B, refinement 01KWTKGV). The accreted wiki is a READING of the trust ledger, not a generator: verified and observed entries render in full, claim-first, evidence attached, grouped by type in stable order; stale and deprecated stay visible under retired with their reasons. Deterministic markdown export (kervo wiki -write) is deferred until someone needs the wiki outside the dash - committing derived files needs a deliberate gesture, not a default.
 Evidence: dash knowledge view shipped 2026-07-06; screenshot-verified on this repo's 16 verified entries
 
-**[generated — agent:claude-code]**
+**[verified — human:refuse1993]**
 Workspace-native wiki management (plan for judgment; reframe by user 2026-07-06: kervo manages the workspace, and a wiki inside it is workspace surface to manage in place - not a corpus to copy into the ledger). Stage W1, fact scan: detect a wiki/ markdown tree and state it in the artifact and dash as facts - page counts per sub-tree, last change - declared-only (the directory structure is the declaration), deterministic, zero content copying; every session learns the wiki's existence and map for zero calls, which makes 'conclusions, not corpus' natural: the corpus is pointable. Gate: a real workspace grows a wiki (newsroom adoption). Stage W2, convention only: knowledge entries cite wiki pages as evidence anchors - already expressible, document it. Stage W3, page-level trust states (deferred, needs real design): signing a page raises the invalidation question - a signature should probably bind to a content hash, not a path - so this stage waits for demand and gets planned properly, not improvised. Boundary unchanged: wiki lint/graph stay the producer's job; kervo adds existence, scale, freshness, and the trust layer.
 Evidence: user reframe 2026-07-06: '우리는 워크스페이스 기준으로 관리하는 역할. 그 워크스페이스에 위키가 있으면 그것까지 관리하는 것'
+
+**[verified — human:refuse1993]**
+The conversation IS a review surface (plan for judgment; user challenge 2026-07-06). Formalize what this project already practices: when a human explicitly affirms a specific claim in session, the agent records capture AND relays the verification in one motion - reason quotes the affirmation as evidence - and no queue round-trip happens. The queue does not disappear; it shrinks to its true purpose: knowledge no human has seen (unattended write-backs, external producers, other agents' sessions, Mode 3). Three boundaries hold: (1) affirmation is claim-scoped, not vibe-scoped - an OK covers what was actually put to the human; anything learned but not discussed stays generated; (2) provenance must say HOW it was verified ('user approved in session' + quote), so signatures stay auditable; (3) the self-signature ban is untouched - the agent relays the human's stated judgment, never its own. Conflict flow, protocol-level: a consumer that finds evidence contradicting a verified entry raises it with the human in conversation, then records the updated judgment (deprecate old with reason + capture new, or re-affirm) - conflicts become questions, not queue sediment. Implementation when judged: protocol text for the injected block and MCP tool descriptions; a capture sugar flag (one command for capture+relay) only if the two-command pattern shows friction.
+Evidence: user 2026-07-06: '사람이 OK 했으니까 진행된거면 그것 자체가 검증. 과거랑 다르면 다시 물어보고 팩트를 바꾸면'; this session's own practice (capture then trust with chat-quote reasons) as the working precedent
 <!-- kervo:slot:decisions:end -->
 
 ## Known Risks
@@ -170,6 +170,14 @@ Phase 3 spike: JSONL ledger + capture/hook landed
 **[verified — human:refuse1993]**
 Real-repo eval (12-module Python monorepo, blind A/B, 2026-07-06): artifact-only answered 5.5/10 onboarding questions in 1 tool call / 21.2k tokens / 48s; exploration scored 10/10 in 19 calls / 33.7k tokens / 184s. Determinism held (identical hashes), zero hallucinations in both arms. Boundary confirmed: the artifact covers git-known facts; code internals stay exploration's job. The how-to-run-tests gap (0/2) was a declared pytest config the parser missed — fixed same day (pytestCommands).
 
+**[verified — human:refuse1993]**
+Consolidation pass (2026-07-06, no version tag by user direction): race detector in CI, i18n completeness pinned by test (both directions), atomic registry writes, README command tables verified 12/12 against the CLI in three languages, CHANGELOG.md covering v0.1.0..v0.13.0, dash_overview.go split. Dependencies: zero (stdlib-only go.mod). Known debt left on record: review -web page is a plain fallback surface (dash supersedes it visually); GitHub release notes for v0.7.0..v0.13.0 are auto-changelogs while CHANGELOG.md is now canonical.
+Evidence: go test -race ./... clean; goreleaser check clean; go.mod contains no requires
+
+**[verified — human:refuse1993]**
+Write-back pilot on the adopted real repo (2026-07-06, third-party agent session): two previously unanswerable questions went 0/2 to 2/2 after targeted captures flowed capture -> ledger -> compile -> slots -> a fresh consumer; same 5-question basis moved 5.5/10 to 9.5/10 at unchanged cost (1 tool call, 48s to 21s). Trust labels reached the consumer and changed its behavior: it flagged its own answer as [generated], not human-signed. The declared-pytest scan (v0.2.1/v0.13.0) fired on the real repo. Caveat kept honest: this is a mechanism pilot on 2 targeted questions, not the pre-registered full A/B re-run with blinded judging - that still runs at the volume gate.
+Evidence: user-pasted eval table 2026-07-06: Q3 0/2->2/2, Q4 0/2->2/2, 1 call, 48s->21s; consumer quote flagging [generated] vs Verified
+
 **[observed — human:refuse1993]**
 H4 run1 (n=15, agent-judged): S1+S3 primary — A(kervo)=100%, B(no-label)=90%, C(unmanaged)=80%. A-C=20%p, exactly at pass threshold; interim pass, run2 needed. Mechanism confirmed: unlabeled arms rejected TRUE facts after finding one poison (guilt-by-association); labels compartmentalized contamination. Details: EXPER/h4-kit/RESULTS-run1.md
 
@@ -178,14 +186,6 @@ H4 final (n=30, 2 runs, agent-judged): primary S1+S3 A=100% B=90% C=85% — A-C 
 
 **[observed — human:refuse1993]**
 H4 confirmatory run (pre-registered, n=24, no-repo-access, sonnet+haiku): composite A=91.7% B=91.7% C=62.5% — A-C=29.2%p >= 20%p bar: PASS. First real poisoning events of the program: all 3 in C-haiku (bound to dead RabbitMQ, asserted single-region, 95%-asserted disputed refund claim); same model defended in A/B. Interpretation: treatment table (stale segregation/deprecated exclusion) is the main effect, labels add anti-contagion robustness in mixed conditions; protection strongest for weaker consumers. H4 program verdict: SUPPORTED (A unbeaten across 54 responses). Remaining: human-judged replication before public claims. Details: EXPER/h4-kit/RESULTS-confirm.md
-
-**[generated — agent:claude-code]**
-Consolidation pass (2026-07-06, no version tag by user direction): race detector in CI, i18n completeness pinned by test (both directions), atomic registry writes, README command tables verified 12/12 against the CLI in three languages, CHANGELOG.md covering v0.1.0..v0.13.0, dash_overview.go split. Dependencies: zero (stdlib-only go.mod). Known debt left on record: review -web page is a plain fallback surface (dash supersedes it visually); GitHub release notes for v0.7.0..v0.13.0 are auto-changelogs while CHANGELOG.md is now canonical.
-Evidence: go test -race ./... clean; goreleaser check clean; go.mod contains no requires
-
-**[generated — agent:claude-code]**
-Write-back pilot on the adopted real repo (2026-07-06, third-party agent session): two previously unanswerable questions went 0/2 to 2/2 after targeted captures flowed capture -> ledger -> compile -> slots -> a fresh consumer; same 5-question basis moved 5.5/10 to 9.5/10 at unchanged cost (1 tool call, 48s to 21s). Trust labels reached the consumer and changed its behavior: it flagged its own answer as [generated], not human-signed. The declared-pytest scan (v0.2.1/v0.13.0) fired on the real repo. Caveat kept honest: this is a mechanism pilot on 2 targeted questions, not the pre-registered full A/B re-run with blinded judging - that still runs at the volume gate.
-Evidence: user-pasted eval table 2026-07-06: Q3 0/2->2/2, Q4 0/2->2/2, 1 call, 48s->21s; consumer quote flagging [generated] vs Verified
 <!-- kervo:slot:summaries:end -->
 
 ## Deprecated / Stale Notes
