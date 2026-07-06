@@ -3,6 +3,15 @@
 All notable changes, newest first. Versions are git tags; every release
 ships prebuilt binaries and a Homebrew cask (`brew install kervo-os/tap/kervo`).
 
+## v0.14.0 — 2026-07-06
+
+- Dash visualization layer: 28-day activity sparklines, trust-state donut,
+  commit-proven coupling ring, and a CONNECTED panel showing which adapters
+  actually feed and consume each workspace. All inline SVG, zero deps.
+- README overhaul in three languages: the loop as a diagram, dashboard
+  screenshots, and the real-repo measurements (write-back 5.5→9.5,
+  Mode 3 grading, labels reaching consumers).
+
 ## v0.13.1 — 2026-07-06
 
 - Judgment semantics in the dash: a hint line under the actions and a

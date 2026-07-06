@@ -26,6 +26,9 @@
 
 ## Recent Changes
 
+- `26d3840` 2026-07-06 dash: a visualization layer worthy of the hero shot
+- `41189a8` 2026-07-06 ledger: session hook events
+- `8661ae0` 2026-07-06 docs: external producers — publish the intake contract, don't chase formats
 - `8b1fd6b` 2026-07-06 ledger: session hook events
 - `59f7e17` 2026-07-06 docs: Mode 3 is a bootstrap channel, not a running mate to Mode 2
 - `8a6f3f1` 2026-07-06 changelog: v0.13.1
@@ -43,23 +46,20 @@
 - `d67c5e1` 2026-07-06 ledger: session hook events
 - `eb12de9` 2026-07-06 dash: claim-first display + capture convention — lead with a one-line claim
 - `9cb11b6` 2026-07-06 dash: sellable — monogram identity, readable paths, product-grade visuals
-- `1661d55` 2026-07-06 dash: a clear repo must not blank the page — Items marshals as [], never null
-- `0b283a0` 2026-07-06 ledger: session hook events
-- `614c088` 2026-07-06 dash: the fleet control tower — every workspace, one page
 
-_Showing 20 of 66 analyzed commits._
+_Showing 20 of 69 analyzed commits._
 
 ### Frequently Changed Files
 
-- .kervo/events/2026-07.jsonl (46)
-- CLAUDE.md (24)
-- README.md (20)
-- README.ja.md (16)
-- README.ko.md (16)
+- .kervo/events/2026-07.jsonl (49)
+- CLAUDE.md (25)
+- README.md (21)
+- README.ja.md (17)
+- README.ko.md (17)
 - internal/cli/compile.go (11)
-- internal/cli/dashpage.go (10)
-- internal/cli/dash.go (9)
-- internal/core/i18n/i18n.go (9)
+- internal/cli/dashpage.go (11)
+- internal/cli/dash.go (10)
+- internal/core/i18n/i18n.go (10)
 - internal/adapters/source/files/files.go (8)
 
 ## Open Tasks
@@ -69,7 +69,7 @@ _No TODO/FIXME comments found._
 ## Related Modules
 
 - .github/ (2 files)
-- assets/ (3 files)
+- assets/ (5 files)
 - cmd/ (1 files)
 - docs/ (60 files)
 - internal/ (64 files)
@@ -77,7 +77,7 @@ _No TODO/FIXME comments found._
 
 ## Workspace Facts
 
-- Commits analyzed: 66 (complete)
+- Commits analyzed: 69 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 6
 - Docs captured: 1

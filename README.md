@@ -7,6 +7,7 @@
 **Stop re-explaining your project to AI. `kervo init` once.**
 
 [![CI](https://github.com/kervo-os/kervo/actions/workflows/ci.yml/badge.svg)](https://github.com/kervo-os/kervo/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/kervo-os/kervo?color=34d399)](https://github.com/kervo-os/kervo/releases)
 [![Go Report Card](https://goreportcard.com/badge/github.com/kervo-os/kervo)](https://goreportcard.com/report/github.com/kervo-os/kervo)
 [![Go](https://img.shields.io/badge/Go-1.23+-00ADD8?logo=go&logoColor=white)](go.mod)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
@@ -33,6 +34,23 @@ their reason shown**.
 
 This repository eats its own cooking: [`CLAUDE.md`](CLAUDE.md) here is
 compiled by kervo.
+
+The loop, end to end:
+
+```mermaid
+flowchart LR
+  S[deterministic scan] --> A[Context Artifact]
+  A -->|CLAUDE.md · AGENTS.md · MCP| C[AI sessions]
+  C -->|write-back: facts + evidence| L[(event ledger · git)]
+  P[external producers] -->|proposals.json| L
+  L --> R{human review}
+  R -->|verified / deprecated + reason| L
+  L --> A
+```
+
+And `kervo dash`, one page over every workspace on the machine:
+
+<p align="center"><img src="assets/dash-fleet.png" width="860" alt="kervo dash — every workspace, pending judgments, activity"></p>
 
 ## Quickstart
 
@@ -214,6 +232,17 @@ a pre-registered rubric by structurally blinded judges; a human-grading
 replication kit is included but has not been run — the limitation is
 stated, not hidden.
 
+And on a real production monorepo (2026-07-06, from its own ledger):
+
+| What was measured | Result |
+|---|---|
+| Write-back pilot: capture → ledger → compile → fresh consumer | onboarding answers **5.5/10 → 9.5/10**, cost unchanged (1 tool call) |
+| Trust labels reaching consumers | the consuming agent flagged its own answer as `[generated]`, unprompted |
+| Mode 3 backend proposals, graded against ground truth | goal C+ / risk D → repositioned as a bootstrap channel (see above) |
+
+The pre-registered full re-run happens at a volume gate (10 sessions +
+10 judged write-backs), not on a calendar.
+
 ## Capture: wire the hooks
 
 Live capture feeds the ledger and the built-in measurement counters. For
@@ -277,10 +306,14 @@ one-shot local page — it lives only as long as the command, binds
 
 Every `kervo compile` registers its workspace **path** (path only,
 machine-local, never committed) in `~/.kervo/workspaces.json`. `kervo dash`
-opens a one-shot dashboard over all of them — pending judgments, trust-state
-bars, and last activity per repo — with keyboard-first inline triage
-(`1`–`9` open a repo, `j`/`k` move, `v`/`s`/`d` judge, `?` for keys) that
-writes each judgment back to that repo's own ledger. Truth stays per-repo in
+opens a one-shot dashboard over all of them — pending judgments, 28-day
+activity, trust-state mix, the project overview (declared commands, recent
+changes, modules), coupling proven by commit history, and which adapters
+are actually connected — with keyboard-first inline triage (`1`–`9` open a
+repo, `j`/`k` move, `v`/`s`/`d` judge, `?` for keys) that writes each
+judgment back to that repo's own ledger.
+
+<p align="center"><img src="assets/dash-detail.png" width="860" alt="kervo dash — workspace detail: triage, overview, coupling"></p> Truth stays per-repo in
 git; the dashboard is a lens, not a store, and it dies with the command.
 The chrome speaks your language — `$LANG`, `-lang en|ko|ja`, or the in-page
 switcher, whose choice sticks for the next launch. Observation bodies stay
