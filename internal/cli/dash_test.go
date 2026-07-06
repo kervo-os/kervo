@@ -93,7 +93,56 @@ func TestDashKoreanChrome(t *testing.T) {
 	}
 }
 
+func TestDashLangSwitchPersists(t *testing.T) {
+	t.Setenv("KERVO_STATE_DIR", t.TempDir())
+	t.Setenv("LC_ALL", "")
+	t.Setenv("LANG", "en_US.UTF-8")
+	dir := t.TempDir()
+	if _, _, err := captureObservation(dir, "decision", "switch me", "", "agent:test"); err != nil {
+		t.Fatal(err)
+	}
+	srv, err := newDashServer([]string{dir}, "human:tester", i18n.EN)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ts := httptest.NewServer(srv.handler())
+	defer ts.Close()
+
+	// Every table ships with the page, so switching is instant client-side.
+	res, err := http.Get(ts.URL + "/")
+	if err != nil {
+		t.Fatal(err)
+	}
+	page, _ := io.ReadAll(res.Body)
+	res.Body.Close()
+	for _, want := range []string{"판정 대기", "判定待ち", "awaiting judgment"} {
+		if !strings.Contains(string(page), want) {
+			t.Errorf("bundled tables missing %q", want)
+		}
+	}
+
+	res, err = http.Post(ts.URL+"/lang", "application/json", strings.NewReader(`{"Lang":"ko"}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	res.Body.Close()
+	if res.StatusCode != http.StatusOK {
+		t.Fatalf("/lang status = %d", res.StatusCode)
+	}
+	// The choice outlives the session: next launch resolves to it even
+	// though $LANG says English.
+	if l, err := dashLang(""); err != nil || l != i18n.KO {
+		t.Errorf("persisted lang = %v/%v, want ko", l, err)
+	}
+	res, _ = http.Post(ts.URL+"/lang", "application/json", strings.NewReader(`{"Lang":"xx"}`))
+	res.Body.Close()
+	if res.StatusCode != http.StatusBadRequest {
+		t.Errorf("unsupported lang status = %d, want 400", res.StatusCode)
+	}
+}
+
 func TestDashLangDetection(t *testing.T) {
+	t.Setenv("KERVO_STATE_DIR", t.TempDir())
 	t.Setenv("LC_ALL", "")
 	t.Setenv("LANG", "ko_KR.UTF-8")
 	if l, err := dashLang(""); err != nil || l != i18n.KO {

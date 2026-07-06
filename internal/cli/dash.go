@@ -92,10 +92,18 @@ type dashServer struct {
 }
 
 // dashLang: the dash is a user surface spanning many repos, so its language
-// is the USER's — flag first, then $LC_ALL/$LANG — not any one workspace's.
+// is the USER's — flag, then the persisted in-page choice (~/.kervo/ui-lang),
+// then $LC_ALL/$LANG — never any one workspace's .kervo/lang.
 func dashLang(flagVal string) (i18n.Lang, error) {
 	if flagVal != "" {
 		return i18n.Parse(flagVal)
+	}
+	if sd := stateDir(); sd != "" {
+		if raw, err := os.ReadFile(filepath.Join(sd, "ui-lang")); err == nil {
+			if l, err := i18n.Parse(strings.TrimSpace(string(raw))); err == nil {
+				return l, nil
+			}
+		}
 	}
 	for _, env := range []string{"LC_ALL", "LANG"} {
 		if v := os.Getenv(env); len(v) >= 2 {
@@ -208,8 +216,38 @@ func (s *dashServer) handler() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", s.page)
 	mux.HandleFunc("/judge", s.judge)
+	mux.HandleFunc("/lang", s.setLang)
 	mux.HandleFunc("/quit", s.quit)
 	return mux
+}
+
+// setLang persists the in-page language choice machine-locally, so the
+// next `kervo dash` opens in it without a flag.
+func (s *dashServer) setLang(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "POST only", http.StatusMethodNotAllowed)
+		return
+	}
+	var req struct{ Lang string }
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "bad request", http.StatusBadRequest)
+		return
+	}
+	l, err := i18n.Parse(req.Lang)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	s.mu.Lock()
+	s.lang = l
+	s.mu.Unlock()
+	if sd := stateDir(); sd != "" {
+		if err := os.MkdirAll(sd, 0o755); err == nil {
+			_ = os.WriteFile(filepath.Join(sd, "ui-lang"), []byte(string(l)+"\n"), 0o644)
+		}
+	}
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write([]byte(`{"ok":true}`))
 }
 
 func (s *dashServer) page(w http.ResponseWriter, r *http.Request) {
@@ -224,13 +262,22 @@ func (s *dashServer) page(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	strs, err := json.Marshal(dashStrings(s.lang))
+	// All three tables ship with the page: switching languages is instant
+	// and offline; only the persistence round-trips.
+	all := map[string]map[string]string{}
+	for _, l := range i18n.Supported() {
+		all[string(l)] = dashStrings(l)
+	}
+	strs, err := json.Marshal(all)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	_ = dashTmpl.Execute(w, struct{ FleetJS, TJS template.JS }{template.JS(fleet), template.JS(strs)})
+	_ = dashTmpl.Execute(w, struct {
+		FleetJS, TTJS template.JS
+		Lang          string
+	}{template.JS(fleet), template.JS(strs), string(s.lang)})
 }
 
 // judge writes the human's decision to the TARGET repo's own ledger — the

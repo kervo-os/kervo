@@ -240,7 +240,7 @@ kervo import claude                                      # 過去の Claude Code
 ページを開きます — コマンドが生きている間だけ存在し、127.0.0.1 のみに
 バインドされ、設計保証(デーモンなし・アカウントなし)をすべて守ります。
 
-### フリート: `kervo dash`
+### 全体ビュー: `kervo dash`
 
 `kervo compile` の実行ごとにワークスペースの**パス**(パスのみ、マシン
 ローカル、コミットされない)が `~/.kervo/workspaces.json` に登録されます。
@@ -249,8 +249,9 @@ kervo import claude                                      # 過去の Claude Code
 (`1`–`9` でリポジトリを開く、`j`/`k` 移動、`v`/`s`/`d` 判定、`?` キー
 一覧)付きで、各判定はそのリポジトリ自身の台帳に記録されます。真実は
 リポジトリごとに git に残り、ダッシュボードはストアではなくレンズであり、
-コマンドと共に消えます。UI はユーザーの言語に従い(`$LANG`、または
-`-lang en|ko|ja`)、観察本文は提案者が書いた言語のままです。
+コマンドと共に消えます。UI はユーザーの言語に従います —
+`$LANG`、`-lang en|ko|ja`、またはページ内の言語スイッチャ(選択は次回の
+起動にも保持)。観察本文は提案者が書いた言語のままです。
 
 ## コマンド
 
@@ -261,7 +262,7 @@ kervo import claude                                      # 過去の Claude Code
 | `kervo capture -type <t> -body <本文>` | 観察を台帳に記録 |
 | `kervo trust -id <接頭辞> -to verified\|stale\|deprecated -reason <理由>` | ID で観察を判定 (スクリプト用プリミティブ) |
 | `kervo review [-web]` | レビューキュー — 提案と ⚠ 衝突を一つずつ判定; `-web` は一回限りのローカルページ |
-| `kervo dash` | フリートダッシュボード — 登録済みワークスペース全体を 1 ページに、インライン判定 |
+| `kervo dash` | 全体ダッシュボード — 登録済みワークスペース全体を 1 ページに、インライン判定 |
 | `kervo status` | 1 画面の台帳 + トラストビュー |
 | `kervo metrics` | artifact 有/無のプロンプトサイズ(内蔵 A/B カウンタ) |
 | `kervo import claude` | Claude Code トランスクリプトから台帳をバックフィル(サイズのみ) |

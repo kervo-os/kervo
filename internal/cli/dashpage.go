@@ -40,6 +40,8 @@ button{border:1px solid var(--line2);background:var(--card);color:var(--fg);bord
 button:hover{border-color:var(--muted)}
 button.primary{background:var(--accent);color:#07130e;font-weight:700;border:none;
   box-shadow:0 2px 12px rgba(52,211,153,.25)}
+select{border:1px solid var(--line2);background:var(--card);color:var(--fg);border-radius:8px;
+  padding:.4rem .5rem;font:inherit;font-size:.82rem;cursor:pointer}
 main{max-width:66rem;margin:0 auto;padding:1.6rem 1.4rem 3rem}
 .page-head{display:flex;align-items:baseline;gap:1rem;margin:0 0 1.3rem}
 .page-head h1{margin:0;font-size:1.5rem;letter-spacing:-.03em}
@@ -124,6 +126,9 @@ main{max-width:66rem;margin:0 auto;padding:1.6rem 1.4rem 3rem}
   <div class="spacer"></div>
   <div class="progress"><i id="pbar"></i></div>
   <span class="hint"><kbd>?</kbd> <span id="keysHint"></span></span>
+  <select id="langSel" onchange="setLang(this.value)">
+    <option value="en">English</option><option value="ko">한국어</option><option value="ja">日本語</option>
+  </select>
   <button class="primary" id="finishBtn" onclick="finish()"></button>
 </header>
 <main>
@@ -145,7 +150,9 @@ main{max-width:66rem;margin:0 auto;padding:1.6rem 1.4rem 3rem}
 <div id="help"><div class="box"><h3 id="helpTitle"></h3><div id="helpRows"></div></div></div>
 <script>
 const FLEET = {{.FleetJS}};
-const T = {{.TJS}};
+const TT = {{.TTJS}};
+let LANG = "{{.Lang}}";
+let T = TT[LANG] || TT.en;
 // %[1]d-style verbs come straight from the Go string tables.
 const F = (s,...a)=>s.replace(/%\[(\d+)\]d/g,(_,n)=>a[n-1]);
 FLEET.forEach(r=>{ r.Items = r.Items || []; r.Counts = r.Counts || {} });
@@ -296,19 +303,30 @@ document.addEventListener("keydown",e=>{
   else if(e.key==="x") skip();
   else if(e.key==="r"){ e.preventDefault(); document.getElementById("reason")?.focus() }
 });
-// Static chrome + help overlay, all from the string table.
-for(const [id,key] of [["wtitle","workspaces"],["localnote","localnote"],
-  ["keysHint","keys"],["finishBtn","finish"],["backLbl","back"],["helpTitle","helptitle"]])
-  document.getElementById(id).textContent = T[key];
-const rows = [[T.hopen,["1","–","9"]],[T.hmove,["j","/","k"]],[T.hjudge,["v","s","d"]],
-  [T.hskip,["x"]],[T.hreason,["r"]],[T.hback,["Esc"]]];
-const hr = document.getElementById("helpRows");
-for(const [label,keys] of rows){
-  const d = el("div"); d.append(el("span","",label));
-  const ks = el("span");
-  keys.forEach(k=>{ (k==="–"||k==="/")? ks.append(document.createTextNode(" "+k+" ")) : ks.append(el("kbd","",k)) });
-  d.append(ks); hr.append(d);
+// Static chrome + help overlay, all from the active string table — called
+// again whenever the user switches languages.
+function applyChrome(){
+  for(const [id,key] of [["wtitle","workspaces"],["localnote","localnote"],
+    ["keysHint","keys"],["finishBtn","finish"],["backLbl","back"],["helpTitle","helptitle"]])
+    document.getElementById(id).textContent = T[key];
+  document.getElementById("langSel").value = LANG;
+  const rows = [[T.hopen,["1","–","9"]],[T.hmove,["j","/","k"]],[T.hjudge,["v","s","d"]],
+    [T.hskip,["x"]],[T.hreason,["r"]],[T.hback,["Esc"]]];
+  const hr = document.getElementById("helpRows"); hr.textContent="";
+  for(const [label,keys] of rows){
+    const d = el("div"); d.append(el("span","",label));
+    const ks = el("span");
+    keys.forEach(k=>{ (k==="–"||k==="/")? ks.append(document.createTextNode(" "+k+" ")) : ks.append(el("kbd","",k)) });
+    d.append(ks); hr.append(d);
+  }
 }
+function setLang(l){
+  LANG = l; T = TT[l] || TT.en;
+  applyChrome(); repo? renderTriage() : renderFleet(); totals();
+  fetch("/lang",{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({Lang:l})}); // persists for the next launch
+}
+applyChrome();
 renderFleet();
 // Deep link: #2 opens the second repo — refresh keeps your place.
 const h = location.hash.match(/^#(\d+)$/);

@@ -252,8 +252,9 @@ bars, and last activity per repo — with keyboard-first inline triage
 (`1`–`9` open a repo, `j`/`k` move, `v`/`s`/`d` judge, `?` for keys) that
 writes each judgment back to that repo's own ledger. Truth stays per-repo in
 git; the dashboard is a lens, not a store, and it dies with the command.
-The chrome speaks your language (`$LANG`, or `-lang en|ko|ja`); observation
-bodies stay in whatever language their proposer wrote.
+The chrome speaks your language — `$LANG`, `-lang en|ko|ja`, or the in-page
+switcher, whose choice sticks for the next launch. Observation bodies stay
+in whatever language their proposer wrote.
 
 ## Commands
 
