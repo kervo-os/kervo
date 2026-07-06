@@ -1,0 +1,129 @@
+package cli
+
+import (
+	"io"
+	"net/http"
+	"net/http/httptest"
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+
+	"github.com/kervo-os/kervo/internal/adapters/store/jsonl"
+	"github.com/kervo-os/kervo/internal/core/trust"
+)
+
+// TestMain sandboxes the machine-local registry for the whole package —
+// tests must never write into the developer's real ~/.kervo.
+func TestMain(m *testing.M) {
+	dir, err := os.MkdirTemp("", "kervo-test-state-*")
+	if err != nil {
+		panic(err)
+	}
+	os.Setenv("KERVO_STATE_DIR", dir)
+	code := m.Run()
+	os.RemoveAll(dir)
+	os.Exit(code)
+}
+
+func TestRegistryUpsertAndValidation(t *testing.T) {
+	t.Setenv("KERVO_STATE_DIR", t.TempDir())
+
+	live := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(live, ".kervo"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	registerWorkspace(live)
+	registerWorkspace(live) // upsert, not duplicate
+	gone := filepath.Join(t.TempDir(), "moved-away")
+	registerWorkspace(gone) // path without .kervo must be filtered on read
+
+	got := registeredWorkspaces()
+	abs, _ := filepath.Abs(live)
+	if len(got) != 1 || got[0] != abs {
+		t.Fatalf("registeredWorkspaces = %v, want just %s", got, abs)
+	}
+}
+
+func TestCompileRegistersWorkspace(t *testing.T) {
+	t.Setenv("KERVO_STATE_DIR", t.TempDir())
+	dir := t.TempDir()
+	git(t, dir, "init", "-q", "-b", "main")
+	writeFile(t, dir, "README.md", "# demo\n")
+	git(t, dir, "add", ".")
+	git(t, dir, "commit", "-q", "-m", "x")
+
+	if err := runInit([]string{"-dir", dir}); err != nil {
+		t.Fatal(err)
+	}
+	abs, _ := filepath.Abs(dir)
+	for _, w := range registeredWorkspaces() {
+		if w == abs {
+			return
+		}
+	}
+	t.Fatalf("init did not register %s", abs)
+}
+
+func TestDashFleetAndCrossRepoJudge(t *testing.T) {
+	a, b := t.TempDir(), t.TempDir()
+	if _, _, err := captureObservation(a, "decision", "alpha fact <b>x</b>", "ran it", "agent:test"); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err := captureObservation(b, "risk", "beta fact", "", "agent:test"); err != nil {
+		t.Fatal(err)
+	}
+	srv, err := newDashServer([]string{a, b}, "human:tester")
+	if err != nil {
+		t.Fatal(err)
+	}
+	ts := httptest.NewServer(srv.handler())
+	defer ts.Close()
+
+	res, err := http.Get(ts.URL + "/")
+	if err != nil {
+		t.Fatal(err)
+	}
+	page, _ := io.ReadAll(res.Body)
+	res.Body.Close()
+	for _, want := range []string{"alpha fact", "beta fact", "ran it"} {
+		if !strings.Contains(string(page), want) {
+			t.Errorf("page missing %q", want)
+		}
+	}
+	if strings.Contains(string(page), "<b>x</b>") {
+		t.Error("body not escaped inside the script payload")
+	}
+
+	// Judge repo B's item; repo A must stay untouched.
+	id := srv.byPath[b].Items[0].ID
+	res, err = http.Post(ts.URL+"/judge", "application/json",
+		strings.NewReader(`{"Workspace":"`+b+`","ID":"`+id+`","To":"verified","Reason":"ok"}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	res.Body.Close()
+	if res.StatusCode != http.StatusOK {
+		t.Fatalf("judge status = %d", res.StatusCode)
+	}
+	folder, _ := replayFolder(jsonl.Open(b))
+	if o := folder.Observations()[0]; o.State != trust.Verified {
+		t.Errorf("repo B state = %s, want verified", o.State)
+	}
+	folder, _ = replayFolder(jsonl.Open(a))
+	if o := folder.Observations()[0]; o.State != trust.Generated {
+		t.Errorf("repo A state = %s — cross-repo judge leaked", o.State)
+	}
+	if srv.pendingTotal() != 1 || srv.judgedTotal() != 1 {
+		t.Errorf("pending=%d judged=%d, want 1/1", srv.pendingTotal(), srv.judgedTotal())
+	}
+
+	// A workspace not in the fleet must be rejected — the page can only
+	// route judgments to repos it was launched over.
+	res, _ = http.Post(ts.URL+"/judge", "application/json",
+		strings.NewReader(`{"Workspace":"/tmp/evil","ID":"`+id+`","To":"verified"}`))
+	res.Body.Close()
+	if res.StatusCode != http.StatusConflict {
+		t.Errorf("foreign workspace status = %d, want 409", res.StatusCode)
+	}
+}

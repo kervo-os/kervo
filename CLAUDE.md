@@ -26,6 +26,8 @@
 
 ## Recent Changes
 
+- `898eaf5` 2026-07-06 dogfood: register the kervo MCP server for sessions in this repo
+- `2af8964` 2026-07-06 mcp + review -web: the conversation is the frontend
 - `ea3c874` 2026-07-06 ledger: session hook events
 - `c6e4fbe` 2026-07-06 store: monotonic ULIDs within a millisecond — replay must match append order
 - `002394e` 2026-07-06 flywheel: evidence-attached proposals — labor to agents, signature to humans
@@ -44,18 +46,16 @@
 - `2c032a4` 2026-07-06 release: GoReleaser pipeline — prebuilt binaries + Homebrew tap
 - `e7fa626` 2026-07-05 ledger: first live hook events from a real session
 - `25a59c2` 2026-07-05 release prep: team workflow docs, commands reference, self-scan fixes
-- `f8f7a44` 2026-07-04 docs: publish the H4 experiment package — receipts, not claims
-- `76e05d8` 2026-07-04 readme: Korean and Japanese editions with language switcher
 
-_Showing 20 of 44 analyzed commits._
+_Showing 20 of 46 analyzed commits._
 
 ### Frequently Changed Files
 
-- .kervo/events/2026-07.jsonl (25)
-- CLAUDE.md (16)
-- README.md (12)
-- README.ja.md (8)
-- README.ko.md (8)
+- .kervo/events/2026-07.jsonl (27)
+- CLAUDE.md (17)
+- README.md (13)
+- README.ja.md (9)
+- README.ko.md (9)
 - internal/adapters/source/files/files.go (8)
 - internal/adapters/source/files/files_test.go (8)
 - internal/cli/compile.go (8)
@@ -72,12 +72,12 @@ _No TODO/FIXME comments found._
 - assets/ (1 files)
 - cmd/ (1 files)
 - docs/ (60 files)
-- internal/ (54 files)
+- internal/ (57 files)
 - packaging/ (3 files)
 
 ## Workspace Facts
 
-- Commits analyzed: 44 (complete)
+- Commits analyzed: 46 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 6
 - Docs captured: 1
@@ -87,6 +87,10 @@ _No TODO/FIXME comments found._
 <!-- kervo:slot:goal:begin -->
 **[verified — human:refuse1993]**
 AgentOS-class direction (proposal, 2026-07-06): close the write-back loop. The injected block carries a contributing-back protocol — any consumer that learns a durable fact the artifact lacks (how-to-run, component roles, internals) captures it as a proposal; humans judge via review; every later session (any agent, any teammate) gets it for zero calls with a trust label. Exploration cost amortizes across the team. Phases: A write-back protocol in the artifact; B accreted wiki from verified observations (vs openwiki generation — no hallucination, staleness via trust lifecycle); C memory bus — personal agent memories sync in via import/MCP, team-shareable knowledge passes through review (vs agentmemory — shared and judged); D session handoff notes for WIP. Success metric (H5, pre-registerable): re-run the real-repo A/B after 2 weeks of write-back use — artifact-only score rises from 5.5/10 toward 10 at ~1 tool call.
+
+**[verified — human:refuse1993]**
+kervo dash — the fleet control tower (supersedes the single-repo SOTA page as the batch surface): init/compile self-register the workspace PATH (nothing else) into a machine-local registry (~/.kervo/workspaces.json, never committed); 'kervo dash' serves a one-shot localhost dashboard over every registered repo — per-repo pending counts, trust-state bars, last activity, and inline keyboard-first triage that writes each judgment to that repo's own ledger. Truth stays per-repo in git; the dashboard is a local derived lens, holds no state of its own, and dies with the command.
+Evidence: user direction 2026-07-06: 'init한 모든 kervo 레포를 한 페이지에서 관리' + '프로젝트를 위에서 전망할수있는'
 <!-- kervo:slot:goal:end -->
 
 ## Known Decisions
@@ -107,6 +111,10 @@ Evidence-attached proposals (Phase A extension, proposal): capture gains an opti
 **[verified — human:refuse1993]**
 review web UI (supersedes the 2026-07-04 HTML-report demotion for the triage surface only): 'kervo review -web' serves a one-shot localhost page — judge with buttons, reasons inline, evidence shown — and exits with the command. Reopening gate met: repeated user demand 2026-07-06. Guarantees intact: no daemon (lives only while the command runs), no external service, no account, state stays in .kervo/. Reading-wiki surfaces stay demoted.
 Evidence: user requests 2026-07-06: clean-CLAUDE.md thread, separate-DB thread, 'review 프론트 안 만들어?'
+
+**[verified — human:refuse1993]**
+review -web bar raised (refines 01KWTVKV): the batch surface must be a 2026-grade triage dashboard — keyboard-first (j/k/v/s/d/x, ? help), single-item focus flow with queue rail, live progress and per-state counters, optimistic UI with toasts, dark-first — while keeping zero dependencies (hand-written CSS/JS embedded in the binary, no build step, no CDN).
+Evidence: user directive 2026-07-06: '그 페이지는 2026 sota급 대시보드여야한다'
 
 **[generated — agent:claude-code]**
 inject mode option (v1.x candidate): default stays full-block in CLAUDE.md (zero-command clone is the product's proof); add opt-in '@.kervo/artifact.md' import mode for clean-CLAUDE.md users — trade-off: fresh clones see nothing until 'kervo compile'. Gate: field demand from real adopters.

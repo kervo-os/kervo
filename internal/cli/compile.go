@@ -329,6 +329,8 @@ func writeOutputs(ctx context.Context, dir, rendered, cursor string, lang i18n.L
 	if err := ensureGitignore(dir); err != nil {
 		return nil, err
 	}
+	// Machine-local, path-only, best-effort — powers `kervo dash`.
+	registerWorkspace(dir)
 	if err := injector.Apply(injPath, injContent); err != nil {
 		return nil, err
 	}

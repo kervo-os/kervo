@@ -243,6 +243,16 @@ never the agent's own). For batch triage, `kervo review -web` serves a
 one-shot local page — it lives only as long as the command, binds
 127.0.0.1, and keeps every design guarantee (no daemon, no account).
 
+### The fleet: `kervo dash`
+
+Every `kervo compile` registers its workspace **path** (path only,
+machine-local, never committed) in `~/.kervo/workspaces.json`. `kervo dash`
+opens a one-shot dashboard over all of them — pending judgments, trust-state
+bars, and last activity per repo — with keyboard-first inline triage
+(`1`–`9` open a repo, `j`/`k` move, `v`/`s`/`d` judge, `?` for keys) that
+writes each judgment back to that repo's own ledger. Truth stays per-repo in
+git; the dashboard is a lens, not a store, and it dies with the command.
+
 ## Commands
 
 | Command | Does |
@@ -252,6 +262,7 @@ one-shot local page — it lives only as long as the command, binds
 | `kervo capture -type <t> -body <text>` | Record an observation into the ledger |
 | `kervo trust -id <prefix> -to verified\|stale\|deprecated -reason <r>` | Judge an observation by ID (the scriptable primitive) |
 | `kervo review [-web]` | Triage queue — judge proposals and ⚠ conflicts one by one; `-web` serves a one-shot local page |
+| `kervo dash` | Fleet dashboard — every registered workspace on one page, inline triage |
 | `kervo status` | One-screen ledger + trust view |
 | `kervo metrics` | Prompt sizes with vs without the artifact (built-in A/B counters) |
 | `kervo import claude` | Back-fill the ledger from Claude Code transcripts (sizes only) |

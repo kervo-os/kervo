@@ -19,6 +19,7 @@ func commands() []command {
 		{"capture", "Record an Observation into the event ledger", runCapture},
 		{"trust", "Judge an observation: -id <prefix> -to verified|stale|deprecated", runTrust},
 		{"review", "Triage queue: judge generated proposals and ⚠ conflicts one by one", runReview},
+		{"dash", "Fleet dashboard: every registered workspace on one page (one-shot, 127.0.0.1)", runDash},
 		{"status", "One-screen view: ledger size, trust states, observations", runStatus},
 		{"metrics", "H3 counters: prompt sizes with vs without the artifact", runMetrics},
 		{"import", "Back-fill the ledger from existing stores: claude (transcripts, sizes only)", runImport},
