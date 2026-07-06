@@ -360,16 +360,27 @@ kervo import claude                                      # 過去の Claude Code
 - **サーバなし、デーモンなし、DB なし、アカウントなし** — すべての状態は
   `.kervo/` と `CLAUDE.md` に。
 
-## ステータス
+## ステータスとロードマップ
 
-v0.19.x — リリースは CI を通過し、理由があるときだけ切られ、すべて
-`CHANGELOG.md` に記録されます。実際の本番リポジトリで稼働中: write-back
-パイロットがオンボーディング回答 **5.5/10 → 9.5/10、ツール呼び出し 1 回**
-を計測し、最初のクロスベンダー write-back(`AGENTS.md` からプロトコルを
-読んだ Codex セッション)が実台帳に入っています。実験プロトコルと生の
-証拠は [kervo-os/experiments](https://github.com/kervo-os/experiments)
-にあり、事前登録のフライホイール再実行はカレンダーではなくボリューム
-ゲート(セッション 10 + 判定済み write-back 10)で行われます。
+v0.19.x、実際の本番リポジトリで稼働中 — リリースは CI を通過し、理由が
+あるときだけ切られ、すべて [CHANGELOG.md](CHANGELOG.md) にあります。
+証拠は [kervo-os/experiments](https://github.com/kervo-os/experiments) に。
+次のゲート: 事前登録フライホイール再実行 — セッション 10 + 判定済み
+write-back 10、カレンダーではなくボリューム基準。
+
+## コントリビュート
+
+```bash
+make build   # go 1.23+; ビルド手順はこれだけ
+go test -race ./...
+make arch-check   # core は adapters を import できない
+```
+
+Issue と PR を歓迎します。レビュアーが守らせる二つのこと: **依存関係ゼロ**
+(`go.mod` は stdlib のみ — 新しい依存には例外的な理由が必要)と**決定論**
+(スケルトンはゴールデンファイルで、i18n テーブルは完全性テストで固定、
+CI はレースディテクタ付き)。設計判断はこのリポジトリ自身の台帳にあります —
+クローンで `kervo dash` を開き、ナレッジビューを読んでください。
 
 ---
 

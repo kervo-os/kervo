@@ -362,17 +362,28 @@ in whatever language their proposer wrote.
 - **No server, no daemon, no database, no account** — all state lives in
   `.kervo/` and `CLAUDE.md`.
 
-## Status
+## Status & roadmap
 
-v0.19.x — releases are CI-gated and cut only for a reason; `CHANGELOG.md`
-records every one. Running on production repositories: the write-back
-pilot measured onboarding answers at **5.5/10 → 9.5/10 for one tool
-call**, and the first cross-vendor write-back (a Codex session, following
-the protocol it read from `AGENTS.md`) is in a real ledger. Experiment
-protocols and raw evidence live in
-[kervo-os/experiments](https://github.com/kervo-os/experiments); the
-pre-registered flywheel re-run fires at a volume gate (10 sessions +
-10 judged write-backs), not on a calendar.
+v0.19.x, running on production repositories — releases are CI-gated and
+cut only for a reason ([CHANGELOG.md](CHANGELOG.md) has every one).
+Evidence lives in [kervo-os/experiments](https://github.com/kervo-os/experiments).
+Next gate: the pre-registered flywheel re-run at 10 sessions + 10 judged
+write-backs — volume, not calendar.
+
+## Contributing
+
+```bash
+make build   # go 1.23+; the only build step there is
+go test -race ./...
+make arch-check   # the core must not import adapters
+```
+
+Issues and PRs are welcome. Two things reviewers will hold you to:
+**zero dependencies** (`go.mod` is stdlib-only; a new dependency needs an
+exceptional reason) and **determinism** (the skeleton is pinned by golden
+files; i18n tables are pinned complete; CI runs the race detector).
+Design decisions live in this repo's own ledger — open `kervo dash` on
+your clone and read the knowledge view.
 
 ---
 
