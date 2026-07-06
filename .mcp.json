@@ -1,0 +1,5 @@
+{
+  "mcpServers": {
+    "kervo": { "command": "kervo", "args": ["mcp"] }
+  }
+}
