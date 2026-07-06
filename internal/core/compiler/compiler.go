@@ -76,7 +76,13 @@ func BuildSkeleton(s fact.Snapshot, lang i18n.Lang) (string, error) {
 	b.WriteString("## " + tr("sec.stale") + "\n\n")
 	b.WriteString(artifact.SlotBegin(staleSlot) + "\n")
 	b.WriteString(tr("stale.empty") + "\n")
-	b.WriteString(artifact.SlotEnd(staleSlot) + "\n")
+	b.WriteString(artifact.SlotEnd(staleSlot) + "\n\n")
+
+	// The write-back flywheel: the artifact instructs its consumers to
+	// return durable facts it lacks, so exploration cost is paid once and
+	// amortized across every later session (goal 01KWTJGS).
+	b.WriteString("## " + tr("sec.writeback") + "\n\n")
+	b.WriteString(tr("writeback.body") + "\n")
 
 	return b.String(), nil
 }

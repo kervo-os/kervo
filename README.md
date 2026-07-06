@@ -149,6 +149,14 @@ The division of labor is deliberate: **agents capture, propose, and manage;
 the human only judges.** `kervo review` is that judging surface — a triage
 queue over everything awaiting a decision, one item at a time.
 
+Every artifact ends with a **write-back protocol** that closes the loop on
+exploration: it instructs any AI consumer to capture the durable facts it
+had to discover the hard way — how to run things, component roles,
+in-conversation decisions — as proposals. Judge them once with
+`kervo review`, and every later session — any agent, any teammate — gets
+the answer for zero tool calls. Duplicate bodies are dropped automatically,
+so the queue stays clean.
+
 ## Measured, not claimed
 
 Does any of this actually protect an agent from poisoned context? We

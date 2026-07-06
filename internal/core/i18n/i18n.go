@@ -105,6 +105,9 @@ var tables = map[Lang]map[string]string{
 
 		"sec.stale":   "Deprecated / Stale Notes",
 		"stale.empty": "_None recorded. Stale or deprecated observations are listed here with their\nexclusion reason instead of being silently dropped._",
+
+		"sec.writeback":  "Write-back Protocol",
+		"writeback.body": "> For AI consumers — close the loop. If this session taught you a durable\n> fact this artifact does not carry (how to run something, what a component\n> does, a decision made in conversation), stage it for human judgment:\n>\n> `kervo capture -type decision|risk|summary|goal -actor \"agent:<you>\" -body \"<the fact>\"`\n>\n> Rules: facts you observed, not speculation · one capture per fact · skip\n> what this artifact already says · never include secrets or file contents.\n> Duplicates are dropped automatically. A human triages the queue with\n> `kervo review`.",
 	},
 	KO: {
 		"hdr.quote": "> AI 에이전트용으로 기계 생성된 컨텍스트. Fact 섹션은 결정적으로 생성되며,\n> 슬롯 섹션에는 신뢰 라벨이 달린 관찰이 담긴다. `kervo compile`로 재생성 —\n> 손으로 수정하지 말 것.",
@@ -151,6 +154,9 @@ var tables = map[Lang]map[string]string{
 
 		"sec.stale":   "폐기·낡음 기록",
 		"stale.empty": "_기록 없음. 낡거나 폐기된 관찰은 조용히 삭제되는 대신\n제외 사유와 함께 여기에 나열된다._",
+
+		"sec.writeback":  "Write-back 프로토콜",
+		"writeback.body": "> AI 소비자용 — 루프를 닫을 것. 이 세션에서 이 artifact에 없는 지속적\n> 사실을 알게 됐다면(무언가의 실행 방법, 컴포넌트의 역할, 대화 중 내려진\n> 결정), 사람의 판정을 받도록 올려둘 것:\n>\n> `kervo capture -type decision|risk|summary|goal -actor \"agent:<너>\" -body \"<사실>\"`\n>\n> 규칙: 관찰한 사실만, 추측 금지 · 사실 하나당 캡처 하나 · 이 artifact에\n> 이미 있는 내용은 생략 · 비밀값·파일 내용은 절대 넣지 말 것. 중복은\n> 자동으로 버려진다. 사람이 `kervo review`로 큐를 판정한다.",
 	},
 	JA: {
 		"hdr.quote": "> AIエージェント向けに機械生成されたコンテキスト。Factセクションは決定的に生成され、\n> スロットセクションには信頼ラベル付きの観察が入る。`kervo compile`で再生成 —\n> 手で編集しないこと。",
@@ -197,5 +203,8 @@ var tables = map[Lang]map[string]string{
 
 		"sec.stale":   "廃止・陳腐化ノート",
 		"stale.empty": "_記録なし。陳腐化・廃止された観察は黙って消される代わりに、\n除外理由と共にここへ列挙される._",
+
+		"sec.writeback":  "Write-back プロトコル",
+		"writeback.body": "> AI コンシューマ向け — ループを閉じること。このセッションでこの artifact\n> にない持続的事実を知ったなら(何かの実行方法、コンポーネントの役割、会話中\n> の決定)、人間の判定を受けるよう登録すること:\n>\n> `kervo capture -type decision|risk|summary|goal -actor \"agent:<あなた>\" -body \"<事実>\"`\n>\n> ルール: 観察した事実のみ、推測禁止 · 事実ひとつにつきキャプチャひとつ ·\n> この artifact に既にある内容は省略 · 秘密情報・ファイル内容は決して入れ\n> ない。重複は自動的に破棄される。人間が `kervo review` でキューを判定する。",
 	},
 }

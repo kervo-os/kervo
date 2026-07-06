@@ -10,6 +10,7 @@ import (
 
 	"github.com/kervo-os/kervo/internal/adapters/store/jsonl"
 	"github.com/kervo-os/kervo/internal/core/event"
+	"github.com/kervo-os/kervo/internal/core/trust"
 )
 
 // runCapture appends an Observation to the workspace ledger — the manual
@@ -27,6 +28,22 @@ func runCapture(args []string) error {
 	if strings.TrimSpace(*body) == "" {
 		return fmt.Errorf("capture: -body is required")
 	}
+	store := jsonl.Open(*dir)
+	// Write-back guardrail: an identical live body is a duplicate, not new
+	// knowledge — agents re-reading the same session must not spam the
+	// review queue. Exit 0: a duplicate is a no-op, not an agent failure.
+	// Stale/deprecated bodies may be re-captured (re-assertion is a fresh
+	// claim for the human to judge).
+	folder, err := replayFolder(store)
+	if err != nil {
+		return err
+	}
+	for _, o := range folder.Observations() {
+		if o.Body == *body && o.State != trust.Stale && o.State != trust.Deprecated {
+			fmt.Printf("duplicate of %s (%s) — skipped\n", shortID(o.ID), o.State)
+			return nil
+		}
+	}
 	payload, err := json.Marshal(map[string]string{"body": *body})
 	if err != nil {
 		return err
@@ -35,7 +52,7 @@ func runCapture(args []string) error {
 	if err != nil {
 		return err
 	}
-	id, err := jsonl.Open(*dir).Append(context.Background(), event.Event{
+	id, err := store.Append(context.Background(), event.Event{
 		Kind:    event.KindObservation,
 		Type:    *typ,
 		Repo:    filepath.Base(abs),

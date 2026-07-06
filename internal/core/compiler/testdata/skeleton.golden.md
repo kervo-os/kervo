@@ -83,3 +83,16 @@ _None proposed yet. Semantic providers (Mode 2/3) attach labeled observations he
 _None recorded. Stale or deprecated observations are listed here with their
 exclusion reason instead of being silently dropped._
 <!-- kervo:slot:stale:end -->
+
+## Write-back Protocol
+
+> For AI consumers — close the loop. If this session taught you a durable
+> fact this artifact does not carry (how to run something, what a component
+> does, a decision made in conversation), stage it for human judgment:
+>
+> `kervo capture -type decision|risk|summary|goal -actor "agent:<you>" -body "<the fact>"`
+>
+> Rules: facts you observed, not speculation · one capture per fact · skip
+> what this artifact already says · never include secrets or file contents.
+> Duplicates are dropped automatically. A human triages the queue with
+> `kervo review`.

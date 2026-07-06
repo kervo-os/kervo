@@ -125,3 +125,38 @@ func TestHookSwallowsGarbage(t *testing.T) {
 		t.Errorf("garbage captured: %+v", got)
 	}
 }
+
+// Write-back guardrail: identical live bodies are duplicates — agents must
+// not be able to spam the review queue; re-capture is allowed once the
+// original was judged away (deprecated = fresh claim to re-judge).
+func TestCaptureDedupsLiveBodies(t *testing.T) {
+	dir := t.TempDir()
+	if err := runCapture([]string{"-dir", dir, "-type", "decision", "-body", "same fact", "-actor", "agent:test"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := runCapture([]string{"-dir", dir, "-type", "decision", "-body", "same fact", "-actor", "agent:test"}); err != nil {
+		t.Fatalf("duplicate capture must be a no-op, got: %v", err)
+	}
+	folder, err := replayFolder(jsonl.Open(dir))
+	if err != nil {
+		t.Fatal(err)
+	}
+	obs := folder.Observations()
+	if len(obs) != 1 {
+		t.Fatalf("observations = %d, want 1 (duplicate dropped)", len(obs))
+	}
+
+	if err := runTrust([]string{"-dir", dir, "-id", obs[0].ID[:10], "-to", "deprecated", "-reason", "judged wrong", "-actor", "human:test"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := runCapture([]string{"-dir", dir, "-type", "decision", "-body", "same fact", "-actor", "agent:test"}); err != nil {
+		t.Fatal(err)
+	}
+	folder, err = replayFolder(jsonl.Open(dir))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := len(folder.Observations()); got != 2 {
+		t.Fatalf("observations = %d, want 2 (re-assertion after deprecation allowed)", got)
+	}
+}
