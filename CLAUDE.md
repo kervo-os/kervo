@@ -31,6 +31,7 @@
 
 ## Recent Changes
 
+- `aa22916` 2026-07-06 changelog: v0.17.0
 - `64c6963` 2026-07-06 init/compile: choose your consumers — claude, codex, both, or auto
 - `e51d39d` 2026-07-06 brief: init alone must brief like a teammate — deterministically
 - `b93a143` 2026-07-06 privacy: the ledger carries no machine, no employer, no neighbor repos
@@ -50,14 +51,13 @@
 - `75a02f5` 2026-07-06 dash: a visualization layer worthy of the hero shot
 - `8511a60` 2026-07-06 ledger: session hook events
 - `444bed4` 2026-07-06 docs: external producers — publish the intake contract, don't chase formats
-- `105e5ed` 2026-07-06 ledger: session hook events
 
-_Showing 20 of 85 analyzed commits._
+_Showing 20 of 86 analyzed commits._
 
 ### Frequently Changed Files
 
 - .kervo/events/2026-07.jsonl (64)
-- CLAUDE.md (37)
+- CLAUDE.md (38)
 - README.md (28)
 - README.ja.md (24)
 - README.ko.md (24)
@@ -81,7 +81,7 @@ _No TODO/FIXME comments found._
 
 ## Workspace Facts
 
-- Commits analyzed: 85 (complete)
+- Commits analyzed: 86 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 5
 - Docs captured: 1
@@ -172,6 +172,10 @@ Evidence: user-supplied regenerated images 2026-07-06 21:45/21:47; JPEG 339KB/39
 **[verified — human:refuse1993]**
 Evidence lives in its own repo: kervo-os/experiments (h4 moved there with provenance kervo@f8f7a44; H5 lands there too). The product repo's docs/ was 60/60 experiment files - research corpora polluted the artifact's module facts and once injected fake TODOs. Three-repo structure now: kervo (product) / experiments (evidence) / kervo.dev (landing, later); READMEs link the receipts one click away. .kervoignore file removed from this repo (nothing left to exclude; the feature stays documented and tested).
 Evidence: user 2026-07-06: '그렇게 하자'; docs/experiments was 516KB, 60 files = 100% of docs/
+
+**[verified — human:refuse1993]**
+History purge executed before public promotion (user-approved sequence: land parallel work, purge, release). git filter-repo rewrote all blobs across the full history - machine paths relativized, a neighbor repo's name replaced - then force-pushed with all 24+ tags; verification greps across every rev: zero occurrences. The ledger itself was KEPT: deleting it would not have removed history leaks and would have destroyed the dogfood record. Local clones require re-clone or hard reset; release assets and brew unaffected. v0.17.0 ships the Brief, consumer choice, and the privacy hardening together.
+Evidence: user 2026-07-06: 'ㅇㅋ 그 순서로 가자'; post-purge grep across git rev-list --all: 0 hits for both strings
 <!-- kervo:slot:decisions:end -->
 
 ## Known Risks
