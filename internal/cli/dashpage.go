@@ -88,7 +88,8 @@ main{max-width:66rem;margin:0 auto;padding:1.6rem 1.4rem 3rem}
 .tag.note,.tag.correction{background:#6b728026;color:#9aa1ac}
 .conf{color:var(--d);font-weight:700}
 .mono{font-family:ui-monospace,monospace;font-size:.72rem}
-.body{white-space:pre-wrap;font-size:.98rem;line-height:1.75;max-width:64ch;margin-bottom:1rem}
+.body-title{font-size:1.05rem;font-weight:650;letter-spacing:-.01em;line-height:1.5;max-width:60ch;margin-bottom:.45rem}
+.body{white-space:pre-wrap;font-size:.94rem;line-height:1.75;max-width:64ch;margin-bottom:1rem;color:color-mix(in srgb,var(--fg) 82%,var(--muted))}
 .evid{font:.8rem/1.6 ui-monospace,monospace;color:var(--muted);border-left:3px solid var(--v);
   padding:.2rem 0 .2rem .75rem;margin-bottom:1.1rem;white-space:pre-wrap;opacity:.9}
 .actions{display:flex;gap:.45rem;flex-wrap:wrap;align-items:center}
@@ -235,7 +236,15 @@ function renderTriage(){
   const m = el("div","meta");
   m.append(el("span","tag "+o.Type,o.Type), el("span","mono",o.ShortID), el("span","",o.State), el("span","",o.Actor));
   if(o.Conflict) m.append(el("span","conf","⚠ conflict"));
-  c.append(m, el("div","body",o.Body));
+  c.append(m);
+  // Claim-first display: the first line (or the pre-colon lead of a
+  // one-paragraph body) becomes the headline, the rest reads as detail.
+  const nl = o.Body.indexOf("\n"), col = o.Body.indexOf(":");
+  let head = o.Body, rest = "";
+  if(nl > 0){ head = o.Body.slice(0,nl); rest = o.Body.slice(nl+1).trim() }
+  else if(col > 0 && col < 90){ head = o.Body.slice(0,col); rest = o.Body.slice(col+1).trim() }
+  c.append(el("div","body-title",head));
+  if(rest) c.append(el("div","body",rest));
   if(o.Evidence) c.append(el("div","evid","evidence: "+o.Evidence));
   const a = el("div","actions");
   const reason = el("input"); reason.id="reason"; reason.placeholder="reason (optional) — r to focus";
