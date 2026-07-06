@@ -120,6 +120,11 @@ with a warning, and the fact skeleton is always produced:
 | **2 — Consumer-assisted** | Your AI session stages proposals in `.kervo/proposals.json` | an agent session |
 | **3 — Dedicated backend** | Any OpenAI-compatible endpoint proposes observations | a local or remote LLM |
 
+Mode 3 is a bootstrap channel: it fills empty slots when no capturing
+agent has worked in the repo yet. Once Mode 2 session capture is live,
+leave the env unset — artifact-only inference reads history, not intent,
+and mostly adds review noise (measured on a real repo).
+
 Mode 3 with a fully local model (nothing leaves your machine):
 
 ```bash

@@ -26,6 +26,9 @@
 
 ## Recent Changes
 
+- `8a6f3f1` 2026-07-06 changelog: v0.13.1
+- `757172b` 2026-07-06 dash: the buttons now explain themselves — judgment semantics in the UI
+- `6e1dda5` 2026-07-06 ledger: write-back pilot on the real repo — 5.5 to 9.5 at one call
 - `1022166` 2026-07-06 ledger: session hook events
 - `deaf0a1` 2026-07-06 ledger: consolidation summary
 - `b8eaf90` 2026-07-06 consolidate: no new features — pay the day's debt
@@ -43,24 +46,21 @@
 - `614c088` 2026-07-06 dash: the fleet control tower — every workspace, one page
 - `898eaf5` 2026-07-06 dogfood: register the kervo MCP server for sessions in this repo
 - `2af8964` 2026-07-06 mcp + review -web: the conversation is the frontend
-- `ea3c874` 2026-07-06 ledger: session hook events
-- `c6e4fbe` 2026-07-06 store: monotonic ULIDs within a millisecond — replay must match append order
-- `002394e` 2026-07-06 flywheel: evidence-attached proposals — labor to agents, signature to humans
 
-_Showing 20 of 61 analyzed commits._
+_Showing 20 of 64 analyzed commits._
 
 ### Frequently Changed Files
 
-- .kervo/events/2026-07.jsonl (42)
-- CLAUDE.md (22)
+- .kervo/events/2026-07.jsonl (44)
+- CLAUDE.md (23)
 - README.md (19)
 - README.ja.md (15)
 - README.ko.md (15)
 - internal/cli/compile.go (11)
-- internal/cli/dashpage.go (9)
+- internal/cli/dashpage.go (10)
+- internal/cli/dash.go (9)
+- internal/core/i18n/i18n.go (9)
 - internal/adapters/source/files/files.go (8)
-- internal/adapters/source/files/files_test.go (8)
-- internal/cli/dash.go (8)
 
 ## Open Tasks
 
@@ -77,7 +77,7 @@ _No TODO/FIXME comments found._
 
 ## Workspace Facts
 
-- Commits analyzed: 61 (complete)
+- Commits analyzed: 64 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 6
 - Docs captured: 1
@@ -128,6 +128,10 @@ Evidence: user directive 2026-07-06: '그 페이지는 2026 sota급 대시보드
 **[generated — agent:claude-code]**
 H5 trigger is volume-based, not calendar-based (proposal). Agent-velocity development voids the two-week frame: today alone this repo accrued ~400 ledger events. Re-run the real-repo A/B once the adopted workspace accumulates >=10 artifact-present sessions and >=10 write-back proposals judged — at agent pace that is days, possibly hours.
 Evidence: user challenge 2026-07-06: 'ai agent로 개발중인데 2주뒤에 뭐 볼게 있나'; kervo ledger: 400 events in one day
+
+**[generated — agent:claude-code]**
+Mode 3 is a bootstrap channel, not a running mate to Mode 2 (field eval on the adopted real repo, 2026-07-06). With only the artifact as input (commit messages + TODO list), a local 120b produced a rear-view goal (inferred from pushed history; the real goal lived in an unpushed branch — stale, not hallucinated) and an overreaching risk (18 TODOs exist -> 'critical logic is empty'; evidence does not support the conclusion). Session-verified Mode 2 capture measured 9.5/10 the same day. The trust gate worked as designed: both weak proposals arrived as [generated] and were quarantined pending judgment. Positioning: run Mode 3 to fill empty slots at cold start; once Mode 2 capture is live, leave KERVO_SEMANTIC_URL unset (auto Mode 1) — artifact-only inference reads history, not intent, and adds review noise.
+Evidence: user-relayed eval 2026-07-06: goal C+ (rear-view), risk D (fact->overreach), 9.5s local 120b, 2 proposals; Mode 2 pilot 9.5/10 same day
 <!-- kervo:slot:decisions:end -->
 
 ## Known Risks
