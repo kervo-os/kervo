@@ -62,6 +62,14 @@ func BriefFocus(s fact.Snapshot) string {
 	if len(window) < 3 {
 		return ""
 	}
+	// History describes paths that may no longer exist — repos extracted
+	// from a parent directory carry the old prefix in every pre-split
+	// commit. The brief describes the repo that exists: only current
+	// top-level modules count.
+	current := map[string]bool{}
+	for _, m := range s.Modules {
+		current[m.Path] = true
+	}
 	scopes := map[string]int{}
 	mods := map[string]int{}
 	for _, c := range window {
@@ -70,7 +78,7 @@ func BriefFocus(s fact.Snapshot) string {
 		}
 		seen := map[string]bool{}
 		for _, f := range c.Files {
-			if i := strings.IndexByte(f, '/'); i > 0 && f[0] != '.' && !seen[f[:i]] {
+			if i := strings.IndexByte(f, '/'); i > 0 && f[0] != '.' && !seen[f[:i]] && current[f[:i]] {
 				seen[f[:i]] = true
 				mods[f[:i]]++
 			}

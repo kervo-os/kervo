@@ -124,19 +124,23 @@ func buildOverview(snap fact.Snapshot) *dashOverview {
 	for _, m := range snap.Modules {
 		ov.Modules = append(ov.Modules, dashModule{Name: m.Path, Files: m.Files})
 	}
-	ov.Links = coupledModules(snap.Commits)
+	current := map[string]bool{}
+	for _, m := range snap.Modules {
+		current[m.Path] = true
+	}
+	ov.Links = coupledModules(snap.Commits, current)
 	return ov
 }
 
 // coupledModules counts top-level module pairs touched by the same commit.
 // Commits spanning more than 6 modules are skipped as noise (mass renames,
 // formatting sweeps). Deterministic: ties break lexically.
-func coupledModules(commits []fact.Commit) []dashLink {
+func coupledModules(commits []fact.Commit, current map[string]bool) []dashLink {
 	pair := map[[2]string]int{}
 	for _, c := range commits {
 		mods := map[string]bool{}
 		for _, f := range c.Files {
-			if i := strings.IndexByte(f, '/'); i > 0 && f[0] != '.' {
+			if i := strings.IndexByte(f, '/'); i > 0 && f[0] != '.' && current[f[:i]] {
 				// Dot-dirs are plumbing (.kervo travels with every commit
 				// by design, .github with releases) — coupling is about
 				// code modules.

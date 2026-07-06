@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"sort"
@@ -80,6 +81,16 @@ func (s *Scanner) Scan(ctx context.Context, dir, cursor string) (fact.Snapshot, 
 	snap.Commits = commits
 	snap.Partial = partial
 	snap.Files = aggregateFiles(commits)
+	// History names paths that may no longer exist (repos extracted from a
+	// parent directory carry the old prefix). Hot files describe the repo
+	// that exists.
+	kept := snap.Files[:0]
+	for _, f := range snap.Files {
+		if _, err := os.Stat(filepath.Join(dir, f.Path)); err == nil {
+			kept = append(kept, f)
+		}
+	}
+	snap.Files = kept
 
 	tracked, err := s.lsFiles(ctx, dir)
 	if err == nil {
