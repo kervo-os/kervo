@@ -3,6 +3,16 @@
 All notable changes, newest first. Versions are git tags; every release
 ships prebuilt binaries and a Homebrew cask (`brew install kervo-os/tap/kervo`).
 
+## v0.16.0 — 2026-07-06
+
+- The conversation is the review: the write-back protocol and MCP tools now
+  instruct agents to relay in-session affirmations with the capture, quoting
+  the human's words — the queue holds only what no human has seen. Conflicts
+  with verified entries become questions to the human, not re-proposals.
+- Queue guardrails: "conclusions, not corpus" joins the protocol, and
+  capture applies backpressure — a source with 12 unjudged proposals must
+  seek judgment before proposing more (humans are never throttled).
+
 ## v0.15.0 — 2026-07-06
 
 - The knowledge view: workspace detail renders every verified and observed

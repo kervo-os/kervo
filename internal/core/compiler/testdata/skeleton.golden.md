@@ -98,5 +98,11 @@ exclusion reason instead of being silently dropped._
 > one-line claim, details after it · attach evidence — the command you
 > ran, the doc you read — so the human can sign in one keystroke · one
 > capture per fact · skip what this artifact already says · never include
-> secrets or file contents. Duplicates are dropped automatically. A human
-> triages the queue with `kervo review`.
+> secrets or file contents. Duplicates are dropped automatically.
+>
+> The conversation is the review: if the human affirmed a fact in this
+> session, relay their judgment with the capture (`kervo trust -to
+> verified -reason "<their words>"`) — only undiscussed facts wait in
+> the queue (`kervo review`). If evidence contradicts a verified entry,
+> raise it with the human and record their updated judgment instead of
+> re-proposing.

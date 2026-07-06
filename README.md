@@ -190,7 +190,9 @@ winner. Stale entries are listed with their exclusion reason instead of being
 silently dropped.
 
 The division of labor is deliberate: **agents capture, propose, and manage;
-the human only judges.** `kervo review` is that judging surface — a triage
+the human only judges.** And the conversation is a review surface: when the
+human affirms a fact in-session, the agent relays that judgment with the
+capture, quoting their words — the queue holds only what no human has seen. `kervo review` is that judging surface — a triage
 queue over everything awaiting a decision, one item at a time.
 
 Every artifact ends with a **write-back protocol** that closes the loop on

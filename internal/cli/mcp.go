@@ -131,7 +131,7 @@ func mcpToolDefs() []map[string]any {
 		},
 		{
 			"name":        "kervo_capture",
-			"description": "Write-back: stage one durable fact this workspace's artifact lacks as a proposal for human judgment. Attach evidence (the command you ran, the doc you read). Duplicates are dropped automatically.",
+			"description": "Write-back: stage one durable fact this workspace's artifact lacks. Attach evidence (the command you ran, the doc you read). Duplicates are dropped automatically. If the human affirmed this fact in the current session, follow up with review_judge quoting their words — the conversation is the review; only undiscussed facts wait in the queue.",
 			"inputSchema": obj(map[string]any{
 				"type":     str("decision | risk | summary | goal | note"),
 				"body":     str("the fact, one per call"),
@@ -146,7 +146,7 @@ func mcpToolDefs() []map[string]any {
 		},
 		{
 			"name":        "review_judge",
-			"description": "Record a judgment the human explicitly stated in conversation (verified | stale | deprecated). Only call this to relay the human's decision, never your own.",
+			"description": "Record a judgment the human explicitly stated in conversation (verified | stale | deprecated) — including an in-session affirmation of a fact you just captured. Quote the human's words in reason. Only relay the human's decision, never your own.",
 			"inputSchema": obj(map[string]any{
 				"id":     str("observation ID or unique prefix"),
 				"to":     str("verified | stale | deprecated"),

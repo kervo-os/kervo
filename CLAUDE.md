@@ -26,6 +26,7 @@
 
 ## Recent Changes
 
+- `2ec13e5` 2026-07-06 ledger: the conversation is a review surface — a plan
 - `1e5d5ce` 2026-07-06 ledger: workspace-native wiki management — a plan, not code
 - `412a256` 2026-07-06 dash: the knowledge view — judged knowledge IS the wiki
 - `f0de3ab` 2026-07-06 ledger: llm-wiki-newsroom assessed — first producer candidate, zero code needed
@@ -45,14 +46,13 @@
 - `1cfbd6b` 2026-07-06 dash: workspace detail carries the project itself, not just the queue
 - `f549544` 2026-07-06 identity: the K mark — SVG redraw of the user's logo, wired everywhere
 - `b9d7447` 2026-07-06 dash: judged records stay visible — the ledger never hides history
-- `5b38a0f` 2026-07-06 inject: opt-in import mode — one @-line for clean-CLAUDE.md teams
 
-_Showing 20 of 74 analyzed commits._
+_Showing 20 of 75 analyzed commits._
 
 ### Frequently Changed Files
 
-- .kervo/events/2026-07.jsonl (54)
-- CLAUDE.md (29)
+- .kervo/events/2026-07.jsonl (55)
+- CLAUDE.md (30)
 - README.md (24)
 - README.ja.md (20)
 - README.ko.md (20)
@@ -77,7 +77,7 @@ _No TODO/FIXME comments found._
 
 ## Workspace Facts
 
-- Commits analyzed: 74 (complete)
+- Commits analyzed: 75 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 6
 - Docs captured: 1
@@ -125,6 +125,10 @@ Evidence: user requests 2026-07-06: clean-CLAUDE.md thread, separate-DB thread, 
 review -web bar raised (refines 01KWTVKV): the batch surface must be a 2026-grade triage dashboard — keyboard-first (j/k/v/s/d/x, ? help), single-item focus flow with queue rail, live progress and per-state counters, optimistic UI with toasts, dark-first — while keeping zero dependencies (hand-written CSS/JS embedded in the binary, no build step, no CDN).
 Evidence: user directive 2026-07-06: '그 페이지는 2026 sota급 대시보드여야한다'
 
+**[verified — human:refuse1993]**
+The conversation IS a review surface (plan for judgment; user challenge 2026-07-06). Formalize what this project already practices: when a human explicitly affirms a specific claim in session, the agent records capture AND relays the verification in one motion - reason quotes the affirmation as evidence - and no queue round-trip happens. The queue does not disappear; it shrinks to its true purpose: knowledge no human has seen (unattended write-backs, external producers, other agents' sessions, Mode 3). Three boundaries hold: (1) affirmation is claim-scoped, not vibe-scoped - an OK covers what was actually put to the human; anything learned but not discussed stays generated; (2) provenance must say HOW it was verified ('user approved in session' + quote), so signatures stay auditable; (3) the self-signature ban is untouched - the agent relays the human's stated judgment, never its own. Conflict flow, protocol-level: a consumer that finds evidence contradicting a verified entry raises it with the human in conversation, then records the updated judgment (deprecate old with reason + capture new, or re-affirm) - conflicts become questions, not queue sediment. Implementation when judged: protocol text for the injected block and MCP tool descriptions; a capture sugar flag (one command for capture+relay) only if the two-command pattern shows friction.
+Evidence: user 2026-07-06: '사람이 OK 했으니까 진행된거면 그것 자체가 검증. 과거랑 다르면 다시 물어보고 팩트를 바꾸면'; this session's own practice (capture then trust with chat-quote reasons) as the working precedent
+
 **[generated — agent:claude-code]**
 H5 trigger is volume-based, not calendar-based (proposal). Agent-velocity development voids the two-week frame: today alone this repo accrued ~400 ledger events. Re-run the real-repo A/B once the adopted workspace accumulates >=10 artifact-present sessions and >=10 write-back proposals judged — at agent pace that is days, possibly hours.
 Evidence: user challenge 2026-07-06: 'ai agent로 개발중인데 2주뒤에 뭐 볼게 있나'; kervo ledger: 400 events in one day
@@ -148,10 +152,6 @@ Evidence: dash knowledge view shipped 2026-07-06; screenshot-verified on this re
 **[generated — agent:claude-code]**
 Workspace-native wiki management (plan for judgment; reframe by user 2026-07-06: kervo manages the workspace, and a wiki inside it is workspace surface to manage in place - not a corpus to copy into the ledger). Stage W1, fact scan: detect a wiki/ markdown tree and state it in the artifact and dash as facts - page counts per sub-tree, last change - declared-only (the directory structure is the declaration), deterministic, zero content copying; every session learns the wiki's existence and map for zero calls, which makes 'conclusions, not corpus' natural: the corpus is pointable. Gate: a real workspace grows a wiki (newsroom adoption). Stage W2, convention only: knowledge entries cite wiki pages as evidence anchors - already expressible, document it. Stage W3, page-level trust states (deferred, needs real design): signing a page raises the invalidation question - a signature should probably bind to a content hash, not a path - so this stage waits for demand and gets planned properly, not improvised. Boundary unchanged: wiki lint/graph stay the producer's job; kervo adds existence, scale, freshness, and the trust layer.
 Evidence: user reframe 2026-07-06: '우리는 워크스페이스 기준으로 관리하는 역할. 그 워크스페이스에 위키가 있으면 그것까지 관리하는 것'
-
-**[generated — agent:claude-code]**
-The conversation IS a review surface (plan for judgment; user challenge 2026-07-06). Formalize what this project already practices: when a human explicitly affirms a specific claim in session, the agent records capture AND relays the verification in one motion - reason quotes the affirmation as evidence - and no queue round-trip happens. The queue does not disappear; it shrinks to its true purpose: knowledge no human has seen (unattended write-backs, external producers, other agents' sessions, Mode 3). Three boundaries hold: (1) affirmation is claim-scoped, not vibe-scoped - an OK covers what was actually put to the human; anything learned but not discussed stays generated; (2) provenance must say HOW it was verified ('user approved in session' + quote), so signatures stay auditable; (3) the self-signature ban is untouched - the agent relays the human's stated judgment, never its own. Conflict flow, protocol-level: a consumer that finds evidence contradicting a verified entry raises it with the human in conversation, then records the updated judgment (deprecate old with reason + capture new, or re-affirm) - conflicts become questions, not queue sediment. Implementation when judged: protocol text for the injected block and MCP tool descriptions; a capture sugar flag (one command for capture+relay) only if the two-command pattern shows friction.
-Evidence: user 2026-07-06: '사람이 OK 했으니까 진행된거면 그것 자체가 검증. 과거랑 다르면 다시 물어보고 팩트를 바꾸면'; this session's own practice (capture then trust with chat-quote reasons) as the working precedent
 <!-- kervo:slot:decisions:end -->
 
 ## Known Risks
@@ -203,10 +203,18 @@ exclusion reason instead of being silently dropped._
 >
 > `kervo capture -type decision|risk|summary|goal -actor "agent:<you>" -body "<the fact>" -evidence "<how you verified it>"`
 >
-> Rules: facts you observed, not speculation · start the body with a
+> Rules: facts you observed, not speculation · conclusions, not corpus —
+> what lives in a file agents can read stays there; cite it as evidence
+> instead of mirroring it · start the body with a
 > one-line claim, details after it · attach evidence — the command you
 > ran, the doc you read — so the human can sign in one keystroke · one
 > capture per fact · skip what this artifact already says · never include
-> secrets or file contents. Duplicates are dropped automatically. A human
-> triages the queue with `kervo review`.
+> secrets or file contents. Duplicates are dropped automatically.
+>
+> The conversation is the review: if the human affirmed a fact in this
+> session, relay their judgment with the capture (`kervo trust -to
+> verified -reason "<their words>"`) — only undiscussed facts wait in
+> the queue (`kervo review`). If evidence contradicts a verified entry,
+> raise it with the human and record their updated judgment instead of
+> re-proposing.
 <!-- kervo:end -->
