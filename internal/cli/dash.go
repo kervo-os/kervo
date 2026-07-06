@@ -67,6 +67,7 @@ type dashItem struct {
 
 type dashRepo struct {
 	Path, Name, Lang string
+	DisplayPath      string // Path with $HOME shortened to ~ — for humans
 	Events           int
 	Counts           map[string]int
 	LastEvent        string // RFC3339, "" if the ledger is empty
@@ -102,7 +103,8 @@ func newDashServer(paths []string, actorFlag string) (*dashServer, error) {
 		}
 		repo := &dashRepo{
 			Path: p, Name: filepath.Base(p), Lang: workspaceLang(p),
-			Events: events, Counts: map[string]int{},
+			DisplayPath: displayPath(p),
+			Events:      events, Counts: map[string]int{},
 			// Never nil: a clear repo must marshal as [], not null — the
 			// page reads .Items.length on every repo before rendering.
 			Items: []dashItem{},
@@ -123,6 +125,14 @@ func newDashServer(paths []string, actorFlag string) (*dashServer, error) {
 		s.byPath[p] = repo
 	}
 	return s, nil
+}
+
+func displayPath(p string) string {
+	home, err := os.UserHomeDir()
+	if err != nil || home == "" || !strings.HasPrefix(p, home) {
+		return p
+	}
+	return "~" + strings.TrimPrefix(p, home)
 }
 
 func workspaceLang(dir string) string {
