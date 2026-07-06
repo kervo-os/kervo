@@ -56,6 +56,14 @@ Go 툴체인이 필요 없습니다. 실제 저장소 기준 첫 실행은 1초 
 있으면 같은 마커 블록을 같은 계약으로 거기에도 주입합니다. 파일 존재가 곧
 opt-in이고(`touch AGENTS.md`), kervo가 이 파일을 스스로 만들지는 않습니다.
 
+`CLAUDE.md`를 깔끔하게 유지하고 싶다면? `kervo compile -inject import`가
+전체 블록 대신 `@.kervo/artifact.md` 한 줄만 주입합니다(Claude Code가 로드
+시점에 확장). 트레이드오프는 의도된 것입니다: artifact 파일은 파생물이라
+gitignore 대상이므로, 신선한 클론은 `kervo compile` 한 번 전까지 아무것도
+보지 못합니다 — 전체 블록이 기본값인 이유입니다. 선택은 워크스페이스별로
+유지됩니다(`.kervo/inject`, 커밋됨). `@` 줄은 Claude Code 문법이라
+AGENTS.md 소비자는 확장하지 못할 수 있습니다.
+
 **Artifact가 담는 것:** 저장소 요약 · 선언된 명령어(Makefile 타깃, npm
 스크립트, docker-compose 서비스, pyproject 스크립트, justfile 레시피) ·
 머지 노이즈를 제외한 최근 변경 · 열린 TODO/FIXME · 모듈 구조 — 모노레포의
@@ -197,6 +205,13 @@ artifact), **B**(같은 내용, 트러스트 라벨 제거), **C**(관리 없는
     ]
   }
 }
+```
+
+다이제스트 자체도 신경 쓰지 않고 최신으로 — git post-commit 훅:
+
+```bash
+printf '#!/bin/sh\nkervo compile >/dev/null 2>&1 || true\n' > .git/hooks/post-commit
+chmod +x .git/hooks/post-commit
 ```
 
 훅은 밀리초 예산의 로컬 append입니다 — LLM 없음, 네트워크 없음, 세션을

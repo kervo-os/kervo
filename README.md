@@ -58,6 +58,14 @@ the repo root, kervo injects the same marker block there too, under the same
 contract. Presence is the opt-in — `touch AGENTS.md` — and kervo never
 creates the file on its own.
 
+Prefer a clean `CLAUDE.md`? `kervo compile -inject import` swaps the full
+block for a single `@.kervo/artifact.md` line (Claude Code expands it at
+load time). The trade-off is deliberate: the artifact file is derived and
+gitignored, so fresh clones see nothing until one `kervo compile` — which
+is why the full block stays the default. The choice persists per workspace
+(`.kervo/inject`, committed). The `@`-line is Claude Code syntax; AGENTS.md
+readers may not expand it.
+
 **What the artifact covers:** repository summary · declared commands (Makefile
 targets, npm scripts, docker-compose services, pyproject scripts, justfile
 recipes) · recent changes with merge noise excluded · open TODO/FIXME tasks ·
@@ -213,6 +221,14 @@ project directory, so `kervo` just needs to be on PATH):
     ]
   }
 }
+```
+
+Keep the digest itself fresh without thinking about it — a git post-commit
+hook:
+
+```bash
+printf '#!/bin/sh\nkervo compile >/dev/null 2>&1 || true\n' > .git/hooks/post-commit
+chmod +x .git/hooks/post-commit
 ```
 
 The hook is a millisecond-budget local append — no LLM, no network, and it

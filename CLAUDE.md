@@ -26,6 +26,14 @@
 
 ## Recent Changes
 
+- `17ea7bc` 2026-07-06 dash: user-switchable language — in-page selector, choice persists
+- `d40e267` 2026-07-06 dash: speak the user's language — en/ko/ja chrome from the i18n tables
+- `d67c5e1` 2026-07-06 ledger: session hook events
+- `eb12de9` 2026-07-06 dash: claim-first display + capture convention — lead with a one-line claim
+- `9cb11b6` 2026-07-06 dash: sellable — monogram identity, readable paths, product-grade visuals
+- `1661d55` 2026-07-06 dash: a clear repo must not blank the page — Items marshals as [], never null
+- `0b283a0` 2026-07-06 ledger: session hook events
+- `614c088` 2026-07-06 dash: the fleet control tower — every workspace, one page
 - `898eaf5` 2026-07-06 dogfood: register the kervo MCP server for sessions in this repo
 - `2af8964` 2026-07-06 mcp + review -web: the conversation is the frontend
 - `ea3c874` 2026-07-06 ledger: session hook events
@@ -38,27 +46,19 @@
 - `19958ed` 2026-07-06 ledger: agentOS-class direction — the write-back flywheel (proposal)
 - `d0d27d8` 2026-07-06 scan: declared pytest runners (real-repo eval field finding)
 - `72216b9` 2026-07-06 review: the verifier's surface — triage queue over pending judgments
-- `70639d4` 2026-07-06 consumer: AGENTS.md as a second injection target (opt-in by presence)
-- `39c1a0f` 2026-07-06 ledger: propose AGENTS.md injection target (codex A/B field evidence)
-- `404c54c` 2026-07-06 ledger: propose inject-mode option (agent proposal, awaiting judgment)
-- `4754cc8` 2026-07-06 scan: strip block-comment closers from TODO text
-- `619a7df` 2026-07-06 ledger: live hook events from the v0.1.1 release session
-- `2c032a4` 2026-07-06 release: GoReleaser pipeline — prebuilt binaries + Homebrew tap
-- `e7fa626` 2026-07-05 ledger: first live hook events from a real session
-- `25a59c2` 2026-07-05 release prep: team workflow docs, commands reference, self-scan fixes
 
-_Showing 20 of 46 analyzed commits._
+_Showing 20 of 54 analyzed commits._
 
 ### Frequently Changed Files
 
-- .kervo/events/2026-07.jsonl (27)
-- CLAUDE.md (17)
-- README.md (13)
-- README.ja.md (9)
-- README.ko.md (9)
+- .kervo/events/2026-07.jsonl (35)
+- CLAUDE.md (18)
+- README.md (16)
+- README.ja.md (12)
+- README.ko.md (12)
+- internal/cli/compile.go (9)
 - internal/adapters/source/files/files.go (8)
 - internal/adapters/source/files/files_test.go (8)
-- internal/cli/compile.go (8)
 - internal/core/compiler/compiler.go (8)
 - internal/core/compiler/compiler_test.go (7)
 
@@ -72,12 +72,12 @@ _No TODO/FIXME comments found._
 - assets/ (1 files)
 - cmd/ (1 files)
 - docs/ (60 files)
-- internal/ (57 files)
+- internal/ (61 files)
 - packaging/ (3 files)
 
 ## Workspace Facts
 
-- Commits analyzed: 46 (complete)
+- Commits analyzed: 54 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 6
 - Docs captured: 1
@@ -97,6 +97,9 @@ Evidence: user direction 2026-07-06: 'init한 모든 kervo 레포를 한 페이�
 
 <!-- kervo:slot:decisions:begin -->
 **[verified — human:refuse1993]**
+inject mode option (v1.x candidate): default stays full-block in CLAUDE.md (zero-command clone is the product's proof); add opt-in '@.kervo/artifact.md' import mode for clean-CLAUDE.md users — trade-off: fresh clones see nothing until 'kervo compile'. Gate: field demand from real adopters.
+
+**[verified — human:refuse1993]**
 AGENTS.md injection target: field evidence from codex-cli 0.142.5 A/B test (2026-07-06) — with CLAUDE.md only codex answered NO CONTEXT LOADED; with the same block copied to AGENTS.md it correctly answered from a trust-labeled risk observation without opening files. Proposal: inject the marker block into AGENTS.md when the file already exists; creating it is opt-in.
 
 **[verified — human:refuse1993]**
@@ -104,6 +107,12 @@ kervo review (v1.x candidate): interactive triage inbox over pending observation
 
 **[verified — human:refuse1993]**
 Operating principle (user directive 2026-07-06): minimize human touch on every element — project management is agent-driven; the human's role converges to verifier. Product surface follows: agents capture, propose, and manage; humans judge, primarily via 'kervo review'.
+
+**[verified — human:refuse1993]**
+Post-commit auto-compile (proposal): a 2-line git post-commit hook running 'kervo compile' keeps the digest current with zero human touch. Ship as README documentation first; an init flag installer only on repeat demand.
+
+**[verified — human:refuse1993]**
+Phase B refinement (fact-wiki design): the accreted wiki renders verified observations grouped into stable sections, each fact carrying an evidence anchor (file path / commit hash) that GitHub renders as a clickable link. kervo links to code, never copies it — code browsing and search stay with the consumer (agent, IDE, GitHub); the artifact is the map that tells them where to look for zero calls.
 
 **[verified — human:refuse1993]**
 Evidence-attached proposals (Phase A extension, proposal): capture gains an optional -evidence field ('reproduced: ran cd api && pytest, 81 passed' / 'source: docs/adr-007.md'); the write-back protocol asks agents to attach reproduction evidence; review displays it under the body. Reproducible facts then arrive substantively pre-verified by the LLM and the human signs in one keystroke — verification LABOR moves to agents, the verified SIGNATURE stays human. Auto-verify policies for reproducible types stay opt-in per team, never default.
@@ -115,24 +124,12 @@ Evidence: user requests 2026-07-06: clean-CLAUDE.md thread, separate-DB thread, 
 **[verified — human:refuse1993]**
 review -web bar raised (refines 01KWTVKV): the batch surface must be a 2026-grade triage dashboard — keyboard-first (j/k/v/s/d/x, ? help), single-item focus flow with queue rail, live progress and per-state counters, optimistic UI with toasts, dark-first — while keeping zero dependencies (hand-written CSS/JS embedded in the binary, no build step, no CDN).
 Evidence: user directive 2026-07-06: '그 페이지는 2026 sota급 대시보드여야한다'
-
-**[generated — agent:claude-code]**
-inject mode option (v1.x candidate): default stays full-block in CLAUDE.md (zero-command clone is the product's proof); add opt-in '@.kervo/artifact.md' import mode for clean-CLAUDE.md users — trade-off: fresh clones see nothing until 'kervo compile'. Gate: field demand from real adopters.
-
-**[generated — agent:claude-code]**
-Post-commit auto-compile (proposal): a 2-line git post-commit hook running 'kervo compile' keeps the digest current with zero human touch. Ship as README documentation first; an init flag installer only on repeat demand.
-
-**[generated — agent:claude-code]**
-Uncommitted-work visibility (proposal, low priority): eval noted WIP is invisible. A 'N files modified' fact would cover it without content leakage but churns CLAUDE.md mid-work and strains byte-determinism. Defer unless demand repeats.
-
-**[generated — agent:claude-code]**
-Phase B refinement (fact-wiki design): the accreted wiki renders verified observations grouped into stable sections, each fact carrying an evidence anchor (file path / commit hash) that GitHub renders as a clickable link. kervo links to code, never copies it — code browsing and search stay with the consumer (agent, IDE, GitHub); the artifact is the map that tells them where to look for zero calls.
 <!-- kervo:slot:decisions:end -->
 
 ## Known Risks
 
 <!-- kervo:slot:risks:begin -->
-**[generated — agent:claude-code]**
+**[verified — human:refuse1993]**
 In repos without a capture habit, Mode 1 leaves goal/decisions/risks empty and the artifact reads as a git digest only — the measured-protection value (H4) only materializes once slots are filled via session capture or Mode 2/3 (real-repo eval, 2026-07-06).
 <!-- kervo:slot:risks:end -->
 
@@ -142,6 +139,9 @@ In repos without a capture habit, Mode 1 leaves goal/decisions/risks empty and t
 **[verified — human:refuse1993]**
 Phase 3 spike: JSONL ledger + capture/hook landed
 
+**[verified — human:refuse1993]**
+Real-repo eval (12-module Python monorepo, blind A/B, 2026-07-06): artifact-only answered 5.5/10 onboarding questions in 1 tool call / 21.2k tokens / 48s; exploration scored 10/10 in 19 calls / 33.7k tokens / 184s. Determinism held (identical hashes), zero hallucinations in both arms. Boundary confirmed: the artifact covers git-known facts; code internals stay exploration's job. The how-to-run-tests gap (0/2) was a declared pytest config the parser missed — fixed same day (pytestCommands).
+
 **[observed — human:refuse1993]**
 H4 run1 (n=15, agent-judged): S1+S3 primary — A(kervo)=100%, B(no-label)=90%, C(unmanaged)=80%. A-C=20%p, exactly at pass threshold; interim pass, run2 needed. Mechanism confirmed: unlabeled arms rejected TRUE facts after finding one poison (guilt-by-association); labels compartmentalized contamination. Details: EXPER/h4-kit/RESULTS-run1.md
 
@@ -150,9 +150,6 @@ H4 final (n=30, 2 runs, agent-judged): primary S1+S3 A=100% B=90% C=85% — A-C 
 
 **[observed — human:refuse1993]**
 H4 confirmatory run (pre-registered, n=24, no-repo-access, sonnet+haiku): composite A=91.7% B=91.7% C=62.5% — A-C=29.2%p >= 20%p bar: PASS. First real poisoning events of the program: all 3 in C-haiku (bound to dead RabbitMQ, asserted single-region, 95%-asserted disputed refund claim); same model defended in A/B. Interpretation: treatment table (stale segregation/deprecated exclusion) is the main effect, labels add anti-contagion robustness in mixed conditions; protection strongest for weaker consumers. H4 program verdict: SUPPORTED (A unbeaten across 54 responses). Remaining: human-judged replication before public claims. Details: EXPER/h4-kit/RESULTS-confirm.md
-
-**[generated — agent:claude-code]**
-Real-repo eval (12-module Python monorepo, blind A/B, 2026-07-06): artifact-only answered 5.5/10 onboarding questions in 1 tool call / 21.2k tokens / 48s; exploration scored 10/10 in 19 calls / 33.7k tokens / 184s. Determinism held (identical hashes), zero hallucinations in both arms. Boundary confirmed: the artifact covers git-known facts; code internals stay exploration's job. The how-to-run-tests gap (0/2) was a declared pytest config the parser missed — fixed same day (pytestCommands).
 <!-- kervo:slot:summaries:end -->
 
 ## Deprecated / Stale Notes
@@ -170,8 +167,9 @@ exclusion reason instead of being silently dropped._
 >
 > `kervo capture -type decision|risk|summary|goal -actor "agent:<you>" -body "<the fact>" -evidence "<how you verified it>"`
 >
-> Rules: facts you observed, not speculation · attach evidence — the command
-> you ran, the doc you read — so the human can sign in one keystroke · one
+> Rules: facts you observed, not speculation · start the body with a
+> one-line claim, details after it · attach evidence — the command you
+> ran, the doc you read — so the human can sign in one keystroke · one
 > capture per fact · skip what this artifact already says · never include
 > secrets or file contents. Duplicates are dropped automatically. A human
 > triages the queue with `kervo review`.

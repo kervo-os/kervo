@@ -58,6 +58,15 @@ Codex のように `AGENTS.md` を読むエージェントを使うなら?リポ
 注入します。ファイルの存在が opt-in であり(`touch AGENTS.md`)、kervo が
 このファイルを自ら作成することはありません。
 
+`CLAUDE.md` をきれいに保ちたいなら?`kervo compile -inject import` が
+フルブロックの代わりに `@.kervo/artifact.md` の 1 行だけを注入します
+(Claude Code がロード時に展開)。トレードオフは意図的です: artifact
+ファイルは派生物で gitignore 対象なので、新規クローンは `kervo compile`
+一回までは何も見えません — フルブロックがデフォルトである理由です。選択は
+ワークスペースごとに保持されます(`.kervo/inject`、コミット対象)。`@` 行は
+Claude Code の構文であり、AGENTS.md のコンシューマは展開できない場合が
+あります。
+
 **Artifact が含むもの:** リポジトリ要約 · 宣言されたコマンド(Makefile
 ターゲット、npm スクリプト、docker-compose サービス、pyproject スクリプト、
 justfile レシピ) · マージノイズを除いた最近の変更 · 未解決の TODO/FIXME ·
@@ -210,6 +219,13 @@ n = 24):
     ]
   }
 }
+```
+
+ダイジェスト自体も意識せず最新に — git post-commit フック:
+
+```bash
+printf '#!/bin/sh\nkervo compile >/dev/null 2>&1 || true\n' > .git/hooks/post-commit
+chmod +x .git/hooks/post-commit
 ```
 
 フックはミリ秒予算のローカル append です — LLM なし、ネットワークなし、

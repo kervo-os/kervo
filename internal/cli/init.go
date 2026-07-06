@@ -21,10 +21,15 @@ func runInit(args []string) error {
 	fs := newFlagSet("init")
 	dir := fs.String("dir", ".", "workspace directory")
 	langFlag := fs.String("lang", "", "artifact language: en, ko, ja (default: en)")
+	injectFlag := fs.String("inject", "", "consumer-file injection: block (full artifact) or import (one @-line)")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
 	lang, err := resolveLang(*dir, *langFlag)
+	if err != nil {
+		return err
+	}
+	inject, err := resolveInject(*dir, *injectFlag)
 	if err != nil {
 		return err
 	}
@@ -37,7 +42,7 @@ func runInit(args []string) error {
 	if err != nil {
 		return err
 	}
-	injected, err := writeOutputs(ctx, *dir, skeleton, cursor, lang)
+	injected, err := writeOutputs(ctx, *dir, skeleton, cursor, lang, inject)
 	if err != nil {
 		return err
 	}

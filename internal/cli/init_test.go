@@ -169,6 +169,61 @@ func TestInitCorruptAgentsMarkersLeavesNoPartialState(t *testing.T) {
 	}
 }
 
+// Decision 01KWTFTX: import mode trades the zero-command clone for a clean
+// CLAUDE.md — one @-line in the block, the full artifact in .kervo/. The
+// choice persists per workspace and flips back losslessly.
+func TestInitInjectImportMode(t *testing.T) {
+	dir := t.TempDir()
+	git(t, dir, "init", "-q", "-b", "main")
+	writeFile(t, dir, "README.md", "# demo\n")
+	git(t, dir, "add", ".")
+	git(t, dir, "commit", "-q", "-m", "x")
+
+	if err := runInit([]string{"-dir", dir, "-inject", "import"}); err != nil {
+		t.Fatal(err)
+	}
+	claude, err := os.ReadFile(filepath.Join(dir, "CLAUDE.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(claude), "@.kervo/artifact.md") {
+		t.Error("import mode missing the @-line")
+	}
+	if strings.Contains(string(claude), "# Context Artifact") {
+		t.Error("import mode must not inline the artifact")
+	}
+	art, err := os.ReadFile(filepath.Join(dir, ".kervo", "artifact.md"))
+	if err != nil || !strings.Contains(string(art), "# Context Artifact") {
+		t.Fatalf("full artifact must live in .kervo/artifact.md: %v", err)
+	}
+	mode, _ := os.ReadFile(filepath.Join(dir, ".kervo", "inject"))
+	if strings.TrimSpace(string(mode)) != "import" {
+		t.Errorf("inject mode not persisted: %q", mode)
+	}
+
+	// No flag → the persisted choice holds, byte-idempotently.
+	if err := runInit([]string{"-dir", dir}); err != nil {
+		t.Fatal(err)
+	}
+	claude2, _ := os.ReadFile(filepath.Join(dir, "CLAUDE.md"))
+	if string(claude) != string(claude2) {
+		t.Error("import mode not idempotent across runs")
+	}
+
+	// Flipping back restores the full block.
+	if err := runInit([]string{"-dir", dir, "-inject", "block"}); err != nil {
+		t.Fatal(err)
+	}
+	claude3, _ := os.ReadFile(filepath.Join(dir, "CLAUDE.md"))
+	if !strings.Contains(string(claude3), "# Context Artifact") {
+		t.Error("block mode did not restore the inline artifact")
+	}
+
+	if err := runInit([]string{"-dir", dir, "-inject", "weird"}); err == nil {
+		t.Error("unsupported inject mode must error")
+	}
+}
+
 func TestInitOutsideRepoFails(t *testing.T) {
 	if err := runInit([]string{"-dir", t.TempDir()}); err == nil {
 		t.Fatal("expected error outside a git repository")
