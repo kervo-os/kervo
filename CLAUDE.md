@@ -26,6 +26,7 @@
 
 ## Recent Changes
 
+- `b8eaf90` 2026-07-06 consolidate: no new features — pay the day's debt
 - `1cfbd6b` 2026-07-06 dash: workspace detail carries the project itself, not just the queue
 - `f549544` 2026-07-06 identity: the K mark — SVG redraw of the user's logo, wired everywhere
 - `b9d7447` 2026-07-06 dash: judged records stay visible — the ledger never hides history
@@ -45,22 +46,21 @@
 - `002394e` 2026-07-06 flywheel: evidence-attached proposals — labor to agents, signature to humans
 - `dbe373d` 2026-07-06 ledger: evidence-attached proposals (LLM pre-verification, human signature)
 - `94657b1` 2026-07-06 ledger: Phase B refinement — fact-wiki links to code, never copies it
-- `41f958c` 2026-07-06 ledger: session hook events
 
-_Showing 20 of 58 analyzed commits._
+_Showing 20 of 59 analyzed commits._
 
 ### Frequently Changed Files
 
-- .kervo/events/2026-07.jsonl (39)
-- CLAUDE.md (20)
-- README.md (18)
-- README.ja.md (14)
-- README.ko.md (14)
+- .kervo/events/2026-07.jsonl (40)
+- CLAUDE.md (21)
+- README.md (19)
+- README.ja.md (15)
+- README.ko.md (15)
 - internal/cli/compile.go (11)
 - internal/cli/dashpage.go (9)
 - internal/adapters/source/files/files.go (8)
 - internal/adapters/source/files/files_test.go (8)
-- internal/core/compiler/compiler.go (8)
+- internal/cli/dash.go (8)
 
 ## Open Tasks
 
@@ -72,12 +72,12 @@ _No TODO/FIXME comments found._
 - assets/ (3 files)
 - cmd/ (1 files)
 - docs/ (60 files)
-- internal/ (62 files)
+- internal/ (64 files)
 - packaging/ (3 files)
 
 ## Workspace Facts
 
-- Commits analyzed: 58 (complete)
+- Commits analyzed: 59 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 6
 - Docs captured: 1
@@ -154,6 +154,10 @@ H4 final (n=30, 2 runs, agent-judged): primary S1+S3 A=100% B=90% C=85% — A-C 
 
 **[observed — human:refuse1993]**
 H4 confirmatory run (pre-registered, n=24, no-repo-access, sonnet+haiku): composite A=91.7% B=91.7% C=62.5% — A-C=29.2%p >= 20%p bar: PASS. First real poisoning events of the program: all 3 in C-haiku (bound to dead RabbitMQ, asserted single-region, 95%-asserted disputed refund claim); same model defended in A/B. Interpretation: treatment table (stale segregation/deprecated exclusion) is the main effect, labels add anti-contagion robustness in mixed conditions; protection strongest for weaker consumers. H4 program verdict: SUPPORTED (A unbeaten across 54 responses). Remaining: human-judged replication before public claims. Details: EXPER/h4-kit/RESULTS-confirm.md
+
+**[generated — agent:claude-code]**
+Consolidation pass (2026-07-06, no version tag by user direction): race detector in CI, i18n completeness pinned by test (both directions), atomic registry writes, README command tables verified 12/12 against the CLI in three languages, CHANGELOG.md covering v0.1.0..v0.13.0, dash_overview.go split. Dependencies: zero (stdlib-only go.mod). Known debt left on record: review -web page is a plain fallback surface (dash supersedes it visually); GitHub release notes for v0.7.0..v0.13.0 are auto-changelogs while CHANGELOG.md is now canonical.
+Evidence: go test -race ./... clean; goreleaser check clean; go.mod contains no requires
 <!-- kervo:slot:summaries:end -->
 
 ## Deprecated / Stale Notes
