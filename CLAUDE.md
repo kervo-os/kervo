@@ -6,6 +6,11 @@
 > slot sections carry trust-labeled observations. Regenerate with `kervo compile`
 > — do not edit by hand.
 
+## Brief
+
+- **Focus**: internal/ ×9 · assets/ ×2 · docs/ ×1
+- **Run**: `make build` · `make test` · `make arch-check`
+
 ## Repository Summary
 
 - Name: kervo
@@ -26,41 +31,41 @@
 
 ## Recent Changes
 
-- `060205e` 2026-07-06 ledger: session hook events
-- `44e7077` 2026-07-06 repo: evidence moves out — kervo-os/experiments holds the receipts
-- `b06ce83` 2026-07-06 readme: the story banner — regenerated art with exact product strings
-- `bdf0f0f` 2026-07-06 ledger: kervo.dev purchased — launch deferred until H5 numbers
-- `5d74768` 2026-07-06 readme: lead with what the product means, then how it works
-- `354ce04` 2026-07-06 ledger: queue cleared — eight judgments with conversational provenance
-- `cd67fc3` 2026-07-06 protocol: the conversation is the review — relay affirmations, question conflicts
-- `2ec13e5` 2026-07-06 ledger: the conversation is a review surface — a plan
-- `1e5d5ce` 2026-07-06 ledger: workspace-native wiki management — a plan, not code
-- `412a256` 2026-07-06 dash: the knowledge view — judged knowledge IS the wiki
-- `f0de3ab` 2026-07-06 ledger: llm-wiki-newsroom assessed — first producer candidate, zero code needed
-- `ac3d8f7` 2026-07-06 registry: prune only what provably does not exist
-- `70b6ed2` 2026-07-06 readme: show the product — diagram, screenshots, real-repo numbers
-- `26d3840` 2026-07-06 dash: a visualization layer worthy of the hero shot
-- `41189a8` 2026-07-06 ledger: session hook events
-- `8661ae0` 2026-07-06 docs: external producers — publish the intake contract, don't chase formats
-- `8b1fd6b` 2026-07-06 ledger: session hook events
-- `59f7e17` 2026-07-06 docs: Mode 3 is a bootstrap channel, not a running mate to Mode 2
-- `8a6f3f1` 2026-07-06 changelog: v0.13.1
-- `757172b` 2026-07-06 dash: the buttons now explain themselves — judgment semantics in the UI
+- `64c6963` 2026-07-06 init/compile: choose your consumers — claude, codex, both, or auto
+- `e51d39d` 2026-07-06 brief: init alone must brief like a teammate — deterministically
+- `b93a143` 2026-07-06 privacy: the ledger carries no machine, no employer, no neighbor repos
+- `fd2f174` 2026-07-06 ledger: session hook events
+- `31d239e` 2026-07-06 repo: evidence moves out — kervo-os/experiments holds the receipts
+- `18ce65e` 2026-07-06 readme: the story banner — regenerated art with exact product strings
+- `5fbc45c` 2026-07-06 ledger: kervo.dev purchased — launch deferred until H5 numbers
+- `04b81aa` 2026-07-06 readme: lead with what the product means, then how it works
+- `b54a73c` 2026-07-06 ledger: queue cleared — eight judgments with conversational provenance
+- `0b729ad` 2026-07-06 protocol: the conversation is the review — relay affirmations, question conflicts
+- `0273d94` 2026-07-06 ledger: the conversation is a review surface — a plan
+- `378242b` 2026-07-06 ledger: workspace-native wiki management — a plan, not code
+- `64b1852` 2026-07-06 dash: the knowledge view — judged knowledge IS the wiki
+- `993106a` 2026-07-06 ledger: llm-wiki-newsroom assessed — first producer candidate, zero code needed
+- `a16df52` 2026-07-06 registry: prune only what provably does not exist
+- `ee971fa` 2026-07-06 readme: show the product — diagram, screenshots, real-repo numbers
+- `75a02f5` 2026-07-06 dash: a visualization layer worthy of the hero shot
+- `8511a60` 2026-07-06 ledger: session hook events
+- `444bed4` 2026-07-06 docs: external producers — publish the intake contract, don't chase formats
+- `105e5ed` 2026-07-06 ledger: session hook events
 
-_Showing 20 of 82 analyzed commits._
+_Showing 20 of 85 analyzed commits._
 
 ### Frequently Changed Files
 
-- .kervo/events/2026-07.jsonl (62)
-- CLAUDE.md (36)
+- .kervo/events/2026-07.jsonl (64)
+- CLAUDE.md (37)
 - README.md (28)
 - README.ja.md (24)
 - README.ko.md (24)
-- internal/core/i18n/i18n.go (13)
+- internal/core/i18n/i18n.go (14)
+- internal/cli/compile.go (12)
 - internal/cli/dash.go (12)
 - internal/cli/dashpage.go (12)
-- internal/cli/compile.go (11)
-- internal/core/compiler/testdata/skeleton.golden.md (9)
+- internal/core/compiler/testdata/skeleton.golden.md (10)
 
 ## Open Tasks
 
@@ -71,12 +76,12 @@ _No TODO/FIXME comments found._
 - .github/ (2 files)
 - assets/ (7 files)
 - cmd/ (1 files)
-- internal/ (64 files)
+- internal/ (66 files)
 - packaging/ (3 files)
 
 ## Workspace Facts
 
-- Commits analyzed: 82 (complete)
+- Commits analyzed: 85 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 5
 - Docs captured: 1

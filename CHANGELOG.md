@@ -3,6 +3,19 @@
 All notable changes, newest first. Versions are git tags; every release
 ships prebuilt binaries and a Homebrew cask (`brew install kervo-os/tap/kervo`).
 
+## v0.17.0 — 2026-07-06
+
+- The Brief: artifacts open with deterministic orientation — where recent
+  commits concentrate (scopes + modules), one run line, open edges,
+  unpushed count. Zero LLM; empty signals render nothing. The init screen
+  gains the Focus row.
+- `-consumers claude|codex|both|auto`: pick injection targets; interactive
+  init asks once and the choice persists in `.kervo/consumers`.
+- Privacy: hook and import store workspace-relative paths only (outside
+  the workspace → basename); the committed ledger was scrubbed and the
+  full git history rewritten to carry no machine paths or neighbor-repo
+  names. NOTICE added.
+
 ## v0.16.0 — 2026-07-06
 
 - The conversation is the review: the write-back protocol and MCP tools now
