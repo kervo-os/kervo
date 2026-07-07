@@ -3,6 +3,15 @@
 All notable changes, newest first. Versions are git tags; every release
 ships prebuilt binaries and a Homebrew cask (`brew install kervo-os/tap/kervo`).
 
+## Unreleased
+
+- `kervo init` wires git auto-compile: a third wizard question installs
+  `post-commit` and `post-merge` hooks (`-autocompile yes|no` in
+  scripts), so local commits and incoming pulls refresh the artifact
+  without anyone remembering to run `compile`. Foreign hooks are never
+  rewritten. Field demand: a production repo went stale under incoming
+  pulls — the documented manual hook was never installed.
+
 ## v0.20.0 — 2026-07-07
 
 - Fixed: `merge=union` is now actually wired. The README had claimed it

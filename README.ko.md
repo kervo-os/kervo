@@ -53,7 +53,7 @@ Go 툴체인이 필요 없습니다.
 
 ## 빠른 시작
 
-대화형 `kervo init`은 질문 두 개를 묻고, 스캔은 1초 미만입니다(커밋 상한
+대화형 `kervo init`은 질문 세 개를 묻고, 스캔은 1초 미만입니다(커밋 상한
 500개, 도달 시 partial 표시):
 
 ```text
@@ -64,6 +64,7 @@ Which agent files should kervo inject?
   3) Both         -> CLAUDE.md + AGENTS.md
 Select [3]: ⏎
 Wire Claude Code hooks for automatic capture? [Y/n]: ⏎
+Refresh the artifact automatically on commit and pull? [Y/n]: ⏎
 
 Workspace Found   ✓ Git   ✓ CLAUDE.md   ✓ README
 ──────────────────────────────────────────────────
@@ -76,6 +77,7 @@ Workspace Found   ✓ Git   ✓ CLAUDE.md   ✓ README
   Artifact   .kervo/artifact.md  (Mode 1 — Fact-only)
   Injected   CLAUDE.md, AGENTS.md  (marker block)
   Hooks      .claude/settings.json — created — commit it and capture fires for every teammate
+  Auto       .git/hooks — post-commit + post-merge — commits and pulls now refresh the artifact
 ```
 
 Artifact가 담는 것: 저장소 요약 · 선언된 명령어(Makefile, npm 스크립트,
@@ -201,12 +203,10 @@ init 위저드가 이 파일을 대신 써줍니다(스크립트에선 `-hooks y
 워크스페이스 상대 경로·크기만** 저장됩니다: 프롬프트와 파일 내용은 머신을
 떠나지도, git 히스토리에 들어가지도 않습니다.
 
-다이제스트 자체도 신경 쓰지 않고 최신으로 — git post-commit 훅:
-
-```bash
-printf '#!/bin/sh\nkervo compile >/dev/null 2>&1 || true\n' > .git/hooks/post-commit
-chmod +x .git/hooks/post-commit
-```
+위저드는 git 자동 컴파일도 제안합니다(스크립트에선 `-autocompile yes`):
+`post-commit`·`post-merge` 훅이 `kervo compile`을 다시 돌려서, 로컬 커밋은
+물론 **pull로 들어오는 커밋**에도 artifact가 갱신됩니다. git 훅은 머신
+로컬이라 — 팀원은 `kervo init` 한 번(멱등)이면 자기 것이 배선됩니다.
 </details>
 
 <details>

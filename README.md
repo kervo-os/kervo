@@ -54,8 +54,8 @@ toolchain needed.
 
 ## Quick start
 
-An interactive `kervo init` asks two questions and scans in well under a
-second (500-commit cap, marked partial when hit):
+An interactive `kervo init` asks three questions and scans in well under
+a second (500-commit cap, marked partial when hit):
 
 ```text
 $ kervo init
@@ -65,6 +65,7 @@ Which agent files should kervo inject?
   3) Both         -> CLAUDE.md + AGENTS.md
 Select [3]: ⏎
 Wire Claude Code hooks for automatic capture? [Y/n]: ⏎
+Refresh the artifact automatically on commit and pull? [Y/n]: ⏎
 
 Workspace Found   ✓ Git   ✓ CLAUDE.md   ✓ README
 ──────────────────────────────────────────────────
@@ -77,6 +78,7 @@ Workspace Found   ✓ Git   ✓ CLAUDE.md   ✓ README
   Artifact   .kervo/artifact.md  (Mode 1 — Fact-only)
   Injected   CLAUDE.md, AGENTS.md  (marker block)
   Hooks      .claude/settings.json — created — commit it and capture fires for every teammate
+  Auto       .git/hooks — post-commit + post-merge — commits and pulls now refresh the artifact
 ```
 
 The artifact covers: repository summary · declared commands (Makefile,
@@ -205,13 +207,11 @@ it never breaks a session (garbage in, exit 0 out). The committed ledger
 stores **names, workspace-relative paths, and sizes only**: prompt and
 file contents never leave your machine or enter git history.
 
-Keep the digest itself fresh without thinking about it — a git
-post-commit hook:
-
-```bash
-printf '#!/bin/sh\nkervo compile >/dev/null 2>&1 || true\n' > .git/hooks/post-commit
-chmod +x .git/hooks/post-commit
-```
+The wizard also offers git auto-compile (`-autocompile yes` in
+scripts): `post-commit` and `post-merge` hooks that rerun
+`kervo compile`, so local commits *and* incoming pulls refresh the
+artifact. Git hooks are machine-local — teammates get theirs by
+re-running `kervo init` once (idempotent).
 </details>
 
 <details>

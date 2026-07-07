@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 )
@@ -58,6 +59,82 @@ func resolveHooksWiring(flagVal string, consumers []string) (bool, error) {
 	line, _ := bufio.NewReader(os.Stdin).ReadString('\n')
 	ans := strings.ToLower(strings.TrimSpace(line))
 	return ans == "" || ans == "y" || ans == "yes", nil
+}
+
+// gitHookScript refreshes the digest after local commits (post-commit)
+// and after pulls that bring teammates' commits in (post-merge) — the
+// two moments a workspace's facts change without a kervo command running.
+const gitHookScript = "#!/bin/sh\nkervo compile >/dev/null 2>&1 || true\n"
+
+// resolveAutoCompile decides whether init installs the git auto-compile
+// hooks. Same contract as resolveHooksWiring: flag wins, an interactive
+// init asks (default yes), non-TTY stays silent. The installer was
+// gated on field demand by decision — demand arrived when a production
+// repo went stale under incoming pulls (2026-07-07).
+func resolveAutoCompile(flagVal string) (bool, error) {
+	switch flagVal {
+	case "yes":
+		return true, nil
+	case "no":
+		return false, nil
+	case "":
+		// fall through to the interactive default
+	default:
+		return false, fmt.Errorf("autocompile: unsupported %q (supported: yes, no)", flagVal)
+	}
+	if !stdinIsTTY() {
+		return false, nil
+	}
+	fmt.Print("Refresh the artifact automatically on commit and pull? [Y/n]: ")
+	line, _ := bufio.NewReader(os.Stdin).ReadString('\n')
+	ans := strings.ToLower(strings.TrimSpace(line))
+	return ans == "" || ans == "y" || ans == "yes", nil
+}
+
+// wireGitAutoCompile installs post-commit and post-merge hooks. Git hooks
+// are machine-local (.git never clones), so teammates get theirs by
+// re-running init — idempotent by contract. Same three safe outcomes as
+// wireClaudeHooks; a foreign hook is never rewritten.
+func wireGitAutoCompile(dir string) (string, error) {
+	out, err := exec.Command("git", "-C", dir, "rev-parse", "--git-path", "hooks").Output()
+	if err != nil {
+		return "", fmt.Errorf("autocompile: not a git repository: %v", err)
+	}
+	hooksDir := strings.TrimSpace(string(out))
+	if !filepath.IsAbs(hooksDir) {
+		hooksDir = filepath.Join(dir, hooksDir)
+	}
+	if err := os.MkdirAll(hooksDir, 0o755); err != nil {
+		return "", err
+	}
+	var wired, kept []string
+	for _, name := range []string{"post-commit", "post-merge"} {
+		p := filepath.Join(hooksDir, name)
+		raw, err := os.ReadFile(p)
+		switch {
+		case err == nil && strings.Contains(string(raw), "kervo compile"):
+			continue // already wired
+		case err == nil:
+			kept = append(kept, name) // someone else's hook — not ours to rewrite
+			continue
+		case !os.IsNotExist(err):
+			return "", err
+		}
+		if err := os.WriteFile(p, []byte(gitHookScript), 0o755); err != nil {
+			return "", err
+		}
+		wired = append(wired, name)
+	}
+	switch {
+	case len(kept) > 0 && len(wired) == 0:
+		return "left untouched — " + strings.Join(kept, ", ") + " carry your own hooks; add `kervo compile` to them yourself", nil
+	case len(kept) > 0:
+		return strings.Join(wired, ", ") + " wired; " + strings.Join(kept, ", ") + " left untouched (your own hooks)", nil
+	case len(wired) == 0:
+		return "already wired", nil
+	default:
+		return "post-commit + post-merge — commits and pulls now refresh the artifact", nil
+	}
 }
 
 // wireClaudeHooks connects automatic capture. Three outcomes, all safe:
