@@ -35,6 +35,7 @@
 
 ## Recent Changes
 
+- `184d43b` 2026-07-07 ledger: session hook events
 - `8813dc6` 2026-07-07 readme: quickstart as a colored terminal card (freeze SVG of the real init styling)
 - `490327b` 2026-07-07 npm: the wrapper downloads the real binary
 - `3d1ffc3` 2026-07-07 community: CONTRIBUTING + SECURITY (private vuln reporting enabled)
@@ -54,14 +55,13 @@
 - `f3e6143` 2026-07-06 readme: the modern OSS shape — short spine, folded depth
 - `d09b5f8` 2026-07-06 readme: a proper OSS tail — contributing in, diary out
 - `900d64c` 2026-07-06 readme: the status section catches up with the product
-- `55c74c4` 2026-07-06 changelog: v0.19.1
 
-_Showing 20 of 113 analyzed commits._
+_Showing 20 of 114 analyzed commits._
 
 ### Frequently Changed Files
 
-- .kervo/events/2026-07.jsonl (83)
-- CLAUDE.md (56)
+- .kervo/events/2026-07.jsonl (84)
+- CLAUDE.md (57)
 - README.md (37)
 - README.ja.md (33)
 - README.ko.md (33)
@@ -85,7 +85,7 @@ _No TODO/FIXME comments found._
 
 ## Workspace Facts
 
-- Commits analyzed: 113 (complete)
+- Commits analyzed: 114 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 5
 - Docs captured: 1
@@ -248,6 +248,10 @@ Evidence: go test -race ./... clean; goreleaser check clean; go.mod contains no 
 **[verified — human:refuse1993]**
 Write-back pilot on the adopted real repo (2026-07-06, third-party agent session): two previously unanswerable questions went 0/2 to 2/2 after targeted captures flowed capture -> ledger -> compile -> slots -> a fresh consumer; same 5-question basis moved 5.5/10 to 9.5/10 at unchanged cost (1 tool call, 48s to 21s). Trust labels reached the consumer and changed its behavior: it flagged its own answer as [generated], not human-signed. The declared-pytest scan (v0.2.1/v0.13.0) fired on the real repo. Caveat kept honest: this is a mechanism pilot on 2 targeted questions, not the pre-registered full A/B re-run with blinded judging - that still runs at the volume gate.
 Evidence: user-pasted eval table 2026-07-06: Q3 0/2->2/2, Q4 0/2->2/2, 1 call, 48s->21s; consumer quote flagging [generated] vs Verified
+
+**[verified — human:refuse1993]**
+npm distribution live (2026-07-07): @kervo-os/kervo@0.21.1 published as latest — the wrapper (packaging/npm) downloads the GoReleaser binary on first run with checksums.txt verification, no postinstall, no deps. E2E verified from the public registry: npx -y @kervo-os/kervo@latest version → fetched darwin_arm64 archive → kervo v0.21.1. Landing hero shows npm as the secondary install path. Open follow-ups: npm version must be republished per binary release (CI step candidate); npm account email is refuse1993@gmail.com in public maintainers metadata (kervo.dev forward optional); README install sections don't mention npm yet.
+Evidence: npm view dist-tags.latest=0.21.1; clean-cache npx run output 'kervo v0.21.1'; curl kervo.dev | grep 'npm install -g @kervo-os/kervo' → hit
 
 **[observed — human:refuse1993]**
 H4 run1 (n=15, agent-judged): S1+S3 primary — A(kervo)=100%, B(no-label)=90%, C(unmanaged)=80%. A-C=20%p, exactly at pass threshold; interim pass, run2 needed. Mechanism confirmed: unlabeled arms rejected TRUE facts after finding one poison (guilt-by-association); labels compartmentalized contamination. Details: EXPER/h4-kit/RESULTS-run1.md
