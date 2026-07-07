@@ -16,6 +16,36 @@ var derivedIgnores = []string{
 
 const ignoreHeader = "# kervo derived state (RFC-0005: events are truth, artifacts are derived)"
 
+// unionAttr makes concurrent ledger appends mergeable: without it, two
+// branches that both captured events conflict on the first team merge —
+// the default text driver cannot union trailing appends. ULID identity
+// makes union safe (README's merge=union claim was unwired until a
+// two-clone experiment surfaced the conflict, 2026-07-07).
+const unionAttr = ".kervo/events/*.jsonl merge=union"
+
+// ensureGitattributes appends the union rule to .gitattributes if absent.
+// Same contract as ensureGitignore: append-only, idempotent, human
+// content untouched.
+func ensureGitattributes(dir string) error {
+	path := filepath.Join(dir, ".gitattributes")
+	existing, err := os.ReadFile(path)
+	if err != nil && !os.IsNotExist(err) {
+		return err
+	}
+	for _, line := range strings.Split(string(existing), "\n") {
+		if strings.TrimSpace(line) == unionAttr {
+			return nil
+		}
+	}
+	var b strings.Builder
+	b.Write(existing)
+	if len(existing) > 0 && !strings.HasSuffix(string(existing), "\n") {
+		b.WriteString("\n")
+	}
+	b.WriteString(unionAttr + "\n")
+	return os.WriteFile(path, []byte(b.String()), 0o644)
+}
+
 // ensureGitignore appends missing kervo rules to the workspace .gitignore.
 // Append-only and idempotent: human content is never rewritten, and a
 // second run adds nothing.
