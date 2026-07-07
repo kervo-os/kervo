@@ -35,6 +35,7 @@
 
 ## Recent Changes
 
+- `29846fc` 2026-07-07 test: drop an import the assertion rewrite left behind
 - `9a2d42d` 2026-07-07 autocompile: pre-commit, not post-commit — the tree must converge
 - `0ec6742` 2026-07-07 ledger: session hook events
 - `6f4b69c` 2026-07-07 ledger: session hook events
@@ -54,14 +55,13 @@
 - `c1157e1` 2026-07-06 bodies read like documents — markdown display, newline restore
 - `0efc45a` 2026-07-06 facts describe the repo that exists — history-only paths stop counting
 - `9231c2c` 2026-07-06 ledger: opening-directive proposal — the protocol must govern session start, not only session end
-- `38949fe` 2026-07-06 init: the wizard wires capture — and says what codex can't have
 
-_Showing 20 of 107 analyzed commits._
+_Showing 20 of 108 analyzed commits._
 
 ### Frequently Changed Files
 
-- .kervo/events/2026-07.jsonl (80)
-- CLAUDE.md (50)
+- .kervo/events/2026-07.jsonl (81)
+- CLAUDE.md (51)
 - README.md (36)
 - README.ja.md (32)
 - README.ko.md (32)
@@ -85,7 +85,7 @@ _No TODO/FIXME comments found._
 
 ## Workspace Facts
 
-- Commits analyzed: 107 (complete)
+- Commits analyzed: 108 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 5
 - Docs captured: 1
@@ -199,6 +199,14 @@ Artifact freshness is default-on, not opt-in — every init/compile wires git po
 - Safety contract unchanged: create if absent, recognize our own, never rewrite a foreign hook — replacing ours with your own IS the opt-out. Hooks are machine-local, so the first compile on any machine wires that machine.
 - The wizard question shipped hours earlier is deleted: freshness is plumbing (same rank as .gitignore/.gitattributes), not a preference.
 Evidence: user directive 2026-07-07: '자동으로 깃 안볼꺼면 왜 쓰냐 이거?'; field case: a production repo pulled a week of commits with the artifact stale
+
+**[verified — human:refuse1993]**
+Blockchain verdict: no chain — but its two useful neighbors are adopted.
+- Chain consensus is orthogonal (kervo is verifier-centric, not trustless) and conflicts with zero-dep/no-network/privacy guarantees — the history purge precedent proves mutability escape hatches are required.
+- Adopted (a): H5 pre-registration hashes anchored via OpenTimestamps at registration (h5/PREREG.md + GATE.md + gate.py, .ots proofs committed) — 'the protocol predates the results' is now third-party verifiable.
+- Adopted (b), deferred to W3/enterprise demand: judgment-commit signing with signatures bound to content hashes.
+- H5 PREREG declares: pass = mean >=8.5/10 at <=2 tool calls on the original 5-question basis; reject <=6.5; gate counts pinned by hash; pilot's targeted captures declared as design, not leakage.
+Evidence: user judgment 2026-07-07: 'ㅇㅋ 그 선으로 가자, H5 해시 앵커링 진행해'; ots stamp accepted by 4 calendars; experiments@main h5/
 <!-- kervo:slot:decisions:end -->
 
 ## Known Risks
