@@ -35,6 +35,8 @@
 
 ## Recent Changes
 
+- `d3fb51d` 2026-07-07 ledger: session hook events
+- `9370eb4` 2026-07-07 ledger merges were a documented lie — now they union
 - `d9a3f24` 2026-07-07 ponytail: -323 lines, zero behavior change
 - `01064e6` 2026-07-06 readme: the modern OSS shape — short spine, folded depth
 - `68c3f9d` 2026-07-06 readme: a proper OSS tail — contributing in, diary out
@@ -53,21 +55,19 @@
 - `b93a143` 2026-07-06 privacy: the ledger carries no machine, no employer, no neighbor repos
 - `fd2f174` 2026-07-06 ledger: session hook events
 - `31d239e` 2026-07-06 repo: evidence moves out — kervo-os/experiments holds the receipts
-- `18ce65e` 2026-07-06 readme: the story banner — regenerated art with exact product strings
-- `5fbc45c` 2026-07-06 ledger: kervo.dev purchased — launch deferred until H5 numbers
 
-_Showing 20 of 98 analyzed commits._
+_Showing 20 of 100 analyzed commits._
 
 ### Frequently Changed Files
 
-- .kervo/events/2026-07.jsonl (73)
-- CLAUDE.md (42)
+- .kervo/events/2026-07.jsonl (75)
+- CLAUDE.md (43)
 - README.md (33)
 - README.ja.md (29)
 - README.ko.md (29)
 - internal/core/i18n/i18n.go (16)
+- internal/cli/compile.go (14)
 - internal/cli/dash.go (14)
-- internal/cli/compile.go (13)
 - internal/cli/dashpage.go (13)
 - internal/core/compiler/testdata/skeleton.golden.md (11)
 
@@ -80,12 +80,12 @@ _No TODO/FIXME comments found._
 - .github/ (2 files)
 - assets/ (7 files)
 - cmd/ (1 files)
-- internal/ (65 files)
+- internal/ (66 files)
 - packaging/ (3 files)
 
 ## Workspace Facts
 
-- Commits analyzed: 98 (complete)
+- Commits analyzed: 100 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 5
 - Docs captured: 1
@@ -199,7 +199,7 @@ Evidence: grep: every ports.* reference outside internal/ports is a 'var _' asse
 **[verified — human:refuse1993]**
 In repos without a capture habit, Mode 1 leaves goal/decisions/risks empty and the artifact reads as a git digest only — the measured-protection value (H4) only materializes once slots are filled via session capture or Mode 2/3 (real-repo eval, 2026-07-06).
 
-**[generated — agent:claude-code]**
+**[verified — human:refuse1993]**
 merge=union was documented but never wired — fixed 2026-07-07.
 - README (3 languages), event.go, and jsonl.go all claimed branch merges union the ledgers, but no .gitattributes existed and no code wrote one: the first concurrent-capture team merge would hit a hard conflict on .kervo/events/*.jsonl.
 - Two-clone experiment reproduced it: default driver -> CONFLICT; with 'merge=union' -> clean union, line order != ULID order (replay sorts by ID, so folds stay correct).

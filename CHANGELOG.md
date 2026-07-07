@@ -3,8 +3,15 @@
 All notable changes, newest first. Versions are git tags; every release
 ships prebuilt binaries and a Homebrew cask (`brew install kervo-os/tap/kervo`).
 
-## Unreleased
+## v0.20.0 — 2026-07-07
 
+- Fixed: `merge=union` is now actually wired. The README had claimed it
+  since the team story shipped, but nothing wrote the `.gitattributes`
+  rule — the first two-branch merge with concurrent captures ended in a
+  hard conflict on the events file (reproduced in a two-clone
+  experiment). `init`/`compile` now append
+  `.kervo/events/*.jsonl merge=union`, committed so every clone inherits
+  mergeable ledgers. Existing repos: run `kervo compile` once.
 - Removed: `kervo review -web`. The dash judges every repo with the same
   ledger primitive and a better surface; the terminal `kervo review`
   covers the no-browser case. One judging page, not two.
