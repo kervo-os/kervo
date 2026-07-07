@@ -57,28 +57,7 @@ toolchain needed.
 An interactive `kervo init` asks two questions and scans in well under a
 second (500-commit cap, marked partial when hit):
 
-```text
-$ kervo init
-Which agent files should kervo inject?
-  1) Claude Code  -> CLAUDE.md
-  2) Codex/agents -> AGENTS.md
-  3) Both         -> CLAUDE.md + AGENTS.md
-Select [3]: ⏎
-Wire Claude Code hooks for automatic capture? [Y/n]: ⏎
-
-Workspace Found   ✓ Git   ✓ CLAUDE.md   ✓ README
-──────────────────────────────────────────────────
-  Commits    500 analyzed  (partial — scan capped)
-  Languages  Python, TypeScript, SQL
-  Frameworks Celery, Docker Compose, FastAPI
-  Tasks      3 open · 12 modules
-  Focus      ingest ×6 · api ×4 — services/ ×9, packages/ ×5
-──────────────────────────────────────────────────
-  Artifact   .kervo/artifact.md  (Mode 1 — Fact-only)
-  Injected   CLAUDE.md, AGENTS.md  (marker block)
-  Hooks      .claude/settings.json — created — commit it and capture fires for every teammate
-  Auto       .git/hooks — pre-commit + post-merge — every commit carries a fresh artifact, pulls refresh it too
-```
+<img src="assets/quickstart.svg" alt="kervo init — two questions, then the scan result: workspace facts, artifact written, agent files injected, hooks wired" width="740">
 
 The artifact covers: repository summary · declared commands (Makefile,
 npm scripts, docker-compose, pyproject, justfile) · recent changes with

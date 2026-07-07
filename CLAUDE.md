@@ -12,7 +12,7 @@
 
 ## Brief
 
-- **Focus**: internal/ ×10
+- **Focus**: internal/ ×10 · packaging/ ×1
 - **Run**: `make build` · `make test` · `make arch-check`
 
 ## Repository Summary
@@ -35,33 +35,33 @@
 
 ## Recent Changes
 
-- `7f31a3d` 2026-07-07 community: CONTRIBUTING + SECURITY (private vuln reporting enabled)
-- `8d42959` 2026-07-07 changelog: condense 0.1–0.19 + ci: least privilege, SHA-pinned actions
-- `1189aef` 2026-07-07 ledger: blockchain verdict + H5 anchored registration
-- `29846fc` 2026-07-07 test: drop an import the assertion rewrite left behind
-- `9a2d42d` 2026-07-07 autocompile: pre-commit, not post-commit — the tree must converge
-- `0ec6742` 2026-07-07 ledger: session hook events
-- `6f4b69c` 2026-07-07 ledger: session hook events
-- `2bc2d3c` 2026-07-07 freshness is the default — compile wires the git hooks itself
-- `1c4fe44` 2026-07-07 init: the wizard keeps the digest fresh — commits and pulls auto-compile
-- `fe96a81` 2026-07-07 ledger: session hook events
-- `869a4f3` 2026-07-07 changelog: v0.20.0
-- `d3fb51d` 2026-07-07 ledger: session hook events
-- `9370eb4` 2026-07-07 ledger merges were a documented lie — now they union
-- `d9a3f24` 2026-07-07 ponytail: -323 lines, zero behavior change
-- `01064e6` 2026-07-06 readme: the modern OSS shape — short spine, folded depth
-- `68c3f9d` 2026-07-06 readme: a proper OSS tail — contributing in, diary out
-- `bd8e659` 2026-07-06 readme: the status section catches up with the product
-- `76705c8` 2026-07-06 changelog: v0.19.1
-- `2c493b9` 2026-07-06 protocol: govern the session start, not only the end
-- `219a0f5` 2026-07-06 changelog: v0.19.0
+- `490327b` 2026-07-07 npm: the wrapper downloads the real binary
+- `3d1ffc3` 2026-07-07 community: CONTRIBUTING + SECURITY (private vuln reporting enabled)
+- `a78866f` 2026-07-07 changelog: condense 0.1–0.19 + ci: least privilege, SHA-pinned actions
+- `54a7646` 2026-07-07 ledger: blockchain verdict + H5 anchored registration
+- `916897a` 2026-07-07 test: drop an import the assertion rewrite left behind
+- `95e0a5f` 2026-07-07 autocompile: pre-commit, not post-commit — the tree must converge
+- `24852c1` 2026-07-07 ledger: session hook events
+- `7f4a5d1` 2026-07-07 ledger: session hook events
+- `33c46f6` 2026-07-07 freshness is the default — compile wires the git hooks itself
+- `e686558` 2026-07-07 init: the wizard keeps the digest fresh — commits and pulls auto-compile
+- `3493ca2` 2026-07-07 ledger: session hook events
+- `5ad7201` 2026-07-07 changelog: v0.20.0
+- `ee473ef` 2026-07-07 ledger: session hook events
+- `8a66336` 2026-07-07 ledger merges were a documented lie — now they union
+- `ac6c2da` 2026-07-07 ponytail: -323 lines, zero behavior change
+- `f3e6143` 2026-07-06 readme: the modern OSS shape — short spine, folded depth
+- `d09b5f8` 2026-07-06 readme: a proper OSS tail — contributing in, diary out
+- `900d64c` 2026-07-06 readme: the status section catches up with the product
+- `55c74c4` 2026-07-06 changelog: v0.19.1
+- `ba2798c` 2026-07-06 protocol: govern the session start, not only the end
 
-_Showing 20 of 111 analyzed commits._
+_Showing 20 of 112 analyzed commits._
 
 ### Frequently Changed Files
 
-- .kervo/events/2026-07.jsonl (82)
-- CLAUDE.md (54)
+- .kervo/events/2026-07.jsonl (83)
+- CLAUDE.md (55)
 - README.md (36)
 - README.ja.md (32)
 - README.ko.md (32)
@@ -78,14 +78,14 @@ _No TODO/FIXME comments found._
 ## Related Modules
 
 - .github/ (2 files)
-- assets/ (7 files)
+- assets/ (8 files)
 - cmd/ (1 files)
 - internal/ (67 files)
 - packaging/ (3 files)
 
 ## Workspace Facts
 
-- Commits analyzed: 111 (complete)
+- Commits analyzed: 112 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 5
 - Docs captured: 1
