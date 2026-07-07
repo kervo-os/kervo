@@ -103,6 +103,24 @@ Needs confirmation — current focus appears to be terminal input/UX
 hardening… Evidence: Recent Changes 05-28..06-28.
 ```
 
+
+```mermaid
+stateDiagram-v2
+    direction LR
+    [*] --> generated: agent proposes
+    generated --> observed: seen in use
+    generated --> verified: human signs
+    observed --> verified: human signs
+    verified --> stale: evidence ages or conflicts
+    observed --> stale
+    generated --> stale
+    stale --> verified: re-affirmed
+    stale --> deprecated: retired — reason kept
+    generated --> deprecated
+    observed --> deprecated
+    verified --> deprecated
+```
+
 States move `generated → observed → verified → stale → deprecated` — by
 evidence and human confirmation, not by a decay timer. Disagreement is
 marked `⚠ conflict` instead of silently picking a winner; retired entries
