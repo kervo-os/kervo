@@ -12,7 +12,7 @@
 
 ## Brief
 
-- **Focus**: internal/ ×8 · assets/ ×1 · packaging/ ×1
+- **Focus**: internal/ ×7 · assets/ ×1 · packaging/ ×1
 - **Run**: `make build` · `make test` · `make arch-check`
 
 ## Repository Summary
@@ -35,6 +35,7 @@
 
 ## Recent Changes
 
+- `773f814` 2026-07-07 readme: npm joins the install paths — all three languages
 - `1a2f72c` 2026-07-07 ledger: session hook events
 - `184d43b` 2026-07-07 ledger: session hook events
 - `8813dc6` 2026-07-07 readme: quickstart as a colored terminal card (freeze SVG of the real init styling)
@@ -54,17 +55,16 @@
 - `8a66336` 2026-07-07 ledger merges were a documented lie — now they union
 - `ac6c2da` 2026-07-07 ponytail: -323 lines, zero behavior change
 - `f3e6143` 2026-07-06 readme: the modern OSS shape — short spine, folded depth
-- `d09b5f8` 2026-07-06 readme: a proper OSS tail — contributing in, diary out
 
-_Showing 20 of 115 analyzed commits._
+_Showing 20 of 116 analyzed commits._
 
 ### Frequently Changed Files
 
 - .kervo/events/2026-07.jsonl (85)
-- CLAUDE.md (58)
-- README.md (37)
-- README.ja.md (33)
-- README.ko.md (33)
+- CLAUDE.md (59)
+- README.md (38)
+- README.ja.md (34)
+- README.ko.md (34)
 - internal/core/i18n/i18n.go (16)
 - CHANGELOG.md (15)
 - internal/cli/compile.go (15)
@@ -78,14 +78,14 @@ _No TODO/FIXME comments found._
 ## Related Modules
 
 - .github/ (2 files)
-- assets/ (8 files)
+- assets/ (10 files)
 - cmd/ (1 files)
 - internal/ (67 files)
 - packaging/ (3 files)
 
 ## Workspace Facts
 
-- Commits analyzed: 115 (complete)
+- Commits analyzed: 116 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 5
 - Docs captured: 1

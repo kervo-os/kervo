@@ -286,6 +286,11 @@ artifact), **B**(같은 내용, 트러스트 라벨 제거), **C**(관리 없는
 
 확증 런 (사전 등록, 레포 접근 차단, sonnet + haiku 소비자, n = 24):
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/h4-chart-dark.svg">
+  <img src="assets/h4-chart-light.svg" alt="H4 confirmatory run, composite accuracy: A kervo artifact 91.7%, B labels stripped 91.7%, C unmanaged notes 62.5% — A−C = +29.2pp; all 3 poisoning infections occurred in arm C" width="740">
+</picture>
+
 | | **A — kervo** | B — 라벨 제거 | C — 무관리 |
 |---|---|---|---|
 | 종합 S1+S2+S3 | **91.7%** | 91.7% | 62.5% |
