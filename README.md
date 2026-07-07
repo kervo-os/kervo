@@ -45,6 +45,7 @@ by kervo.
 
 ```bash
 brew install kervo-os/tap/kervo   # macOS & Linux
+npm install -g @kervo-os/kervo    # any platform with Node 18+
 # or: go install github.com/kervo-os/kervo/cmd/kervo@latest
 ```
 

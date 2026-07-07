@@ -44,6 +44,7 @@ kervo는 저장소를 결정적 **Context Artifact**로 컴파일해
 
 ```bash
 brew install kervo-os/tap/kervo   # macOS & Linux
+npm install -g @kervo-os/kervo    # Node 18+ 가 있는 모든 플랫폼
 # 또는: go install github.com/kervo-os/kervo/cmd/kervo@latest
 ```
 

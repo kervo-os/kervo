@@ -46,6 +46,7 @@ kervo がコンパイルしたものです。
 
 ```bash
 brew install kervo-os/tap/kervo   # macOS & Linux
+npm install -g @kervo-os/kervo    # Node 18+ があれば全プラットフォーム
 # または: go install github.com/kervo-os/kervo/cmd/kervo@latest
 ```
 

@@ -12,7 +12,7 @@
 
 ## Brief
 
-- **Focus**: internal/ ×9 · assets/ ×1 · packaging/ ×1
+- **Focus**: internal/ ×8 · assets/ ×1 · packaging/ ×1
 - **Run**: `make build` · `make test` · `make arch-check`
 
 ## Repository Summary
@@ -35,6 +35,7 @@
 
 ## Recent Changes
 
+- `1a2f72c` 2026-07-07 ledger: session hook events
 - `184d43b` 2026-07-07 ledger: session hook events
 - `8813dc6` 2026-07-07 readme: quickstart as a colored terminal card (freeze SVG of the real init styling)
 - `490327b` 2026-07-07 npm: the wrapper downloads the real binary
@@ -54,14 +55,13 @@
 - `ac6c2da` 2026-07-07 ponytail: -323 lines, zero behavior change
 - `f3e6143` 2026-07-06 readme: the modern OSS shape — short spine, folded depth
 - `d09b5f8` 2026-07-06 readme: a proper OSS tail — contributing in, diary out
-- `900d64c` 2026-07-06 readme: the status section catches up with the product
 
-_Showing 20 of 114 analyzed commits._
+_Showing 20 of 115 analyzed commits._
 
 ### Frequently Changed Files
 
-- .kervo/events/2026-07.jsonl (84)
-- CLAUDE.md (57)
+- .kervo/events/2026-07.jsonl (85)
+- CLAUDE.md (58)
 - README.md (37)
 - README.ja.md (33)
 - README.ko.md (33)
@@ -85,7 +85,7 @@ _No TODO/FIXME comments found._
 
 ## Workspace Facts
 
-- Commits analyzed: 114 (complete)
+- Commits analyzed: 115 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 5
 - Docs captured: 1
