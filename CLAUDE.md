@@ -12,7 +12,7 @@
 
 ## Brief
 
-- **Focus**: internal/ ×9 · assets/ ×1
+- **Focus**: internal/ ×10 · assets/ ×1
 - **Run**: `make build` · `make test` · `make arch-check`
 
 ## Repository Summary
@@ -35,6 +35,7 @@
 
 ## Recent Changes
 
+- `1c4fe44` 2026-07-07 init: the wizard keeps the digest fresh — commits and pulls auto-compile
 - `fe96a81` 2026-07-07 ledger: session hook events
 - `869a4f3` 2026-07-07 changelog: v0.20.0
 - `d3fb51d` 2026-07-07 ledger: session hook events
@@ -54,22 +55,21 @@
 - `aa22916` 2026-07-06 changelog: v0.17.0
 - `64c6963` 2026-07-06 init/compile: choose your consumers — claude, codex, both, or auto
 - `e51d39d` 2026-07-06 brief: init alone must brief like a teammate — deterministically
-- `b93a143` 2026-07-06 privacy: the ledger carries no machine, no employer, no neighbor repos
 
-_Showing 20 of 102 analyzed commits._
+_Showing 20 of 103 analyzed commits._
 
 ### Frequently Changed Files
 
-- .kervo/events/2026-07.jsonl (77)
-- CLAUDE.md (45)
-- README.md (33)
-- README.ja.md (29)
-- README.ko.md (29)
+- .kervo/events/2026-07.jsonl (78)
+- CLAUDE.md (46)
+- README.md (34)
+- README.ja.md (30)
+- README.ko.md (30)
 - internal/core/i18n/i18n.go (16)
 - internal/cli/compile.go (14)
 - internal/cli/dash.go (14)
 - internal/cli/dashpage.go (13)
-- CHANGELOG.md (11)
+- CHANGELOG.md (12)
 
 ## Open Tasks
 
@@ -80,12 +80,12 @@ _No TODO/FIXME comments found._
 - .github/ (2 files)
 - assets/ (7 files)
 - cmd/ (1 files)
-- internal/ (66 files)
+- internal/ (67 files)
 - packaging/ (3 files)
 
 ## Workspace Facts
 
-- Commits analyzed: 102 (complete)
+- Commits analyzed: 103 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 5
 - Docs captured: 1
@@ -191,6 +191,14 @@ ports/ stays despite zero consumers — kept by judgment, not oversight.
 - External producers never touch ports — they enter via the proposals.json file contract, so 'future openwiki integration' is not a reason to keep or grow it.
 - The rest of the review landed: review -web removed (dash + terminal review cover both cases), empty sqlite placeholder removed, stdlib/shrink fixes — net -323 lines, no behavior change.
 Evidence: grep: every ports.* reference outside internal/ports is a 'var _' assertion; go test -race + arch-check green after removal commit
+
+**[verified — human:refuse1993]**
+Artifact freshness is default-on, not opt-in — every init/compile wires git post-commit + post-merge auto-compile hooks.
+- A memory layer for teams that store work as commits must watch commits by default; a stale artifact silently breaks the one promise.
+- post-merge matters as much as post-commit: pulls are how teammates' commits arrive.
+- Safety contract unchanged: create if absent, recognize our own, never rewrite a foreign hook — replacing ours with your own IS the opt-out. Hooks are machine-local, so the first compile on any machine wires that machine.
+- The wizard question shipped hours earlier is deleted: freshness is plumbing (same rank as .gitignore/.gitattributes), not a preference.
+Evidence: user directive 2026-07-07: '자동으로 깃 안볼꺼면 왜 쓰냐 이거?'; field case: a production repo pulled a week of commits with the artifact stale
 <!-- kervo:slot:decisions:end -->
 
 ## Known Risks

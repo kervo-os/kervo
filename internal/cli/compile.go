@@ -362,6 +362,9 @@ func writeOutputs(ctx context.Context, dir, rendered, cursor string, lang i18n.L
 	if err := ensureGitattributes(dir); err != nil {
 		return nil, err
 	}
+	// Best-effort: freshness must not depend on anyone remembering it —
+	// the first compile on any machine wires commit/pull auto-compile.
+	_, _ = wireGitAutoCompile(dir)
 	// Machine-local, path-only, best-effort — powers `kervo dash`.
 	registerWorkspace(dir)
 	for _, s := range staged {

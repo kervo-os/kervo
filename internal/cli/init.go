@@ -23,7 +23,6 @@ func runInit(args []string) error {
 	injectFlag := fs.String("inject", "", "consumer-file injection: block (full artifact) or import (one @-line)")
 	consumersFlag := fs.String("consumers", "", "consumer targets: claude,codex,both,auto (default: ask on TTY, else auto)")
 	hooksFlag := fs.String("hooks", "", "wire Claude Code capture hooks: yes|no (default: ask on TTY)")
-	autoFlag := fs.String("autocompile", "", "wire git post-commit/post-merge auto-compile: yes|no (default: ask on TTY)")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
@@ -40,10 +39,6 @@ func runInit(args []string) error {
 		return err
 	}
 	wantHooks, err := resolveHooksWiring(*hooksFlag, consumers)
-	if err != nil {
-		return err
-	}
-	wantAuto, err := resolveAutoCompile(*autoFlag)
 	if err != nil {
 		return err
 	}
@@ -68,11 +63,7 @@ func runInit(args []string) error {
 		}
 		fmt.Println("  " + "Hooks      .claude/settings.json — " + status)
 	}
-	if wantAuto {
-		status, err := wireGitAutoCompile(*dir)
-		if err != nil {
-			return err
-		}
+	if status, err := wireGitAutoCompile(*dir); err == nil {
 		fmt.Println("  Auto       .git/hooks — " + status)
 	}
 	codexOnly := true

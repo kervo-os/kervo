@@ -53,7 +53,7 @@ Go 툴체인이 필요 없습니다.
 
 ## 빠른 시작
 
-대화형 `kervo init`은 질문 세 개를 묻고, 스캔은 1초 미만입니다(커밋 상한
+대화형 `kervo init`은 질문 두 개를 묻고, 스캔은 1초 미만입니다(커밋 상한
 500개, 도달 시 partial 표시):
 
 ```text
@@ -64,7 +64,6 @@ Which agent files should kervo inject?
   3) Both         -> CLAUDE.md + AGENTS.md
 Select [3]: ⏎
 Wire Claude Code hooks for automatic capture? [Y/n]: ⏎
-Refresh the artifact automatically on commit and pull? [Y/n]: ⏎
 
 Workspace Found   ✓ Git   ✓ CLAUDE.md   ✓ README
 ──────────────────────────────────────────────────
@@ -203,10 +202,11 @@ init 위저드가 이 파일을 대신 써줍니다(스크립트에선 `-hooks y
 워크스페이스 상대 경로·크기만** 저장됩니다: 프롬프트와 파일 내용은 머신을
 떠나지도, git 히스토리에 들어가지도 않습니다.
 
-위저드는 git 자동 컴파일도 제안합니다(스크립트에선 `-autocompile yes`):
-`post-commit`·`post-merge` 훅이 `kervo compile`을 다시 돌려서, 로컬 커밋은
-물론 **pull로 들어오는 커밋**에도 artifact가 갱신됩니다. git 훅은 머신
-로컬이라 — 팀원은 `kervo init` 한 번(멱등)이면 자기 것이 배선됩니다.
+신선도는 opt-in이 아닙니다: 모든 `init`/`compile`이 `post-commit`·
+`post-merge` 훅을 배선해서, 로컬 커밋은 물론 **pull로 들어오는 커밋**에도
+artifact가 기본으로 갱신됩니다. git 훅은 머신 로컬이라 팀원은 첫
+`kervo compile` 한 번이면 자기 머신이 배선됩니다. 직접 쓴 훅은 절대
+덮어쓰지 않습니다(우리 훅을 본인 것으로 바꾸는 게 곧 opt-out).
 </details>
 
 <details>

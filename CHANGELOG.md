@@ -3,14 +3,15 @@
 All notable changes, newest first. Versions are git tags; every release
 ships prebuilt binaries and a Homebrew cask (`brew install kervo-os/tap/kervo`).
 
-## Unreleased
+## v0.21.0 — 2026-07-07
 
-- `kervo init` wires git auto-compile: a third wizard question installs
-  `post-commit` and `post-merge` hooks (`-autocompile yes|no` in
-  scripts), so local commits and incoming pulls refresh the artifact
-  without anyone remembering to run `compile`. Foreign hooks are never
-  rewritten. Field demand: a production repo went stale under incoming
-  pulls — the documented manual hook was never installed.
+- Freshness is no longer opt-in: every `init`/`compile` wires git
+  `post-commit` and `post-merge` hooks that rerun `kervo compile`, so
+  local commits and incoming pulls refresh the artifact by default —
+  a teammate's first `compile` wires their machine. A hook you wrote
+  yourself is never rewritten (replacing ours is the opt-out). Field
+  demand: a production repo went stale under incoming pulls — the
+  documented manual hook was never installed.
 
 ## v0.20.0 — 2026-07-07
 

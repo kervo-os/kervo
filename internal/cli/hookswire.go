@@ -66,35 +66,14 @@ func resolveHooksWiring(flagVal string, consumers []string) (bool, error) {
 // two moments a workspace's facts change without a kervo command running.
 const gitHookScript = "#!/bin/sh\nkervo compile >/dev/null 2>&1 || true\n"
 
-// resolveAutoCompile decides whether init installs the git auto-compile
-// hooks. Same contract as resolveHooksWiring: flag wins, an interactive
-// init asks (default yes), non-TTY stays silent. The installer was
-// gated on field demand by decision — demand arrived when a production
-// repo went stale under incoming pulls (2026-07-07).
-func resolveAutoCompile(flagVal string) (bool, error) {
-	switch flagVal {
-	case "yes":
-		return true, nil
-	case "no":
-		return false, nil
-	case "":
-		// fall through to the interactive default
-	default:
-		return false, fmt.Errorf("autocompile: unsupported %q (supported: yes, no)", flagVal)
-	}
-	if !stdinIsTTY() {
-		return false, nil
-	}
-	fmt.Print("Refresh the artifact automatically on commit and pull? [Y/n]: ")
-	line, _ := bufio.NewReader(os.Stdin).ReadString('\n')
-	ans := strings.ToLower(strings.TrimSpace(line))
-	return ans == "" || ans == "y" || ans == "yes", nil
-}
-
-// wireGitAutoCompile installs post-commit and post-merge hooks. Git hooks
-// are machine-local (.git never clones), so teammates get theirs by
-// re-running init — idempotent by contract. Same three safe outcomes as
-// wireClaudeHooks; a foreign hook is never rewritten.
+// wireGitAutoCompile installs post-commit and post-merge hooks. This is
+// not opt-in: a memory layer for a team that stores its work as commits
+// must watch commits by default — a stale artifact quietly breaks the
+// product's one promise. It runs on every init AND compile (workspace
+// plumbing, same rank as .gitignore/.gitattributes) because git hooks
+// are machine-local: a teammate's first `kervo compile` wires their
+// machine. Same three safe outcomes as wireClaudeHooks; a foreign hook
+// is never rewritten — replacing our hook with your own IS the opt-out.
 func wireGitAutoCompile(dir string) (string, error) {
 	out, err := exec.Command("git", "-C", dir, "rev-parse", "--git-path", "hooks").Output()
 	if err != nil {
