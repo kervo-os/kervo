@@ -12,7 +12,7 @@
 
 ## Brief
 
-- **Focus**: internal/ ×6 · assets/ ×2 · packaging/ ×1
+- **Focus**: internal/ ×7 · assets/ ×3 · packaging/ ×1
 - **Run**: `make build` · `make test` · `make arch-check`
 
 ## Repository Summary
@@ -35,6 +35,7 @@
 
 ## Recent Changes
 
+- `d5e9028` 2026-07-07 init: AGENTS.md joins the workspace-found row
 - `0a8da8f` 2026-07-07 readme: trust lifecycle as a state diagram — the prose arrow was a straight line, the machine is not
 - `653e32a` 2026-07-07 readme: H4 result as a chart — the 29.2pp gap should not hide in a gray table
 - `773f814` 2026-07-07 readme: npm joins the install paths — all three languages
@@ -54,14 +55,13 @@
 - `3493ca2` 2026-07-07 ledger: session hook events
 - `5ad7201` 2026-07-07 changelog: v0.20.0
 - `ee473ef` 2026-07-07 ledger: session hook events
-- `8a66336` 2026-07-07 ledger merges were a documented lie — now they union
 
-_Showing 20 of 118 analyzed commits._
+_Showing 20 of 119 analyzed commits._
 
 ### Frequently Changed Files
 
 - .kervo/events/2026-07.jsonl (85)
-- CLAUDE.md (61)
+- CLAUDE.md (62)
 - README.md (40)
 - README.ja.md (36)
 - README.ko.md (36)
@@ -81,11 +81,11 @@ _No TODO/FIXME comments found._
 - assets/ (10 files)
 - cmd/ (1 files)
 - internal/ (67 files)
-- packaging/ (3 files)
+- packaging/ (8 files)
 
 ## Workspace Facts
 
-- Commits analyzed: 118 (complete)
+- Commits analyzed: 119 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 5
 - Docs captured: 1
@@ -94,11 +94,12 @@ _No TODO/FIXME comments found._
 
 <!-- kervo:slot:goal:begin -->
 **[verified — human:refuse1993]**
-AgentOS-class direction (proposal, 2026-07-06): close the write-back loop. The injected block carries a contributing-back protocol — any consumer that learns a durable fact the artifact lacks (how-to-run, component roles, internals) captures it as a proposal; humans judge via review; every later session (any agent, any teammate) gets it for zero calls with a trust label. Exploration cost amortizes across the team. Phases: A write-back protocol in the artifact; B accreted wiki from verified observations (vs openwiki generation — no hallucination, staleness via trust lifecycle); C memory bus — personal agent memories sync in via import/MCP, team-shareable knowledge passes through review (vs agentmemory — shared and judged); D session handoff notes for WIP. Success metric (H5, pre-registerable): re-run the real-repo A/B after 2 weeks of write-back use — artifact-only score rises from 5.5/10 toward 10 at ~1 tool call.
-
-**[verified — human:refuse1993]**
 kervo dash — the fleet control tower (supersedes the single-repo SOTA page as the batch surface): init/compile self-register the workspace PATH (nothing else) into a machine-local registry (~/.kervo/workspaces.json, never committed); 'kervo dash' serves a one-shot localhost dashboard over every registered repo — per-repo pending counts, trust-state bars, last activity, and inline keyboard-first triage that writes each judgment to that repo's own ledger. Truth stays per-repo in git; the dashboard is a local derived lens, holds no state of its own, and dies with the command.
 Evidence: user direction 2026-07-06: 'init한 모든 kervo 레포를 한 페이지에서 관리' + '프로젝트를 위에서 전망할수있는'
+
+**[generated — agent:claude-code]**
+AgentOS-class direction: close the write-back loop. The injected block carries a contributing-back protocol — any consumer that learns a durable fact the artifact lacks captures it as a proposal; humans judge via review; every later session gets it for zero calls with a trust label. Exploration cost amortizes across the team. Phases: A write-back protocol (shipped); B accreted wiki from verified observations; C memory bus via the published intake contract; D session handoff notes. Success metric (H5, sealed): at the volume gate, re-run the real-repo A/B — artifact-only score reaches the pre-registered pass line (≥8.5/10) at ≤2 tool calls.
+Evidence: re-statement of 01KWTJGSGH6N (deprecated for privacy, not for being wrong); phases and metric unchanged, employer-derived baseline number removed
 <!-- kervo:slot:goal:end -->
 
 ## Known Decisions
@@ -136,10 +137,6 @@ Evidence: user directive 2026-07-06: '그 페이지는 2026 sota급 대시보드
 **[verified — human:refuse1993]**
 H5 trigger is volume-based, not calendar-based (proposal). Agent-velocity development voids the two-week frame: today alone this repo accrued ~400 ledger events. Re-run the real-repo A/B once the adopted workspace accumulates >=10 artifact-present sessions and >=10 write-back proposals judged — at agent pace that is days, possibly hours.
 Evidence: user challenge 2026-07-06: 'ai agent로 개발중인데 2주뒤에 뭐 볼게 있나'; kervo ledger: 400 events in one day
-
-**[verified — human:refuse1993]**
-Mode 3 is a bootstrap channel, not a running mate to Mode 2 (field eval on the adopted real repo, 2026-07-06). With only the artifact as input (commit messages + TODO list), a local 120b produced a rear-view goal (inferred from pushed history; the real goal lived in an unpushed branch — stale, not hallucinated) and an overreaching risk (18 TODOs exist -> 'critical logic is empty'; evidence does not support the conclusion). Session-verified Mode 2 capture measured 9.5/10 the same day. The trust gate worked as designed: both weak proposals arrived as [generated] and were quarantined pending judgment. Positioning: run Mode 3 to fill empty slots at cold start; once Mode 2 capture is live, leave KERVO_SEMANTIC_URL unset (auto Mode 1) — artifact-only inference reads history, not intent, and adds review noise.
-Evidence: user-relayed eval 2026-07-06: goal C+ (rear-view), risk D (fact->overreach), 9.5s local 120b, 2 proposals; Mode 2 pilot 9.5/10 same day
 
 **[verified — human:refuse1993]**
 External producers integrate via the published intake contract, not per-tool importers (refines Phase C of goal 01KWTJGS). Any tool - graph builders, memory stores, wiki generators - stages .kervo/proposals.json entries [{slot, body, source}]; compile ingests them as generated with provenance, review gates them, and the absolute rule holds: no state field exists, so nothing self-promotes. Per-tool importers (graphify/openwiki/agentmemory) are built only when a real export file exists on this machine to test against - chasing N third-party formats is the losing game the scope rule forbids. Known gap for the first real producer: the proposal shape lacks an evidence field; add it when the first producer arrives. State nuance kept from PRD 7.2: your own session history imports may enter observed; generated-content tools always enter generated.
@@ -215,6 +212,10 @@ Evidence: user 2026-07-07: '라이브러리 써도 되는데?' + '좋아. vercel
 **[verified — human:refuse1993]**
 Identity hygiene executed before public promotion (2026-07-07): both public repos' full histories rewritten via git filter-repo and force-pushed — kervo (110 commits + 29 tag taggers: refuse1993@gmail.com → GitHub noreply) and experiments (4 commits: machine-local '위협인텔리전스 <threat-intel@Brown-MacBook-Pro.local>' → refuse1993/noreply). Repo-local git identity set to noreply in both working clones so new commits stay clean. Landing fonts moved from Google Fonts CDN to self-hosted fontsource bundles (GDPR — LG München precedent), deployed to kervo.dev. H5 .ots proofs unaffected: they stamp file hashes, not commit hashes. Cost accepted: all pre-rewrite kervo SHAs dangle (second time — same as the 2026-07-06 purge); commit-map preserved during the session. Remaining human steps: GitHub Settings → Emails → 'Keep private' + 'Block command line pushes that expose my email'; optionally re-point npm account email at a kervo.dev forward.
 Evidence: post-rewrite verification: git log local + gh api commits on both repos → only 31397642+refuse1993@users.noreply.github.com; curl kervo.dev → 200, fonts.googleapis references in live HTML: 0
+
+**[generated — agent:claude-code]**
+Mode 3 (dedicated backend) is a bootstrap channel, not a running mate to Mode 2: run it to fill empty slots at cold start; once session capture is live, leave KERVO_SEMANTIC_URL unset. Re-assertion of retired decision 01KWVDFPJC with its employer-derived evidence withdrawn.
+Evidence: supersedes 01KWVDFPJC (deprecated for privacy, not for being wrong); the positioning itself was previously human-verified
 <!-- kervo:slot:decisions:end -->
 
 ## Known Risks
@@ -239,15 +240,8 @@ Evidence: git check-attr merge .kervo/events/2026-07.jsonl -> unspecified (pre-f
 Phase 3 spike: JSONL ledger + capture/hook landed
 
 **[verified — human:refuse1993]**
-Real-repo eval (12-module Python monorepo, blind A/B, 2026-07-06): artifact-only answered 5.5/10 onboarding questions in 1 tool call / 21.2k tokens / 48s; exploration scored 10/10 in 19 calls / 33.7k tokens / 184s. Determinism held (identical hashes), zero hallucinations in both arms. Boundary confirmed: the artifact covers git-known facts; code internals stay exploration's job. The how-to-run-tests gap (0/2) was a declared pytest config the parser missed — fixed same day (pytestCommands).
-
-**[verified — human:refuse1993]**
 Consolidation pass (2026-07-06, no version tag by user direction): race detector in CI, i18n completeness pinned by test (both directions), atomic registry writes, README command tables verified 12/12 against the CLI in three languages, CHANGELOG.md covering v0.1.0..v0.13.0, dash_overview.go split. Dependencies: zero (stdlib-only go.mod). Known debt left on record: review -web page is a plain fallback surface (dash supersedes it visually); GitHub release notes for v0.7.0..v0.13.0 are auto-changelogs while CHANGELOG.md is now canonical.
 Evidence: go test -race ./... clean; goreleaser check clean; go.mod contains no requires
-
-**[verified — human:refuse1993]**
-Write-back pilot on the adopted real repo (2026-07-06, third-party agent session): two previously unanswerable questions went 0/2 to 2/2 after targeted captures flowed capture -> ledger -> compile -> slots -> a fresh consumer; same 5-question basis moved 5.5/10 to 9.5/10 at unchanged cost (1 tool call, 48s to 21s). Trust labels reached the consumer and changed its behavior: it flagged its own answer as [generated], not human-signed. The declared-pytest scan (v0.2.1/v0.13.0) fired on the real repo. Caveat kept honest: this is a mechanism pilot on 2 targeted questions, not the pre-registered full A/B re-run with blinded judging - that still runs at the volume gate.
-Evidence: user-pasted eval table 2026-07-06: Q3 0/2->2/2, Q4 0/2->2/2, 1 call, 48s->21s; consumer quote flagging [generated] vs Verified
 
 **[verified — human:refuse1993]**
 npm distribution live (2026-07-07): @kervo-os/kervo@0.21.1 published as latest — the wrapper (packaging/npm) downloads the GoReleaser binary on first run with checksums.txt verification, no postinstall, no deps. E2E verified from the public registry: npx -y @kervo-os/kervo@latest version → fetched darwin_arm64 archive → kervo v0.21.1. Landing hero shows npm as the secondary install path. Open follow-ups: npm version must be republished per binary release (CI step candidate); npm account email is refuse1993@gmail.com in public maintainers metadata (kervo.dev forward optional); README install sections don't mention npm yet.

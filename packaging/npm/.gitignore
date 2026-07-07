@@ -1,0 +1,3 @@
+# kervo derived state (RFC-0005: events are truth, artifacts are derived)
+.kervo/artifact.md
+.kervo/cache/
