@@ -3,6 +3,7 @@ package cli
 import (
 	"fmt"
 	"os"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -86,6 +87,10 @@ func renderColdStart(u ui, s fact.Snapshot, version string, injected []string) s
 	b.WriteString(u.bold("Workspace Found") + "   " +
 		mark(true, "Git") + "   " + // init fails before this screen without git
 		mark(hasDoc("CLAUDE.md"), "CLAUDE.md") + "   " +
+		// Codex users read this row to see whether their consumer is wired —
+		// AGENTS.md carries no pre-existing human doc to find, so the truthful
+		// signal is "did this init inject it".
+		mark(slices.Contains(injected, consumerAgents), "AGENTS.md") + "   " +
 		mark(hasDoc("README.md") || hasDoc("README"), "README") + "\n")
 	b.WriteString(u.dim(rule) + "\n")
 

@@ -28,7 +28,7 @@ func TestRenderColdStartPlain(t *testing.T) {
 	out := renderColdStart(ui{}, sampleSnap(), "dev", []string{"CLAUDE.md", "AGENTS.md"})
 	for _, want := range []string{
 		logoLines[0], tagline, "dev",
-		"Workspace Found", "✓ Git", "✓ CLAUDE.md", "✓ README",
+		"Workspace Found", "✓ Git", "✓ CLAUDE.md", "✓ AGENTS.md", "✓ README",
 		"3 analyzed", "(partial — scan capped)",
 		"Go, Markdown", "2 open · 1 modules",
 		".kervo/artifact.md", "(Mode 1 — Fact-only)", "CLAUDE.md, AGENTS.md  (marker block)",
@@ -56,7 +56,7 @@ func TestRenderColdStartMissingDocs(t *testing.T) {
 	s := sampleSnap()
 	s.Docs = nil
 	out := renderColdStart(ui{}, s, "dev", []string{"CLAUDE.md"})
-	for _, want := range []string{"– CLAUDE.md", "– README"} {
+	for _, want := range []string{"– CLAUDE.md", "– AGENTS.md", "– README"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("missing-doc marker %q not shown", want)
 		}

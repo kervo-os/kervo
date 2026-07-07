@@ -12,9 +12,8 @@
 
 ## Brief
 
-- **Focus**: internal/ ×7 · assets/ ×2 · packaging/ ×1
+- **Focus**: internal/ ×6 · assets/ ×2 · packaging/ ×1
 - **Run**: `make build` · `make test` · `make arch-check`
-- **Unpushed commits**: 1
 
 ## Repository Summary
 
@@ -36,6 +35,7 @@
 
 ## Recent Changes
 
+- `0a8da8f` 2026-07-07 readme: trust lifecycle as a state diagram — the prose arrow was a straight line, the machine is not
 - `653e32a` 2026-07-07 readme: H4 result as a chart — the 29.2pp gap should not hide in a gray table
 - `773f814` 2026-07-07 readme: npm joins the install paths — all three languages
 - `1a2f72c` 2026-07-07 ledger: session hook events
@@ -55,17 +55,16 @@
 - `5ad7201` 2026-07-07 changelog: v0.20.0
 - `ee473ef` 2026-07-07 ledger: session hook events
 - `8a66336` 2026-07-07 ledger merges were a documented lie — now they union
-- `ac6c2da` 2026-07-07 ponytail: -323 lines, zero behavior change
 
-_Showing 20 of 117 analyzed commits._
+_Showing 20 of 118 analyzed commits._
 
 ### Frequently Changed Files
 
 - .kervo/events/2026-07.jsonl (85)
-- CLAUDE.md (60)
-- README.md (39)
-- README.ja.md (35)
-- README.ko.md (35)
+- CLAUDE.md (61)
+- README.md (40)
+- README.ja.md (36)
+- README.ko.md (36)
 - internal/core/i18n/i18n.go (16)
 - CHANGELOG.md (15)
 - internal/cli/compile.go (15)
@@ -86,7 +85,7 @@ _No TODO/FIXME comments found._
 
 ## Workspace Facts
 
-- Commits analyzed: 117 (complete)
+- Commits analyzed: 118 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 5
 - Docs captured: 1
