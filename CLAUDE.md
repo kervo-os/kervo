@@ -35,6 +35,7 @@
 
 ## Recent Changes
 
+- `8a3f4ec` 2026-07-07 readme: the measured section carries its own uncertainty
 - `7bda406` 2026-07-07 restore: adopted-repo measurements return — ownership re-affirmed by the owner
 - `f88a73a` 2026-07-07 privacy: retire adopted-repo measurements from all public surfaces
 - `d5e9028` 2026-07-07 init: AGENTS.md joins the workspace-found row
@@ -54,17 +55,16 @@
 - `7f4a5d1` 2026-07-07 ledger: session hook events
 - `33c46f6` 2026-07-07 freshness is the default — compile wires the git hooks itself
 - `e686558` 2026-07-07 init: the wizard keeps the digest fresh — commits and pulls auto-compile
-- `3493ca2` 2026-07-07 ledger: session hook events
 
-_Showing 20 of 121 analyzed commits._
+_Showing 20 of 122 analyzed commits._
 
 ### Frequently Changed Files
 
 - .kervo/events/2026-07.jsonl (87)
-- CLAUDE.md (64)
-- README.md (42)
-- README.ja.md (38)
-- README.ko.md (38)
+- CLAUDE.md (65)
+- README.md (43)
+- README.ja.md (39)
+- README.ko.md (39)
 - internal/core/i18n/i18n.go (16)
 - CHANGELOG.md (15)
 - internal/cli/compile.go (15)
@@ -85,7 +85,7 @@ _No TODO/FIXME comments found._
 
 ## Workspace Facts
 
-- Commits analyzed: 121 (complete)
+- Commits analyzed: 122 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 5
 - Docs captured: 1

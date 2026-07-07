@@ -11,6 +11,7 @@
 [![Dependencies](https://img.shields.io/badge/dependencies-0-34d399)](go.mod)
 [![Go Report Card](https://goreportcard.com/badge/github.com/kervo-os/kervo)](https://goreportcard.com/report/github.com/kervo-os/kervo)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21241109.svg)](https://doi.org/10.5281/zenodo.21241109)
 
 [English](README.md) | **한국어** | [日本語](README.ja.md)
 
