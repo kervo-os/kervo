@@ -12,7 +12,7 @@
 
 ## Brief
 
-- **Focus**: internal/ ×11
+- **Focus**: internal/ ×10
 - **Run**: `make build` · `make test` · `make arch-check`
 
 ## Repository Summary
@@ -35,6 +35,7 @@
 
 ## Recent Changes
 
+- `8d42959` 2026-07-07 changelog: condense 0.1–0.19 + ci: least privilege, SHA-pinned actions
 - `1189aef` 2026-07-07 ledger: blockchain verdict + H5 anchored registration
 - `29846fc` 2026-07-07 test: drop an import the assertion rewrite left behind
 - `9a2d42d` 2026-07-07 autocompile: pre-commit, not post-commit — the tree must converge
@@ -54,20 +55,19 @@
 - `2c493b9` 2026-07-06 protocol: govern the session start, not only the end
 - `219a0f5` 2026-07-06 changelog: v0.19.0
 - `c1157e1` 2026-07-06 bodies read like documents — markdown display, newline restore
-- `0efc45a` 2026-07-06 facts describe the repo that exists — history-only paths stop counting
 
-_Showing 20 of 109 analyzed commits._
+_Showing 20 of 110 analyzed commits._
 
 ### Frequently Changed Files
 
 - .kervo/events/2026-07.jsonl (82)
-- CLAUDE.md (52)
+- CLAUDE.md (53)
 - README.md (36)
 - README.ja.md (32)
 - README.ko.md (32)
 - internal/core/i18n/i18n.go (16)
+- CHANGELOG.md (15)
 - internal/cli/compile.go (15)
-- CHANGELOG.md (14)
 - internal/cli/dash.go (14)
 - internal/cli/dashpage.go (13)
 
@@ -85,7 +85,7 @@ _No TODO/FIXME comments found._
 
 ## Workspace Facts
 
-- Commits analyzed: 109 (complete)
+- Commits analyzed: 110 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 5
 - Docs captured: 1
