@@ -35,6 +35,7 @@
 
 ## Recent Changes
 
+- `7f31a3d` 2026-07-07 community: CONTRIBUTING + SECURITY (private vuln reporting enabled)
 - `8d42959` 2026-07-07 changelog: condense 0.1–0.19 + ci: least privilege, SHA-pinned actions
 - `1189aef` 2026-07-07 ledger: blockchain verdict + H5 anchored registration
 - `29846fc` 2026-07-07 test: drop an import the assertion rewrite left behind
@@ -54,14 +55,13 @@
 - `76705c8` 2026-07-06 changelog: v0.19.1
 - `2c493b9` 2026-07-06 protocol: govern the session start, not only the end
 - `219a0f5` 2026-07-06 changelog: v0.19.0
-- `c1157e1` 2026-07-06 bodies read like documents — markdown display, newline restore
 
-_Showing 20 of 110 analyzed commits._
+_Showing 20 of 111 analyzed commits._
 
 ### Frequently Changed Files
 
 - .kervo/events/2026-07.jsonl (82)
-- CLAUDE.md (53)
+- CLAUDE.md (54)
 - README.md (36)
 - README.ja.md (32)
 - README.ko.md (32)
@@ -85,7 +85,7 @@ _No TODO/FIXME comments found._
 
 ## Workspace Facts
 
-- Commits analyzed: 110 (complete)
+- Commits analyzed: 111 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 5
 - Docs captured: 1

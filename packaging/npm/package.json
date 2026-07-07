@@ -1,10 +1,10 @@
 {
   "name": "@kervo-os/kervo",
-  "version": "0.0.1",
+  "version": "0.21.1",
   "publishConfig": {
     "access": "public"
   },
-  "description": "Deterministic context compiler for AI agents — compiles your repo into a trust-labeled Context Artifact injected into CLAUDE.md. This package will become the npx wrapper for the Go binary; for now install from GitHub.",
+  "description": "Deterministic context compiler for AI agents — compiles your repo into a trust-labeled Context Artifact injected into CLAUDE.md. Downloads the prebuilt kervo binary (checksum-verified) on first run; the npm version tracks the binary release tag.",
   "bin": {
     "kervo": "bin/kervo.js"
   },
