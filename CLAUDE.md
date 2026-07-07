@@ -12,7 +12,7 @@
 
 ## Brief
 
-- **Focus**: internal/ ×10 · assets/ ×1
+- **Focus**: internal/ ×9 · assets/ ×1
 - **Run**: `make build` · `make test` · `make arch-check`
 
 ## Repository Summary
@@ -35,6 +35,7 @@
 
 ## Recent Changes
 
+- `869a4f3` 2026-07-07 changelog: v0.20.0
 - `d3fb51d` 2026-07-07 ledger: session hook events
 - `9370eb4` 2026-07-07 ledger merges were a documented lie — now they union
 - `d9a3f24` 2026-07-07 ponytail: -323 lines, zero behavior change
@@ -54,14 +55,13 @@
 - `e51d39d` 2026-07-06 brief: init alone must brief like a teammate — deterministically
 - `b93a143` 2026-07-06 privacy: the ledger carries no machine, no employer, no neighbor repos
 - `fd2f174` 2026-07-06 ledger: session hook events
-- `31d239e` 2026-07-06 repo: evidence moves out — kervo-os/experiments holds the receipts
 
-_Showing 20 of 100 analyzed commits._
+_Showing 20 of 101 analyzed commits._
 
 ### Frequently Changed Files
 
-- .kervo/events/2026-07.jsonl (75)
-- CLAUDE.md (43)
+- .kervo/events/2026-07.jsonl (76)
+- CLAUDE.md (44)
 - README.md (33)
 - README.ja.md (29)
 - README.ko.md (29)
@@ -69,7 +69,7 @@ _Showing 20 of 100 analyzed commits._
 - internal/cli/compile.go (14)
 - internal/cli/dash.go (14)
 - internal/cli/dashpage.go (13)
-- internal/core/compiler/testdata/skeleton.golden.md (11)
+- CHANGELOG.md (11)
 
 ## Open Tasks
 
@@ -85,7 +85,7 @@ _No TODO/FIXME comments found._
 
 ## Workspace Facts
 
-- Commits analyzed: 100 (complete)
+- Commits analyzed: 101 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 5
 - Docs captured: 1
