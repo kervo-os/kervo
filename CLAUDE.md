@@ -12,8 +12,9 @@
 
 ## Brief
 
-- **Focus**: internal/ ×10 · assets/ ×1
+- **Focus**: internal/ ×11 · assets/ ×1
 - **Run**: `make build` · `make test` · `make arch-check`
+- **Unpushed commits**: 1
 
 ## Repository Summary
 
@@ -35,6 +36,7 @@
 
 ## Recent Changes
 
+- `2bc2d3c` 2026-07-07 freshness is the default — compile wires the git hooks itself
 - `1c4fe44` 2026-07-07 init: the wizard keeps the digest fresh — commits and pulls auto-compile
 - `fe96a81` 2026-07-07 ledger: session hook events
 - `869a4f3` 2026-07-07 changelog: v0.20.0
@@ -54,22 +56,21 @@
 - `550fda5` 2026-07-06 ledger: purge + v0.17.0 recorded
 - `aa22916` 2026-07-06 changelog: v0.17.0
 - `64c6963` 2026-07-06 init/compile: choose your consumers — claude, codex, both, or auto
-- `e51d39d` 2026-07-06 brief: init alone must brief like a teammate — deterministically
 
-_Showing 20 of 103 analyzed commits._
+_Showing 20 of 104 analyzed commits._
 
 ### Frequently Changed Files
 
-- .kervo/events/2026-07.jsonl (78)
-- CLAUDE.md (46)
-- README.md (34)
-- README.ja.md (30)
-- README.ko.md (30)
+- .kervo/events/2026-07.jsonl (79)
+- CLAUDE.md (47)
+- README.md (35)
+- README.ja.md (31)
+- README.ko.md (31)
 - internal/core/i18n/i18n.go (16)
-- internal/cli/compile.go (14)
+- internal/cli/compile.go (15)
 - internal/cli/dash.go (14)
+- CHANGELOG.md (13)
 - internal/cli/dashpage.go (13)
-- CHANGELOG.md (12)
 
 ## Open Tasks
 
@@ -85,7 +86,7 @@ _No TODO/FIXME comments found._
 
 ## Workspace Facts
 
-- Commits analyzed: 103 (complete)
+- Commits analyzed: 104 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 5
 - Docs captured: 1
