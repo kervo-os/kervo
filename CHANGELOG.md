@@ -3,6 +3,15 @@
 All notable changes, newest first. Versions are git tags; every release
 ships prebuilt binaries and a Homebrew cask (`brew install kervo-os/tap/kervo`).
 
+## v0.21.1 — 2026-07-07
+
+- Auto-compile moves from post-commit to **pre-commit**: compiling after
+  the commit left the refreshed digest uncommitted forever (each fix-up
+  commit changed Recent Changes again — the tree never converged; caught
+  by dogfood minutes after v0.21.0). Now each commit recompiles first
+  and carries its own fresh artifact; the v0.21.0 post-commit hook is
+  migrated away automatically (exact match only).
+
 ## v0.21.0 — 2026-07-07
 
 - Freshness is no longer opt-in: every `init`/`compile` wires git

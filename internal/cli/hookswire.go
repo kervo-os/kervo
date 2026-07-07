@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sort"
 	"strings"
 )
 
@@ -61,10 +62,26 @@ func resolveHooksWiring(flagVal string, consumers []string) (bool, error) {
 	return ans == "" || ans == "y" || ans == "yes", nil
 }
 
-// gitHookScript refreshes the digest after local commits (post-commit)
-// and after pulls that bring teammates' commits in (post-merge) — the
-// two moments a workspace's facts change without a kervo command running.
-const gitHookScript = "#!/bin/sh\nkervo compile >/dev/null 2>&1 || true\n"
+// The two moments a workspace's facts change without a kervo command
+// running: a commit and a pull. pre-commit (NOT post-commit) is
+// deliberate — compiling after the commit dirties the tree with the
+// refreshed digest and never converges (each fix-up commit changes
+// Recent Changes again; found by dogfood within minutes of shipping
+// post-commit). Compiling before and staging the consumer files makes
+// every commit carry its own fresh digest and leaves the tree clean.
+const preCommitScript = `#!/bin/sh
+# kervo: the commit carries a fresh context artifact
+kervo compile >/dev/null 2>&1 || exit 0
+for f in CLAUDE.md AGENTS.md; do [ -f "$f" ] && git add -- "$f"; done
+exit 0
+`
+
+const postMergeScript = "#!/bin/sh\nkervo compile >/dev/null 2>&1 || true\n"
+
+// legacyPostCommitScript is the v0.21.0 shape — migrated away on the
+// next wire because it perpetually dirties the tree (see above). Only
+// an exact match is removed; anything else is a foreign hook.
+const legacyPostCommitScript = postMergeScript
 
 // wireGitAutoCompile installs post-commit and post-merge hooks. This is
 // not opt-in: a memory layer for a team that stores its work as commits
@@ -86,8 +103,13 @@ func wireGitAutoCompile(dir string) (string, error) {
 	if err := os.MkdirAll(hooksDir, 0o755); err != nil {
 		return "", err
 	}
+	// Migrate our own v0.21.0 post-commit (exact match only — anything
+	// the user touched is theirs).
+	if raw, err := os.ReadFile(filepath.Join(hooksDir, "post-commit")); err == nil && string(raw) == legacyPostCommitScript {
+		_ = os.Remove(filepath.Join(hooksDir, "post-commit"))
+	}
 	var wired, kept []string
-	for _, name := range []string{"post-commit", "post-merge"} {
+	for name, script := range map[string]string{"pre-commit": preCommitScript, "post-merge": postMergeScript} {
 		p := filepath.Join(hooksDir, name)
 		raw, err := os.ReadFile(p)
 		switch {
@@ -99,11 +121,13 @@ func wireGitAutoCompile(dir string) (string, error) {
 		case !os.IsNotExist(err):
 			return "", err
 		}
-		if err := os.WriteFile(p, []byte(gitHookScript), 0o755); err != nil {
+		if err := os.WriteFile(p, []byte(script), 0o755); err != nil {
 			return "", err
 		}
 		wired = append(wired, name)
 	}
+	sort.Strings(wired)
+	sort.Strings(kept)
 	switch {
 	case len(kept) > 0 && len(wired) == 0:
 		return "left untouched — " + strings.Join(kept, ", ") + " carry your own hooks; add `kervo compile` to them yourself", nil
@@ -112,7 +136,7 @@ func wireGitAutoCompile(dir string) (string, error) {
 	case len(wired) == 0:
 		return "already wired", nil
 	default:
-		return "post-commit + post-merge — commits and pulls now refresh the artifact", nil
+		return "pre-commit + post-merge — every commit carries a fresh artifact, pulls refresh it too", nil
 	}
 }
 

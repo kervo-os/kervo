@@ -76,7 +76,7 @@ Workspace Found   ✓ Git   ✓ CLAUDE.md   ✓ README
   Artifact   .kervo/artifact.md  (Mode 1 — Fact-only)
   Injected   CLAUDE.md, AGENTS.md  (marker block)
   Hooks      .claude/settings.json — created — commit it and capture fires for every teammate
-  Auto       .git/hooks — post-commit + post-merge — commits and pulls now refresh the artifact
+  Auto       .git/hooks — pre-commit + post-merge — every commit carries a fresh artifact, pulls refresh it too
 ```
 
 Artifact가 담는 것: 저장소 요약 · 선언된 명령어(Makefile, npm 스크립트,
@@ -202,11 +202,12 @@ init 위저드가 이 파일을 대신 써줍니다(스크립트에선 `-hooks y
 워크스페이스 상대 경로·크기만** 저장됩니다: 프롬프트와 파일 내용은 머신을
 떠나지도, git 히스토리에 들어가지도 않습니다.
 
-신선도는 opt-in이 아닙니다: 모든 `init`/`compile`이 `post-commit`·
-`post-merge` 훅을 배선해서, 로컬 커밋은 물론 **pull로 들어오는 커밋**에도
-artifact가 기본으로 갱신됩니다. git 훅은 머신 로컬이라 팀원은 첫
-`kervo compile` 한 번이면 자기 머신이 배선됩니다. 직접 쓴 훅은 절대
-덮어쓰지 않습니다(우리 훅을 본인 것으로 바꾸는 게 곧 opt-out).
+신선도는 opt-in이 아닙니다: 모든 `init`/`compile`이 `pre-commit` 훅
+(커밋 직전에 재컴파일해서 **커밋 자신이 최신 artifact를 싣고 가고**,
+트리는 깨끗하게 유지)과 `post-merge` 훅(pull로 들어오는 커밋도 갱신)을
+배선합니다. git 훅은 머신 로컬이라 팀원은 첫 `kervo compile` 한 번이면
+자기 머신이 배선됩니다. 직접 쓴 훅은 절대 덮어쓰지 않습니다(우리 훅을
+본인 것으로 바꾸는 게 곧 opt-out).
 </details>
 
 <details>

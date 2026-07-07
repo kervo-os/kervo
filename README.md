@@ -77,7 +77,7 @@ Workspace Found   ✓ Git   ✓ CLAUDE.md   ✓ README
   Artifact   .kervo/artifact.md  (Mode 1 — Fact-only)
   Injected   CLAUDE.md, AGENTS.md  (marker block)
   Hooks      .claude/settings.json — created — commit it and capture fires for every teammate
-  Auto       .git/hooks — post-commit + post-merge — commits and pulls now refresh the artifact
+  Auto       .git/hooks — pre-commit + post-merge — every commit carries a fresh artifact, pulls refresh it too
 ```
 
 The artifact covers: repository summary · declared commands (Makefile,
@@ -206,12 +206,12 @@ it never breaks a session (garbage in, exit 0 out). The committed ledger
 stores **names, workspace-relative paths, and sizes only**: prompt and
 file contents never leave your machine or enter git history.
 
-Freshness is not opt-in: every `init`/`compile` wires `post-commit`
-and `post-merge` hooks that rerun `kervo compile`, so local commits
-*and* incoming pulls refresh the artifact by default. Git hooks are
-machine-local — a teammate's first `kervo compile` wires their machine.
-A hook you wrote yourself is never rewritten (replacing ours with your
-own is the opt-out).
+Freshness is not opt-in: every `init`/`compile` wires a `pre-commit`
+hook — each commit recompiles and **carries its own fresh artifact**,
+so the tree stays clean — and a `post-merge` hook, so incoming pulls
+refresh it too. Git hooks are machine-local: a teammate's first
+`kervo compile` wires their machine. A hook you wrote yourself is never
+rewritten (replacing ours with your own is the opt-out).
 </details>
 
 <details>
