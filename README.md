@@ -325,15 +325,19 @@ consumers, n = 24):
 |---|---|---|---|
 | Composite S1+S2+S3 | **91.7%** | 91.7% | 62.5% |
 
-- **A−C = +29.2pp**, meeting the pre-registered ≥20pp bar. Every actual
-  poisoning infection in the whole program (3/3) happened in arm C with
-  the weaker consumer model.
+- **A−C = +29.2pp**, meeting the pre-registered ≥20pp bar (95% CI
+  6.9–51.5pp — a strong pre-registered signal with a public replication
+  kit, not statistical proof). Every actual poisoning infection in the
+  whole program (3/3) happened in arm C with the weaker consumer model.
 - Across all 54 responses, arm A never lost a point to a poisoned claim.
-  Unlabeled arms failed by *contagion*: one discovered lie caused true
-  facts to be rejected alongside it.
-- An agent can refute lies the code disproves; **labels protect the truth
-  that lives outside the code** — decisions, constraints, context. The
-  weaker the consumer, the larger the protection.
+  B tying A above means the aggregate effect comes from the **treatment
+  policy** — stale segregated, deprecated excluded — not the labels alone.
+- Labels earn their keep where contagion strikes: in the earlier
+  mixed-condition runs, one discovered lie caused unlabeled arms to
+  reject *true* facts alongside it. An agent can refute lies the code
+  disproves; labels keep the truth that lives outside the code —
+  decisions, constraints, context — from being discredited with them.
+  The weaker the consumer, the larger the protection.
 
 And on a real production monorepo (from its own ledger):
 
