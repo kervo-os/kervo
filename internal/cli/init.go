@@ -15,8 +15,7 @@ const initBudget = 30 * time.Second
 // runInit: full scan -> deterministic skeleton -> .kervo/artifact.md
 // -> CLAUDE.md marker injection.
 // Wiring order per ARCH-0001 §9: gitexec+files -> core/fact -> core/compiler -> claudecode.
-// (Fact events into the store follow once the sqlite adapter lands; the
-// scan cursor is persisted now so `kervo compile` can be incremental.)
+// The scan cursor is persisted so `kervo compile` stays incremental.
 func runInit(args []string) error {
 	fs := newFlagSet("init")
 	dir := fs.String("dir", ".", "workspace directory")

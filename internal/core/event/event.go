@@ -18,7 +18,7 @@ const (
 
 // Event is the single append-only record type.
 // Persistence per RFC-0005: newline JSON in .kervo/events/YYYY-MM.jsonl
-// (committed — branch merges are unions), SQLite only as a local index.
+// (committed — branch merges are unions); views are derived by replay.
 type Event struct {
 	ID   string // ULID, assigned by store — global uniqueness makes merge=union safe
 	Kind Kind

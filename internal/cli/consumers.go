@@ -64,7 +64,6 @@ func legacyConsumers(dir string) ([]string, error) {
 }
 
 func parseConsumers(dir, raw string) ([]string, error) {
-	_ = dir // kept for symmetry with legacy parsing and future file-aware modes.
 	t := strings.ToLower(strings.TrimSpace(raw))
 	t = strings.ReplaceAll(t, "\n", ",")
 	t = strings.ReplaceAll(t, " ", "")

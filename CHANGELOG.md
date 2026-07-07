@@ -3,6 +3,17 @@
 All notable changes, newest first. Versions are git tags; every release
 ships prebuilt binaries and a Homebrew cask (`brew install kervo-os/tap/kervo`).
 
+## Unreleased
+
+- Removed: `kervo review -web`. The dash judges every repo with the same
+  ledger primitive and a better surface; the terminal `kervo review`
+  covers the no-browser case. One judging page, not two.
+- Removed: the empty sqlite index placeholder package and the
+  `.kervo/index.db` gitignore rule — no code ever created that file.
+  Existing `.gitignore` lines are harmless and can be deleted.
+- Internal: dead-code and duplication cleanup from an over-engineering
+  review (-330 lines, no behavior change).
+
 ## v0.19.1 — 2026-07-06
 
 - The artifact opens with a session-start directive: start here, state

@@ -291,7 +291,7 @@ context travel:
 | Event ledger — the truth | `.kervo/events/*.jsonl` | **yes** — append-only, `merge=union`: branch merges union the ledgers |
 | Language · inject mode · consumers | `.kervo/lang` … | **yes** — team choices |
 | Injected context block | `CLAUDE.md` / `AGENTS.md` | **yes** |
-| Compiled artifact, index, cache | `.kervo/artifact.md` … | no — derived, rebuilt by `compile` |
+| Compiled artifact, cache | `.kervo/artifact.md` … | no — derived, rebuilt by `compile` |
 
 1. **First adoption** — one person runs `kervo init` once and commits the
    result.
@@ -354,7 +354,7 @@ judges; a human-grading replication kit is included but has not been run
 | `kervo compile [-lang en\|ko\|ja] [-inject block\|import]` | Incremental rescan + recompile; Mode 3 → 2 → 1 fallback |
 | `kervo capture -type <t> -body <md> -evidence <e>` | Record an observation (dedup + backpressure guarded) |
 | `kervo trust -id <prefix> -to verified\|stale\|deprecated -reason <r>` | Judge by ID (the scriptable primitive) |
-| `kervo review [-web]` | Triage queue — judge one by one; `-web` serves a one-shot local page |
+| `kervo review` | Triage queue in the terminal — judge one by one |
 | `kervo dash` | Fleet dashboard — every registered workspace on one page, inline triage |
 | `kervo status` | One-screen ledger + trust view |
 | `kervo metrics` | Prompt sizes with vs without the artifact (built-in A/B counters) |

@@ -21,12 +21,8 @@ func runReview(args []string) error {
 	fs := newFlagSet("review")
 	dir := fs.String("dir", ".", "workspace directory")
 	actor := fs.String("actor", "", `who is judging (default "human:<git user.name>")`)
-	web := fs.Bool("web", false, "serve the queue as a one-shot localhost page instead of the terminal prompt")
 	if err := fs.Parse(args); err != nil {
 		return err
-	}
-	if *web {
-		return runReviewWeb(*dir, *actor)
 	}
 	return reviewLoop(*dir, *actor, os.Stdin, os.Stdout)
 }

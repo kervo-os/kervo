@@ -199,14 +199,10 @@ func importSession(store *jsonl.Store, dir, repo, session, path string) (int, er
 // sanitizeProjectPath mirrors Claude Code's project-directory naming:
 // every character outside [A-Za-z0-9-] becomes "-".
 func sanitizeProjectPath(p string) string {
-	var b strings.Builder
-	for _, r := range p {
-		switch {
-		case r >= 'a' && r <= 'z', r >= 'A' && r <= 'Z', r >= '0' && r <= '9', r == '-':
-			b.WriteRune(r)
-		default:
-			b.WriteRune('-')
+	return strings.Map(func(r rune) rune {
+		if r >= 'a' && r <= 'z' || r >= 'A' && r <= 'Z' || r >= '0' && r <= '9' || r == '-' {
+			return r
 		}
-	}
-	return b.String()
+		return '-'
+	}, p)
 }

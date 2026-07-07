@@ -12,7 +12,7 @@
 
 ## Brief
 
-- **Focus**: internal/ ×11 · assets/ ×2
+- **Focus**: internal/ ×10 · assets/ ×1
 - **Run**: `make build` · `make test` · `make arch-check`
 
 ## Repository Summary
@@ -35,6 +35,11 @@
 
 ## Recent Changes
 
+- `01064e6` 2026-07-06 readme: the modern OSS shape — short spine, folded depth
+- `68c3f9d` 2026-07-06 readme: a proper OSS tail — contributing in, diary out
+- `bd8e659` 2026-07-06 readme: the status section catches up with the product
+- `76705c8` 2026-07-06 changelog: v0.19.1
+- `2c493b9` 2026-07-06 protocol: govern the session start, not only the end
 - `219a0f5` 2026-07-06 changelog: v0.19.0
 - `c1157e1` 2026-07-06 bodies read like documents — markdown display, newline restore
 - `0efc45a` 2026-07-06 facts describe the repo that exists — history-only paths stop counting
@@ -50,26 +55,21 @@
 - `18ce65e` 2026-07-06 readme: the story banner — regenerated art with exact product strings
 - `5fbc45c` 2026-07-06 ledger: kervo.dev purchased — launch deferred until H5 numbers
 - `04b81aa` 2026-07-06 readme: lead with what the product means, then how it works
-- `b54a73c` 2026-07-06 ledger: queue cleared — eight judgments with conversational provenance
-- `0b729ad` 2026-07-06 protocol: the conversation is the review — relay affirmations, question conflicts
-- `0273d94` 2026-07-06 ledger: the conversation is a review surface — a plan
-- `378242b` 2026-07-06 ledger: workspace-native wiki management — a plan, not code
-- `64b1852` 2026-07-06 dash: the knowledge view — judged knowledge IS the wiki
 
-_Showing 20 of 92 analyzed commits._
+_Showing 20 of 97 analyzed commits._
 
 ### Frequently Changed Files
 
-- .kervo/events/2026-07.jsonl (69)
-- CLAUDE.md (40)
-- README.md (29)
-- README.ja.md (25)
-- README.ko.md (25)
-- internal/core/i18n/i18n.go (15)
+- .kervo/events/2026-07.jsonl (72)
+- CLAUDE.md (41)
+- README.md (32)
+- README.ja.md (28)
+- README.ko.md (28)
+- internal/core/i18n/i18n.go (16)
 - internal/cli/compile.go (13)
 - internal/cli/dash.go (13)
 - internal/cli/dashpage.go (13)
-- internal/core/compiler/testdata/skeleton.golden.md (10)
+- internal/core/compiler/testdata/skeleton.golden.md (11)
 
 ## Open Tasks
 
@@ -80,12 +80,12 @@ _No TODO/FIXME comments found._
 - .github/ (2 files)
 - assets/ (7 files)
 - cmd/ (1 files)
-- internal/ (68 files)
+- internal/ (65 files)
 - packaging/ (3 files)
 
 ## Workspace Facts
 
-- Commits analyzed: 92 (complete)
+- Commits analyzed: 97 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 5
 - Docs captured: 1
@@ -184,6 +184,13 @@ Evidence: user 2026-07-06: 'ㅇㅋ 그 순서로 가자'; post-purge grep across
 **[verified — human:refuse1993]**
 Protocol gains an opening directive (proposal): the injected block should instruct consumers at the START, not only at the end - 'Begin from this artifact: state what it already answers for your task, then explore only the gaps and verify only what your task puts in question.' Field evidence: a codex session asked to analyze a freshly-initialized repo re-derived declared facts (compose topology, TODOs, pytest presence) without referencing the loaded block; exploration itself was legitimate for an audit task, but the zero-acknowledgment start wastes the paid context and hides the product from the user watching. Companion observation: the same session exposed a thin declared fact - root pytest fails without PYTHONPATH=. - which is precisely a write-back candidate; whether the session captures it at the end is a live protocol-compliance datum for a non-hooked consumer.
 Evidence: user-pasted codex transcript 2026-07-06: rg/ls/README/compose/pytest exploration with no artifact reference; PYTHONPATH=. discovery, 22 pass / 23 skip
+
+**[verified — human:refuse1993]**
+ports/ stays despite zero consumers — kept by judgment, not oversight.
+- An over-engineering review found all 4 port interfaces have no consuming caller (assertions only); deletion was proposed and declined: the file is the adapter contract documentation and the hexagonal boundary's physical evidence (RULE: 4 ports, ceiling 6).
+- External producers never touch ports — they enter via the proposals.json file contract, so 'future openwiki integration' is not a reason to keep or grow it.
+- The rest of the review landed: review -web removed (dash + terminal review cover both cases), empty sqlite placeholder removed, stdlib/shrink fixes — net -323 lines, no behavior change.
+Evidence: grep: every ports.* reference outside internal/ports is a 'var _' assertion; go test -race + arch-check green after removal commit
 <!-- kervo:slot:decisions:end -->
 
 ## Known Risks

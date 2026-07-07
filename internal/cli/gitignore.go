@@ -11,7 +11,6 @@ import (
 // rebuildable is ignored. Registered automatically by init/compile.
 var derivedIgnores = []string{
 	".kervo/artifact.md",
-	".kervo/index.db",
 	".kervo/cache/",
 }
 

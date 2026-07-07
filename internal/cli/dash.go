@@ -8,7 +8,10 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"runtime"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -208,10 +211,7 @@ func newDashServer(paths []string, actorFlag string, lang i18n.Lang) (*dashServe
 				repo.History = append(repo.History, it)
 			}
 		}
-		// Newest judgments first.
-		for i, j := 0, len(repo.History)-1; i < j; i, j = i+1, j-1 {
-			repo.History[i], repo.History[j] = repo.History[j], repo.History[i]
-		}
+		slices.Reverse(repo.History) // newest judgments first
 		s.repos = append(s.repos, repo)
 		s.byPath[p] = repo
 	}
@@ -379,4 +379,17 @@ func (s *dashServer) quit(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusOK)
 	s.once.Do(func() { close(s.done) })
+}
+
+func openBrowser(url string) {
+	var cmd string
+	switch runtime.GOOS {
+	case "darwin":
+		cmd = "open"
+	case "linux":
+		cmd = "xdg-open"
+	default:
+		return
+	}
+	_ = exec.Command(cmd, url).Start()
 }

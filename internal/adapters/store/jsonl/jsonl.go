@@ -1,7 +1,7 @@
 // Package jsonl implements the event ledger — the Source of Truth per
 // RFC-0005: one event per line in .kervo/events/YYYY-MM.jsonl, append-only,
-// ULID-keyed, committed to git so branch merges are unions. SQLite (the
-// sqlite package) is only a rebuildable index over these files.
+// ULID-keyed, committed to git so branch merges are unions. Everything
+// else is a derived view, rebuildable by replay.
 package jsonl
 
 import (

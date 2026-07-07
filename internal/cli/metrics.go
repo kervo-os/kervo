@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strconv"
 
 	"github.com/kervo-os/kervo/internal/adapters/store/jsonl"
 	"github.com/kervo-os/kervo/internal/core/event"
@@ -108,7 +109,7 @@ func runMetrics(args []string) error {
 	fmt.Printf("Sessions measured: %d\n\n", len(r.Sessions))
 	fmt.Printf("%-26s %14s %14s\n", "", "with artifact", "without")
 	row := func(label string, w, wo string) { fmt.Printf("%-26s %14s %14s\n", label, w, wo) }
-	row("sessions", itoa(with.sessions), itoa(without.sessions))
+	row("sessions", strconv.Itoa(with.sessions), strconv.Itoa(without.sessions))
 	row("avg first prompt (chars)", avg(with.firstSum, with.sessions), avg(without.firstSum, without.sessions))
 	row("  ≈ tokens", avg(with.firstSum/4, with.sessions), avg(without.firstSum/4, without.sessions))
 	row("avg prompts / session", avg(with.promptSum, with.sessions), avg(without.promptSum, without.sessions))
@@ -122,8 +123,6 @@ func runMetrics(args []string) error {
 	fmt.Printf("(semantic) — raw sizes are recorded so it can be derived later.\n")
 	return nil
 }
-
-func itoa(n int) string { return fmt.Sprintf("%d", n) }
 
 func avg(sum, n int) string {
 	if n == 0 {

@@ -75,7 +75,7 @@ func TestInitEndToEnd(t *testing.T) {
 	if err != nil {
 		t.Fatalf(".gitignore not created: %v", err)
 	}
-	for _, rule := range []string{".kervo/artifact.md", ".kervo/index.db", ".kervo/cache/"} {
+	for _, rule := range []string{".kervo/artifact.md", ".kervo/cache/"} {
 		if !strings.Contains(string(gi), rule) {
 			t.Errorf(".gitignore missing %q", rule)
 		}

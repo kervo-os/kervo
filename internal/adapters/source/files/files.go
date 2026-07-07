@@ -38,9 +38,10 @@ type Scanner struct {
 
 var _ ports.SourceProvider = (*Scanner)(nil)
 
-func New() *Scanner {
-	return &Scanner{MaxTodos: DefaultMaxTodos, MaxDocBytes: DefaultMaxDocBytes}
-}
+// New returns a zero-value Scanner: unset caps fall back to the defaults
+// at the point of use, so one defaulting site serves both New() and
+// literal construction in tests.
+func New() *Scanner { return &Scanner{} }
 
 // Scan is stateless: the cursor is ignored and returned empty (file scanning
 // is cheap enough to redo; incrementality lives in gitexec).

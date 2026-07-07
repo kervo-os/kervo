@@ -32,7 +32,9 @@ type Scanner struct {
 
 var _ ports.SourceProvider = (*Scanner)(nil)
 
-func New() *Scanner { return &Scanner{MaxCommits: DefaultMaxCommits} }
+// New returns a zero-value Scanner: an unset MaxCommits falls back to
+// DefaultMaxCommits at scan time — one defaulting site.
+func New() *Scanner { return &Scanner{} }
 
 // Scan reads the repository at dir. cursor is the last-seen HEAD SHA from a
 // previous scan (empty = full scan); the returned cursor is the current HEAD.
