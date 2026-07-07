@@ -12,7 +12,7 @@
 
 ## Brief
 
-- **Focus**: internal/ ×10 · packaging/ ×1
+- **Focus**: internal/ ×9 · assets/ ×1 · packaging/ ×1
 - **Run**: `make build` · `make test` · `make arch-check`
 
 ## Repository Summary
@@ -35,6 +35,7 @@
 
 ## Recent Changes
 
+- `8813dc6` 2026-07-07 readme: quickstart as a colored terminal card (freeze SVG of the real init styling)
 - `490327b` 2026-07-07 npm: the wrapper downloads the real binary
 - `3d1ffc3` 2026-07-07 community: CONTRIBUTING + SECURITY (private vuln reporting enabled)
 - `a78866f` 2026-07-07 changelog: condense 0.1–0.19 + ci: least privilege, SHA-pinned actions
@@ -54,17 +55,16 @@
 - `d09b5f8` 2026-07-06 readme: a proper OSS tail — contributing in, diary out
 - `900d64c` 2026-07-06 readme: the status section catches up with the product
 - `55c74c4` 2026-07-06 changelog: v0.19.1
-- `ba2798c` 2026-07-06 protocol: govern the session start, not only the end
 
-_Showing 20 of 112 analyzed commits._
+_Showing 20 of 113 analyzed commits._
 
 ### Frequently Changed Files
 
 - .kervo/events/2026-07.jsonl (83)
-- CLAUDE.md (55)
-- README.md (36)
-- README.ja.md (32)
-- README.ko.md (32)
+- CLAUDE.md (56)
+- README.md (37)
+- README.ja.md (33)
+- README.ko.md (33)
 - internal/core/i18n/i18n.go (16)
 - CHANGELOG.md (15)
 - internal/cli/compile.go (15)
@@ -85,7 +85,7 @@ _No TODO/FIXME comments found._
 
 ## Workspace Facts
 
-- Commits analyzed: 112 (complete)
+- Commits analyzed: 113 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 5
 - Docs captured: 1
@@ -211,6 +211,10 @@ Evidence: user judgment 2026-07-07: 'ㅇㅋ 그 선으로 가자, H5 해시 앵�
 **[verified — human:refuse1993]**
 kervo.dev landing: libraries allowed — the zero-dep guarantee binds the shipped binary and its embedded UIs, not the website. Stack: Astro 5 + Tailwind 4 static site at EXPER/kervo.dev; hosting: Vercel (project kervo.dev, prod live at kervodev.vercel.app, domain kervo.dev attached 2026-07-07); DNS pending one Cloudflare A record (76.76.21.21). Measured section carries only public H4 numbers — H5 headline still waits for the re-run. Supersedes 01KWXGDYPA (GitHub Pages detail replaced by Vercel per user direction).
 Evidence: user 2026-07-07: '라이브러리 써도 되는데?' + '좋아. vercel에 올리고 내 도메인 붙일까?'; vercel inspect: alias kervodev.vercel.app, curl 200
+
+**[verified — human:refuse1993]**
+Identity hygiene executed before public promotion (2026-07-07): both public repos' full histories rewritten via git filter-repo and force-pushed — kervo (110 commits + 29 tag taggers: refuse1993@gmail.com → GitHub noreply) and experiments (4 commits: machine-local '위협인텔리전스 <threat-intel@Brown-MacBook-Pro.local>' → refuse1993/noreply). Repo-local git identity set to noreply in both working clones so new commits stay clean. Landing fonts moved from Google Fonts CDN to self-hosted fontsource bundles (GDPR — LG München precedent), deployed to kervo.dev. H5 .ots proofs unaffected: they stamp file hashes, not commit hashes. Cost accepted: all pre-rewrite kervo SHAs dangle (second time — same as the 2026-07-06 purge); commit-map preserved during the session. Remaining human steps: GitHub Settings → Emails → 'Keep private' + 'Block command line pushes that expose my email'; optionally re-point npm account email at a kervo.dev forward.
+Evidence: post-rewrite verification: git log local + gh api commits on both repos → only 31397642+refuse1993@users.noreply.github.com; curl kervo.dev → 200, fonts.googleapis references in live HTML: 0
 <!-- kervo:slot:decisions:end -->
 
 ## Known Risks
