@@ -12,7 +12,7 @@
 
 ## Brief
 
-- **Focus**: internal/ ×11
+- **Focus**: internal/ ×12
 - **Run**: `make build` · `make test` · `make arch-check`
 
 ## Repository Summary
@@ -35,6 +35,7 @@
 
 ## Recent Changes
 
+- `9a2d42d` 2026-07-07 autocompile: pre-commit, not post-commit — the tree must converge
 - `0ec6742` 2026-07-07 ledger: session hook events
 - `6f4b69c` 2026-07-07 ledger: session hook events
 - `2bc2d3c` 2026-07-07 freshness is the default — compile wires the git hooks itself
@@ -54,21 +55,20 @@
 - `0efc45a` 2026-07-06 facts describe the repo that exists — history-only paths stop counting
 - `9231c2c` 2026-07-06 ledger: opening-directive proposal — the protocol must govern session start, not only session end
 - `38949fe` 2026-07-06 init: the wizard wires capture — and says what codex can't have
-- `550fda5` 2026-07-06 ledger: purge + v0.17.0 recorded
 
-_Showing 20 of 106 analyzed commits._
+_Showing 20 of 107 analyzed commits._
 
 ### Frequently Changed Files
 
-- .kervo/events/2026-07.jsonl (79)
-- CLAUDE.md (49)
-- README.md (35)
-- README.ja.md (31)
-- README.ko.md (31)
+- .kervo/events/2026-07.jsonl (80)
+- CLAUDE.md (50)
+- README.md (36)
+- README.ja.md (32)
+- README.ko.md (32)
 - internal/core/i18n/i18n.go (16)
 - internal/cli/compile.go (15)
+- CHANGELOG.md (14)
 - internal/cli/dash.go (14)
-- CHANGELOG.md (13)
 - internal/cli/dashpage.go (13)
 
 ## Open Tasks
@@ -85,7 +85,7 @@ _No TODO/FIXME comments found._
 
 ## Workspace Facts
 
-- Commits analyzed: 106 (complete)
+- Commits analyzed: 107 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 5
 - Docs captured: 1
