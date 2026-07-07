@@ -12,7 +12,7 @@
 
 ## Brief
 
-- **Focus**: internal/ ×11 · assets/ ×1
+- **Focus**: internal/ ×11
 - **Run**: `make build` · `make test` · `make arch-check`
 - **Unpushed commits**: 1
 
@@ -36,6 +36,7 @@
 
 ## Recent Changes
 
+- `6f4b69c` 2026-07-07 ledger: session hook events
 - `2bc2d3c` 2026-07-07 freshness is the default — compile wires the git hooks itself
 - `1c4fe44` 2026-07-07 init: the wizard keeps the digest fresh — commits and pulls auto-compile
 - `fe96a81` 2026-07-07 ledger: session hook events
@@ -55,14 +56,13 @@
 - `38949fe` 2026-07-06 init: the wizard wires capture — and says what codex can't have
 - `550fda5` 2026-07-06 ledger: purge + v0.17.0 recorded
 - `aa22916` 2026-07-06 changelog: v0.17.0
-- `64c6963` 2026-07-06 init/compile: choose your consumers — claude, codex, both, or auto
 
-_Showing 20 of 104 analyzed commits._
+_Showing 20 of 105 analyzed commits._
 
 ### Frequently Changed Files
 
 - .kervo/events/2026-07.jsonl (79)
-- CLAUDE.md (47)
+- CLAUDE.md (48)
 - README.md (35)
 - README.ja.md (31)
 - README.ko.md (31)
@@ -86,7 +86,7 @@ _No TODO/FIXME comments found._
 
 ## Workspace Facts
 
-- Commits analyzed: 104 (complete)
+- Commits analyzed: 105 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 5
 - Docs captured: 1
