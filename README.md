@@ -335,6 +335,13 @@ consumers, n = 24):
   that lives outside the code** — decisions, constraints, context. The
   weaker the consumer, the larger the protection.
 
+And on a real production monorepo (from its own ledger):
+
+| What was measured | Result |
+|---|---|
+| Write-back pilot: capture → ledger → compile → fresh consumer | onboarding answers **5.5/10 → 9.5/10**, cost unchanged (1 tool call) |
+| Trust labels reaching consumers | the consuming agent flagged its own answer as `[generated]`, unprompted |
+| Mode 3 backend proposals, graded against ground truth | goal C+ / risk D → repositioned as a bootstrap channel |
 
 Full protocols, pre-registrations, and all raw responses:
 [kervo-os/experiments](https://github.com/kervo-os/experiments). Grades
