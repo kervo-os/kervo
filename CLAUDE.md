@@ -12,7 +12,7 @@
 
 ## Brief
 
-- **Focus**: internal/ ×12
+- **Focus**: internal/ ×11
 - **Run**: `make build` · `make test` · `make arch-check`
 
 ## Repository Summary
@@ -35,6 +35,7 @@
 
 ## Recent Changes
 
+- `1189aef` 2026-07-07 ledger: blockchain verdict + H5 anchored registration
 - `29846fc` 2026-07-07 test: drop an import the assertion rewrite left behind
 - `9a2d42d` 2026-07-07 autocompile: pre-commit, not post-commit — the tree must converge
 - `0ec6742` 2026-07-07 ledger: session hook events
@@ -54,14 +55,13 @@
 - `219a0f5` 2026-07-06 changelog: v0.19.0
 - `c1157e1` 2026-07-06 bodies read like documents — markdown display, newline restore
 - `0efc45a` 2026-07-06 facts describe the repo that exists — history-only paths stop counting
-- `9231c2c` 2026-07-06 ledger: opening-directive proposal — the protocol must govern session start, not only session end
 
-_Showing 20 of 108 analyzed commits._
+_Showing 20 of 109 analyzed commits._
 
 ### Frequently Changed Files
 
-- .kervo/events/2026-07.jsonl (81)
-- CLAUDE.md (51)
+- .kervo/events/2026-07.jsonl (82)
+- CLAUDE.md (52)
 - README.md (36)
 - README.ja.md (32)
 - README.ko.md (32)
@@ -85,7 +85,7 @@ _No TODO/FIXME comments found._
 
 ## Workspace Facts
 
-- Commits analyzed: 108 (complete)
+- Commits analyzed: 109 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 5
 - Docs captured: 1
@@ -207,6 +207,10 @@ Blockchain verdict: no chain — but its two useful neighbors are adopted.
 - Adopted (b), deferred to W3/enterprise demand: judgment-commit signing with signatures bound to content hashes.
 - H5 PREREG declares: pass = mean >=8.5/10 at <=2 tool calls on the original 5-question basis; reject <=6.5; gate counts pinned by hash; pilot's targeted captures declared as design, not leakage.
 Evidence: user judgment 2026-07-07: 'ㅇㅋ 그 선으로 가자, H5 해시 앵커링 진행해'; ots stamp accepted by 4 calendars; experiments@main h5/
+
+**[verified — human:refuse1993]**
+kervo.dev landing: libraries allowed — the zero-dep guarantee binds the shipped binary and its embedded UIs, not the website. Stack: Astro 5 + Tailwind 4 static site at EXPER/kervo.dev; hosting: Vercel (project kervo.dev, prod live at kervodev.vercel.app, domain kervo.dev attached 2026-07-07); DNS pending one Cloudflare A record (76.76.21.21). Measured section carries only public H4 numbers — H5 headline still waits for the re-run. Supersedes 01KWXGDYPA (GitHub Pages detail replaced by Vercel per user direction).
+Evidence: user 2026-07-07: '라이브러리 써도 되는데?' + '좋아. vercel에 올리고 내 도메인 붙일까?'; vercel inspect: alias kervodev.vercel.app, curl 200
 <!-- kervo:slot:decisions:end -->
 
 ## Known Risks
