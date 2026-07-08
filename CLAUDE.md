@@ -12,7 +12,7 @@
 
 ## Brief
 
-- **Focus**: internal/ ×7 · assets/ ×3 · packaging/ ×2
+- **Focus**: internal/ ×6 · assets/ ×3 · packaging/ ×2
 - **Run**: `make build` · `make test` · `make arch-check`
 
 ## Repository Summary
@@ -35,6 +35,7 @@
 
 ## Recent Changes
 
+- `038b971` 2026-07-07 readme: DOI badge — the v0.21.1 snapshot is citable (10.5281/zenodo.21241109)
 - `8a3f4ec` 2026-07-07 readme: the measured section carries its own uncertainty
 - `7bda406` 2026-07-07 restore: adopted-repo measurements return — ownership re-affirmed by the owner
 - `f88a73a` 2026-07-07 privacy: retire adopted-repo measurements from all public surfaces
@@ -54,17 +55,16 @@
 - `24852c1` 2026-07-07 ledger: session hook events
 - `7f4a5d1` 2026-07-07 ledger: session hook events
 - `33c46f6` 2026-07-07 freshness is the default — compile wires the git hooks itself
-- `e686558` 2026-07-07 init: the wizard keeps the digest fresh — commits and pulls auto-compile
 
-_Showing 20 of 122 analyzed commits._
+_Showing 20 of 123 analyzed commits._
 
 ### Frequently Changed Files
 
 - .kervo/events/2026-07.jsonl (87)
-- CLAUDE.md (65)
-- README.md (43)
-- README.ja.md (39)
-- README.ko.md (39)
+- CLAUDE.md (66)
+- README.md (44)
+- README.ja.md (40)
+- README.ko.md (40)
 - internal/core/i18n/i18n.go (16)
 - CHANGELOG.md (15)
 - internal/cli/compile.go (15)
@@ -85,7 +85,7 @@ _No TODO/FIXME comments found._
 
 ## Workspace Facts
 
-- Commits analyzed: 122 (complete)
+- Commits analyzed: 123 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 5
 - Docs captured: 1
@@ -216,6 +216,18 @@ Evidence: post-rewrite verification: git log local + gh api commits on both repo
 **[verified — human:refuse1993]**
 Mode 3 is a bootstrap channel, not a running mate to Mode 2 (field eval on the adopted real repo, 2026-07-06). With only the artifact as input (commit messages + TODO list), a local 120b produced a rear-view goal (inferred from pushed history; the real goal lived in an unpushed branch — stale, not hallucinated) and an overreaching risk (18 TODOs exist -> 'critical logic is empty'; evidence does not support the conclusion). Session-verified Mode 2 capture measured 9.5/10 the same day. The trust gate worked as designed: both weak proposals arrived as [generated] and were quarantined pending judgment. Positioning: run Mode 3 to fill empty slots at cold start; once Mode 2 capture is live, leave KERVO_SEMANTIC_URL unset (auto Mode 1) — artifact-only inference reads history, not intent, and adds review noise.
 Evidence: user-relayed eval 2026-07-06: goal C+ (rear-view), risk D (fact->overreach), 9.5s local 120b, 2 proposals; Mode 2 pilot 9.5/10 same day
+
+**[generated — agent:claude]**
+Anchors are the shared primitive (proposal): capture gains an optional -anchor flag storing path globs on an event (anchors: []string, backward-compatible, byte-identical compile for anchor-less repos). One schema decision serves two features: 'kervo check' gates diffs against verified anchored decisions, and scope-aware injection becomes a filter (compile -scope / MCP read_context path param) instead of a new system. Anchor precision is refined by the human at verify time — agents propose, humans sign.
+Evidence: design session 2026-07-08; user: '2는 당연히 올것같으니 대비해야하고'
+
+**[generated — agent:claude]**
+kervo check — decisions become a CI gate (proposal): git diff --name-only vs anchors of verified decisions only; output as GitHub Actions annotations (::warning file=...::) so PR-inline rendering needs zero bot code; advisory by default, -strict for exit 1; the warning text teaches the reversal loop (deprecate old + capture new). Bonus: compile proposes stale when an anchored path no longer exists — the first deterministic evidence-based invalidation channel, narrowing the age-based-staleness limitation named in the paper. Layout: internal/core/gate pure matcher (~60 lines, ** glob, zero-dep) + internal/cli/check.go.
+Evidence: design session 2026-07-08; user asked '결정의 CI화는 어떻게 구현이 가능해?'
+
+**[generated — agent:claude]**
+Ledger compaction prep (proposal): replay cost is linear in events (631 events in days, single user). Design requiring zero schema/git change: fold-cache keyed by content-hash of closed monthly JSONL files in .kervo/cache/ (gitignored) — replay = cached folds + current month; late merges change the file hash and self-invalidate the cache. Immediate action is one benchmark test pinning the events-vs-replay-time curve in CI so the wall is visible before teams hit it; build the cache only when the curve says so.
+Evidence: design session 2026-07-08; ledger scan: 631 events, 9 ULID/line-order inversions already on one machine
 <!-- kervo:slot:decisions:end -->
 
 ## Known Risks
