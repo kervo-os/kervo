@@ -148,6 +148,21 @@ verified entry comes back as a question, never a silent re-proposal.
 `kervo review`, or across every repo at once in the
 [dashboard](#the-dashboard).
 
+**Decisions gate CI.** Give a decision an anchor —
+`kervo capture -type decision -body "Payments stay on the legacy
+gateway until Q3" -anchor "services/payments/**"` — and `kervo check`
+warns any PR that touches what a verified decision governs, inline in
+the diff (GitHub annotations, zero bot code). Advisory by default:
+a conflicting PR may be an intentional reversal, so the warning teaches
+the loop — deprecate with a reason, capture the new decision. Anchors
+whose paths vanish from the tree get flagged as stale candidates:
+evidence-based invalidation, not just an age timer.
+
+```yaml
+- run: git fetch origin main
+- run: kervo check -base origin/main   # add -strict to block
+```
+
 <details>
 <summary><b>Consumers — Claude Code, Codex, and anything that speaks MCP</b></summary>
 <br>
@@ -360,9 +375,10 @@ judges; a human-grading replication kit is included but has not been run
 |---|---|
 | `kervo init` | First-time wizard: scan → artifact → inject (idempotent) |
 | `kervo compile [-lang en\|ko\|ja] [-inject block\|import]` | Incremental rescan + recompile; Mode 3 → 2 → 1 fallback |
-| `kervo capture -type <t> -body <md> -evidence <e>` | Record an observation (dedup + backpressure guarded) |
+| `kervo capture -type <t> -body <md> -evidence <e> [-anchor <glob>…]` | Record an observation (dedup + backpressure guarded); anchors name the paths it governs |
 | `kervo trust -id <prefix> -to verified\|stale\|deprecated -reason <r>` | Judge by ID (the scriptable primitive) |
 | `kervo review` | Triage queue in the terminal — judge one by one |
+| `kervo check [-base <ref>] [-strict]` | Gate a diff: which verified anchored decisions does this change touch? |
 | `kervo dash` | Fleet dashboard — every registered workspace on one page, inline triage |
 | `kervo status` | One-screen ledger + trust view |
 | `kervo metrics` | Prompt sizes with vs without the artifact (built-in A/B counters) |

@@ -25,6 +25,11 @@ type Observation struct {
 	// (RFC-0005 §2.2: latest wins, disagreement is surfaced, resolution
 	// is v2 multi-party territory — v1 only refuses to hide it).
 	Conflict bool
+	// Anchors are optional workspace-relative path globs naming what this
+	// observation governs. `kervo check` gates diffs against the anchors
+	// of verified observations; a scope-aware compile filters by them.
+	// Optional and additive: anchor-less ledgers fold byte-identically.
+	Anchors []string
 }
 
 type transitionPayload struct {
@@ -33,8 +38,9 @@ type transitionPayload struct {
 }
 
 type observationPayload struct {
-	Body     string `json:"body"`
-	Evidence string `json:"evidence"`
+	Body     string   `json:"body"`
+	Evidence string   `json:"evidence"`
+	Anchors  []string `json:"anchors,omitempty"`
 }
 
 // Folder folds ledger events into current observation views.
@@ -62,6 +68,7 @@ func (f *Folder) Add(e event.Event) {
 			ID: e.ID, Type: e.Type, Body: p.Body, Evidence: p.Evidence, At: e.At,
 			Actor: e.Actor, Source: e.Source,
 			State: initialState(e.Actor), LastActor: e.Actor,
+			Anchors: p.Anchors,
 		}
 		f.byID[e.ID] = o
 		f.order = append(f.order, e.ID)

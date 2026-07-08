@@ -70,7 +70,7 @@ func TestMCPLifecycleAndTools(t *testing.T) {
 
 func TestMCPJudgeRelaysHumanDecision(t *testing.T) {
 	dir := t.TempDir()
-	if _, _, err := captureObservation(dir, "decision", "judge me", "", "agent:test"); err != nil {
+	if _, _, err := captureObservation(dir, "decision", "judge me", "", "agent:test", nil); err != nil {
 		t.Fatal(err)
 	}
 	folder, err := replayFolder(jsonl.Open(dir))

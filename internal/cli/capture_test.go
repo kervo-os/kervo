@@ -167,17 +167,17 @@ func TestCaptureDedupsLiveBodies(t *testing.T) {
 func TestCaptureBackpressure(t *testing.T) {
 	dir := t.TempDir()
 	for i := 0; i < backpressureCap; i++ {
-		if _, _, err := captureObservation(dir, "note", fmt.Sprintf("fact %d", i), "", "agent:noisy"); err != nil {
+		if _, _, err := captureObservation(dir, "note", fmt.Sprintf("fact %d", i), "", "agent:noisy", nil); err != nil {
 			t.Fatal(err)
 		}
 	}
-	if _, _, err := captureObservation(dir, "note", "one too many", "", "agent:noisy"); err == nil || !strings.Contains(err.Error(), "backpressure") {
+	if _, _, err := captureObservation(dir, "note", "one too many", "", "agent:noisy", nil); err == nil || !strings.Contains(err.Error(), "backpressure") {
 		t.Fatalf("13th proposal from one source must hit backpressure, got: %v", err)
 	}
-	if _, _, err := captureObservation(dir, "note", "different source", "", "agent:other"); err != nil {
+	if _, _, err := captureObservation(dir, "note", "different source", "", "agent:other", nil); err != nil {
 		t.Fatalf("other sources must not be throttled: %v", err)
 	}
-	if _, _, err := captureObservation(dir, "note", "human note", "", "human:mira"); err != nil {
+	if _, _, err := captureObservation(dir, "note", "human note", "", "human:mira", nil); err != nil {
 		t.Fatalf("humans enter observed and must never be throttled: %v", err)
 	}
 }

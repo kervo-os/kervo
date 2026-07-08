@@ -148,6 +148,21 @@ stateDiagram-v2
 **どこでも判定。** チャットでは MCP、ターミナルでは `kervo review`、
 そして全リポジトリを一度に — [ダッシュボード](#ダッシュボード)で。
 
+**決定が CI をゲートします。** 決定にアンカーを付けると —
+`kervo capture -type decision -body "Payments は Q3 まで legacy gateway
+を維持" -anchor "services/payments/**"` — verified な決定が治める
+パスに触れる PR ごとに `kervo check` が diff にインラインで警告します
+(GitHub annotations、ボットコード 0 行)。デフォルトは advisory:
+衝突する PR は意図された翻意かもしれないので、警告文がループを教えます
+— 理由付きで deprecate し、新しい決定を capture。アンカーのパスが
+ツリーから消えると stale 候補として表示されます — 年齢タイマーではなく
+証拠ベースの無効化です。
+
+```yaml
+- run: git fetch origin main
+- run: kervo check -base origin/main   # ブロックするなら -strict
+```
+
 <details>
 <summary><b>コンシューマ — Claude Code、Codex、MCP を話すすべて</b></summary>
 <br>
@@ -360,9 +375,10 @@ n = 24):
 |---|---|
 | `kervo init` | 初回ウィザード:スキャン → artifact → 注入(冪等) |
 | `kervo compile [-lang en\|ko\|ja] [-inject block\|import]` | 増分再スキャン + 再コンパイル;Mode 3 → 2 → 1 フォールバック |
-| `kervo capture -type <t> -body <md> -evidence <e>` | 観察を記録(重複排除 + バックプレッシャー) |
+| `kervo capture -type <t> -body <md> -evidence <e> [-anchor <glob>…]` | 観察を記録(重複排除 + バックプレッシャー);アンカーはこの観察が治めるパス |
 | `kervo trust -id <接頭辞> -to verified\|stale\|deprecated -reason <理由>` | ID で判定(スクリプト用プリミティブ) |
 | `kervo review` | ターミナルのトリアージキュー — 一件ずつ判定 |
+| `kervo check [-base <ref>] [-strict]` | diff のゲート:この変更が触れる verified なアンカー付き決定は? |
 | `kervo dash` | フリートダッシュボード — 登録された全ワークスペースを一ページに、インライン判定 |
 | `kervo status` | 一画面の台帳 + トラストビュー |
 | `kervo metrics` | artifact あり/なしのプロンプトサイズ(内蔵 A/B カウンター) |

@@ -106,7 +106,7 @@ func TestCompileRegistersWorkspace(t *testing.T) {
 // English — they are ledger vocabulary shared with the CLI and artifact.
 func TestDashKoreanChrome(t *testing.T) {
 	dir := t.TempDir()
-	if _, _, err := captureObservation(dir, "decision", "한국어 제안", "", "agent:test"); err != nil {
+	if _, _, err := captureObservation(dir, "decision", "한국어 제안", "", "agent:test", nil); err != nil {
 		t.Fatal(err)
 	}
 	srv, err := newDashServer([]string{dir}, "human:tester", i18n.KO)
@@ -133,7 +133,7 @@ func TestDashLangSwitchPersists(t *testing.T) {
 	t.Setenv("LC_ALL", "")
 	t.Setenv("LANG", "en_US.UTF-8")
 	dir := t.TempDir()
-	if _, _, err := captureObservation(dir, "decision", "switch me", "", "agent:test"); err != nil {
+	if _, _, err := captureObservation(dir, "decision", "switch me", "", "agent:test", nil); err != nil {
 		t.Fatal(err)
 	}
 	srv, err := newDashServer([]string{dir}, "human:tester", i18n.EN)
@@ -197,10 +197,10 @@ func TestDashLangDetection(t *testing.T) {
 
 func TestDashFleetAndCrossRepoJudge(t *testing.T) {
 	a, b := t.TempDir(), t.TempDir()
-	if _, _, err := captureObservation(a, "decision", "alpha fact <b>x</b>", "ran it", "agent:test"); err != nil {
+	if _, _, err := captureObservation(a, "decision", "alpha fact <b>x</b>", "ran it", "agent:test", nil); err != nil {
 		t.Fatal(err)
 	}
-	if _, _, err := captureObservation(b, "risk", "beta fact", "", "agent:test"); err != nil {
+	if _, _, err := captureObservation(b, "risk", "beta fact", "", "agent:test", nil); err != nil {
 		t.Fatal(err)
 	}
 	srv, err := newDashServer([]string{a, b}, "human:tester", i18n.EN)
@@ -285,7 +285,7 @@ func TestDashOverviewAndCoupling(t *testing.T) {
 	git(t, dir, "add", ".")
 	git(t, dir, "commit", "-q", "-m", "api+core together")
 
-	if _, _, err := captureObservation(dir, "decision", "pending one", "", "agent:test"); err != nil {
+	if _, _, err := captureObservation(dir, "decision", "pending one", "", "agent:test", nil); err != nil {
 		t.Fatal(err)
 	}
 	srv, err := newDashServer([]string{dir}, "human:tester", i18n.EN)
@@ -315,7 +315,7 @@ func TestDashOverviewAndCoupling(t *testing.T) {
 
 	// A ledger-only workspace (no git) must still serve — overview absent.
 	plain := t.TempDir()
-	if _, _, err := captureObservation(plain, "note", "no git here", "", "agent:test"); err != nil {
+	if _, _, err := captureObservation(plain, "note", "no git here", "", "agent:test", nil); err != nil {
 		t.Fatal(err)
 	}
 	srv2, err := newDashServer([]string{plain}, "human:tester", i18n.EN)

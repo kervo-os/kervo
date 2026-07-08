@@ -166,14 +166,17 @@ func mcpCall(dir, name string, args json.RawMessage) (string, error) {
 		return string(raw), nil
 
 	case "kervo_capture":
-		var a struct{ Type, Body, Evidence, Actor string }
+		var a struct {
+			Type, Body, Evidence, Actor string
+			Anchors                     []string
+		}
 		if err := json.Unmarshal(args, &a); err != nil {
 			return "", fmt.Errorf("bad arguments: %v", err)
 		}
 		if a.Type == "" {
 			a.Type = "note"
 		}
-		id, dup, err := captureObservation(dir, a.Type, a.Body, a.Evidence, a.Actor)
+		id, dup, err := captureObservation(dir, a.Type, a.Body, a.Evidence, a.Actor, a.Anchors)
 		if err != nil {
 			return "", err
 		}

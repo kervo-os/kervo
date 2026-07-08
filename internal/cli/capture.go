@@ -23,10 +23,17 @@ func runCapture(args []string) error {
 	body := fs.String("body", "", "the observation text (required)")
 	evidence := fs.String("evidence", "", "how you verified it — command run, doc read (optional)")
 	actor := fs.String("actor", "", `who is recording (default "human:<git user.name>")`)
+	var anchors []string
+	fs.Func("anchor", "path glob this observation governs (repeatable) — `kervo check` gates diffs on it", func(s string) error {
+		if s = strings.TrimSpace(s); s != "" {
+			anchors = append(anchors, s)
+		}
+		return nil
+	})
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
-	id, dup, err := captureObservation(*dir, *typ, *body, *evidence, *actor)
+	id, dup, err := captureObservation(*dir, *typ, *body, *evidence, *actor, anchors)
 	if err != nil {
 		return err
 	}
@@ -50,7 +57,7 @@ const backpressureCap = 12
 // knowledge — agents re-reading the same session must not spam the review
 // queue (a duplicate is a no-op, not a failure). Stale/deprecated bodies
 // may be re-captured: re-assertion is a fresh claim for the human to judge.
-func captureObservation(dir, typ, body, evidence, actorFlag string) (id string, dup *trust.Observation, err error) {
+func captureObservation(dir, typ, body, evidence, actorFlag string, anchors []string) (id string, dup *trust.Observation, err error) {
 	if strings.TrimSpace(body) == "" {
 		return "", nil, fmt.Errorf("capture: body is required")
 	}
@@ -75,10 +82,11 @@ func captureObservation(dir, typ, body, evidence, actorFlag string) (id string, 
 			"capture: backpressure — %s already has %d proposals awaiting judgment; a human must run `kervo review` (or judge in the dash) before this source proposes more",
 			actor, pending)
 	}
-	fields := map[string]string{"body": body}
-	if strings.TrimSpace(evidence) != "" {
-		fields["evidence"] = evidence
-	}
+	fields := struct {
+		Body     string   `json:"body"`
+		Evidence string   `json:"evidence,omitempty"`
+		Anchors  []string `json:"anchors,omitempty"`
+	}{body, strings.TrimSpace(evidence), anchors}
 	payload, err := json.Marshal(fields)
 	if err != nil {
 		return "", nil, err
