@@ -93,6 +93,9 @@ main{max-width:66rem;margin:0 auto;padding:1.6rem 1.4rem 3rem}
 .ov .li .t{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 .ov .chips{display:flex;flex-wrap:wrap;gap:.35rem}
 .ov .more{color:var(--faint);font-size:.72rem;padding-top:.2rem}
+.ov button.more{background:none;border:none;padding:.25rem 0 0;color:var(--v);font-weight:600;cursor:pointer;font-size:.72rem}
+.ov button.more:hover{text-decoration:underline}
+.ov .lst.exp{max-height:15rem;overflow-y:auto;scrollbar-width:thin;padding-right:.3rem}
 .ov .link{display:flex;gap:.5rem;align-items:center;font-size:.78rem;padding:.14rem 0;color:var(--muted)}
 .ov .link b{color:var(--fg);font-weight:600}
 .ov .link .n{margin-left:auto;color:var(--faint);font-variant-numeric:tabular-nums}
@@ -292,6 +295,31 @@ function couplingRing(links, size){
   return svg;
 }
 
+// Commit-activity strip: commits per day over the last 8 weeks, one hue,
+// bars anchored to the baseline, native <title> tooltips per mark.
+function commitBars(commits, w, h){
+  const days = 56, dayMs = 864e5;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const counts = new Array(days).fill(0);
+  commits.forEach(c=>{
+    const d = Math.round((today - new Date(c.Date+"T00:00:00")) / dayMs);
+    if(d>=0 && d<days) counts[days-1-d]++;
+  });
+  if(!counts.some(v=>v)) return null;
+  const svg = svgEl("svg",{viewBox:"0 0 "+w+" "+h, width:"100%", height:h});
+  const max = Math.max(...counts), bw = w/days;
+  counts.forEach((v,i)=>{ if(!v) return;
+    const bh = Math.max(2,(v/max)*(h-4));
+    const r = svgEl("rect",{x:(i*bw+1).toFixed(1), y:(h-bh).toFixed(1),
+      width:Math.max(1.5,bw-2).toFixed(1), height:bh.toFixed(1), rx:1.5,
+      fill:"var(--v)","fill-opacity":".85"});
+    const tip = svgEl("title",{});
+    tip.textContent = new Date(today - (days-1-i)*dayMs).toISOString().slice(0,10)+" · "+v;
+    r.append(tip); svg.append(r);
+  });
+  return svg;
+}
+
 function hue(s){ let h=0; for(const c of s) h=(h*31+c.codePointAt(0))>>>0; return h%360 }
 function rel(iso){ if(!iso) return T.emptyledger;
   const s=(Date.now()-Date.parse(iso))/1e3;
@@ -389,11 +417,32 @@ function renderOverview(){
     }
   }
 
-  if((ov.Commands||[]).length){
-    const b = box(T.commands);
-    ov.Commands.forEach(c=>{ const r=el("div","li"); r.append(el("span","m",c.Run), el("span","t",c.Source)); b.append(r) });
-    if(ov.TotalCommands>ov.Commands.length) b.append(el("div","more",F(T.more,ov.TotalCommands-ov.Commands.length)));
-  }
+  // Expandable list: 8 rows first, "+N more" is a button that reveals the
+  // shipped rest (scrolling past 15rem); anything beyond what the server
+  // shipped stays a plain note — that tail lives in git, not the page.
+  const listBox = (title, rows, total, renderRow, extra)=>{
+    if(!rows.length) return;
+    const b = box(title);
+    if(extra) b.append(extra);
+    const lst = el("div","lst"); b.append(lst);
+    const tail = el("div"); b.append(tail);
+    const draw = (n)=>{
+      lst.textContent=""; tail.textContent="";
+      rows.slice(0,n).forEach(r=>lst.append(renderRow(r)));
+      const hidden = rows.length - n, beyond = total - rows.length;
+      if(hidden > 0){
+        const btn = el("button","more",F(T.more, hidden + Math.max(0,beyond)));
+        btn.onclick = ()=>{ lst.classList.add("exp"); draw(rows.length) };
+        tail.append(btn);
+      } else if(beyond > 0){
+        tail.append(el("div","more",F(T.more, beyond)));
+      }
+    };
+    draw(Math.min(8, rows.length));
+  };
+
+  listBox(T.commands, ov.Commands||[], ov.TotalCommands||0, c=>{
+    const r=el("div","li"); r.append(el("span","m",c.Run), el("span","t",c.Source)); return r });
   if((ov.Links||[]).length){
     const b = box(T.links);
     const ring = couplingRing(ov.Links, 170);
@@ -402,16 +451,12 @@ function renderOverview(){
       const pair=el("span"); pair.append(el("b","",l.A), document.createTextNode(" ↔ "), el("b","",l.B));
       r.append(pair, el("span","n","×"+l.N)); b.append(r) });
   }
-  if((ov.Commits||[]).length){
-    const b = box(T.recent);
-    ov.Commits.forEach(c=>{ const r=el("div","li"); r.append(el("span","m",c.Date), el("span","t",c.Subject)); b.append(r) });
-    if(ov.TotalCommits>ov.Commits.length) b.append(el("div","more",F(T.more,ov.TotalCommits-ov.Commits.length)));
-  }
-  if((ov.Tasks||[]).length){
-    const b = box(T.tasks);
-    ov.Tasks.forEach(t=>{ const r=el("div","li"); r.append(el("span","m",t.Loc), el("span","t",t.Text)); b.append(r) });
-    if(ov.TotalTasks>ov.Tasks.length) b.append(el("div","more",F(T.more,ov.TotalTasks-ov.Tasks.length)));
-  }
+  listBox(T.recent, ov.Commits||[], ov.TotalCommits||0, c=>{
+    const r=el("div","li"); r.title = c.SHA+" · "+c.Date;
+    r.append(el("span","m",c.Date), el("span","t",c.Subject)); return r },
+    commitBars(ov.Commits||[], 260, 36));
+  listBox(T.tasks, ov.Tasks||[], ov.TotalTasks||0, t=>{
+    const r=el("div","li"); r.append(el("span","m",t.Loc), el("span","t",t.Text)); return r });
   if((ov.Modules||[]).length){
     const b = box(T.modules);
     const mc = el("div","chips");

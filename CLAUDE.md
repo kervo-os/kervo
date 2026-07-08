@@ -12,7 +12,7 @@
 
 ## Brief
 
-- **Focus**: internal/ ×6 · assets/ ×3 · packaging/ ×2
+- **Focus**: internal/ ×6 · assets/ ×3 · packaging/ ×3
 - **Run**: `make build` · `make test` · `make arch-check`
 
 ## Repository Summary
@@ -35,6 +35,7 @@
 
 ## Recent Changes
 
+- `87a8c18` 2026-07-08 changelog: v0.22.0
 - `a330171` 2026-07-08 check: verified decisions gate the diff
 - `9767301` 2026-07-08 ledger: session hook events
 - `038b971` 2026-07-07 readme: DOI badge — the v0.21.1 snapshot is citable (10.5281/zenodo.21241109)
@@ -54,19 +55,18 @@
 - `54a7646` 2026-07-07 ledger: blockchain verdict + H5 anchored registration
 - `916897a` 2026-07-07 test: drop an import the assertion rewrite left behind
 - `95e0a5f` 2026-07-07 autocompile: pre-commit, not post-commit — the tree must converge
-- `24852c1` 2026-07-07 ledger: session hook events
 
-_Showing 20 of 125 analyzed commits._
+_Showing 20 of 126 analyzed commits._
 
 ### Frequently Changed Files
 
 - .kervo/events/2026-07.jsonl (88)
-- CLAUDE.md (68)
+- CLAUDE.md (69)
 - README.md (45)
 - README.ja.md (41)
 - README.ko.md (41)
+- CHANGELOG.md (16)
 - internal/core/i18n/i18n.go (16)
-- CHANGELOG.md (15)
 - internal/cli/compile.go (15)
 - internal/cli/dash.go (14)
 - internal/cli/dashpage.go (13)
@@ -85,7 +85,7 @@ _No TODO/FIXME comments found._
 
 ## Workspace Facts
 
-- Commits analyzed: 125 (complete)
+- Commits analyzed: 126 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 5
 - Docs captured: 1

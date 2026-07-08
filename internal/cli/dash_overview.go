@@ -87,7 +87,14 @@ type dashLink struct {
 	N    int
 }
 
-const dashOverviewCap = 8
+// The page renders 8 rows per section and expands on click, so we ship
+// enough to make expanding worth it — but not the whole 500-commit scan:
+// beyond these caps the page shows a plain "+N more" that points back at
+// git itself.
+const (
+	dashShipCommits = 100
+	dashShipTasks   = 50
+)
 
 // buildOverview shapes a fact snapshot for the page.
 func buildOverview(snap fact.Snapshot) *dashOverview {
@@ -99,14 +106,11 @@ func buildOverview(snap fact.Snapshot) *dashOverview {
 		Modules: []dashModule{}, Links: []dashLink{},
 		TotalCommands: len(snap.Commands), TotalCommits: len(snap.Commits), TotalTasks: len(snap.Todos),
 	}
-	for i, c := range snap.Commands {
-		if i >= dashOverviewCap {
-			break
-		}
+	for _, c := range snap.Commands {
 		ov.Commands = append(ov.Commands, dashCmd{Run: c.Run, Source: c.Source})
 	}
 	for i, c := range snap.Commits {
-		if i >= dashOverviewCap {
+		if i >= dashShipCommits {
 			break
 		}
 		sha := c.SHA
@@ -116,7 +120,7 @@ func buildOverview(snap fact.Snapshot) *dashOverview {
 		ov.Commits = append(ov.Commits, dashCommit{SHA: sha, Date: c.At.UTC().Format("2006-01-02"), Subject: c.Subject})
 	}
 	for i, t := range snap.Todos {
-		if i >= dashOverviewCap {
+		if i >= dashShipTasks {
 			break
 		}
 		ov.Tasks = append(ov.Tasks, dashTask{Loc: fmt.Sprintf("%s:%d", t.Path, t.Line), Text: t.Text})
