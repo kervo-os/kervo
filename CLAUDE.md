@@ -12,7 +12,7 @@
 
 ## Brief
 
-- **Focus**: internal/ ×8 · packaging/ ×6 · assets/ ×3
+- **Focus**: internal/ ×9 · packaging/ ×7 · assets/ ×3
 - **Run**: `make build` · `make test` · `make arch-check`
 
 ## Repository Summary
@@ -35,6 +35,7 @@
 
 ## Recent Changes
 
+- `abb1337` 2026-07-08 check/trust: round four — the gate gates, the fast lane pays, the gauge reads
 - `0ef152a` 2026-07-08 check: the constitution round — judgments ship like code, signatures see their globs
 - `6c32b6e` 2026-07-08 check: unrecorded reversals arrive as churn — so watch the churn
 - `63a0a9e` 2026-07-08 the red-team round lands: ledger rides commits, queue rot alarms, threat model
@@ -54,20 +55,19 @@
 - `184d43b` 2026-07-07 ledger: session hook events
 - `8813dc6` 2026-07-07 readme: quickstart as a colored terminal card (freeze SVG of the real init styling)
 - `490327b` 2026-07-07 npm: the wrapper downloads the real binary
-- `3d1ffc3` 2026-07-07 community: CONTRIBUTING + SECURITY (private vuln reporting enabled)
 
-_Showing 20 of 130 analyzed commits._
+_Showing 20 of 131 analyzed commits._
 
 ### Frequently Changed Files
 
-- .kervo/events/2026-07.jsonl (91)
-- CLAUDE.md (73)
+- .kervo/events/2026-07.jsonl (92)
+- CLAUDE.md (74)
 - README.md (47)
 - README.ja.md (43)
 - README.ko.md (43)
 - internal/core/i18n/i18n.go (17)
 - CHANGELOG.md (16)
-- internal/cli/compile.go (15)
+- internal/cli/compile.go (16)
 - internal/cli/dash.go (15)
 - internal/cli/dashpage.go (15)
 
@@ -81,11 +81,11 @@ _No TODO/FIXME comments found._
 - assets/ (10 files)
 - cmd/ (1 files)
 - internal/ (71 files)
-- packaging/ (8 files)
+- packaging/ (7 files)
 
 ## Workspace Facts
 
-- Commits analyzed: 130 (complete)
+- Commits analyzed: 131 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 5
 - Docs captured: 1
