@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/kervo-os/kervo/internal/adapters/store/jsonl"
 	"github.com/kervo-os/kervo/internal/core/event"
@@ -99,13 +100,23 @@ func runStatus(args []string) error {
 	fmt.Printf("  generated %d · observed %d · verified %d · stale %d · deprecated %d\n",
 		counts[trust.Generated], counts[trust.Observed], counts[trust.Verified], counts[trust.Stale], counts[trust.Deprecated])
 	pending := 0
+	var oldest time.Time
 	for _, o := range obs {
 		if o.State == trust.Generated || o.Conflict {
 			pending++
+			if oldest.IsZero() || o.At.Before(oldest) {
+				oldest = o.At
+			}
 		}
 	}
 	if pending > 0 {
-		fmt.Printf("  %d awaiting judgment — `kervo review`\n", pending)
+		// Age is the queue-rot alarm: a queue nobody judges must say so
+		// out loud instead of silently decaying into a git digest.
+		age := ""
+		if d := int(time.Since(oldest).Hours() / 24); d >= 1 {
+			age = fmt.Sprintf(" · oldest %dd", d)
+		}
+		fmt.Printf("  %d awaiting judgment%s — `kervo review`\n", pending, age)
 	}
 	fmt.Println()
 	for _, o := range obs {

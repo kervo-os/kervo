@@ -23,7 +23,15 @@ const ignoreHeader = "# kervo derived state (RFC-0005: events are truth, artifac
 // two-clone experiment surfaced the conflict, 2026-07-07).
 const unionAttr = ".kervo/events/*.jsonl merge=union"
 
-// ensureGitattributes appends the union rule to .gitattributes if absent.
+// generatedAttr collapses ledger appends in GitHub PR diffs: reviewers
+// stop scrolling past event lines, while the ledger stays a plain
+// inspectable text file locally (no -diff — "장부는 들여다볼 수 있어야
+// 신뢰").
+const generatedAttr = ".kervo/events/*.jsonl linguist-generated=true"
+
+var kervoAttrs = []string{unionAttr, generatedAttr}
+
+// ensureGitattributes appends missing kervo rules to .gitattributes.
 // Same contract as ensureGitignore: append-only, idempotent, human
 // content untouched.
 func ensureGitattributes(dir string) error {
@@ -32,17 +40,25 @@ func ensureGitattributes(dir string) error {
 	if err != nil && !os.IsNotExist(err) {
 		return err
 	}
+	present := map[string]bool{}
 	for _, line := range strings.Split(string(existing), "\n") {
-		if strings.TrimSpace(line) == unionAttr {
-			return nil
+		present[strings.TrimSpace(line)] = true
+	}
+	var missing []string
+	for _, rule := range kervoAttrs {
+		if !present[rule] {
+			missing = append(missing, rule)
 		}
+	}
+	if len(missing) == 0 {
+		return nil
 	}
 	var b strings.Builder
 	b.Write(existing)
 	if len(existing) > 0 && !strings.HasSuffix(string(existing), "\n") {
 		b.WriteString("\n")
 	}
-	b.WriteString(unionAttr + "\n")
+	b.WriteString(strings.Join(missing, "\n") + "\n")
 	return os.WriteFile(path, []byte(b.String()), 0o644)
 }
 

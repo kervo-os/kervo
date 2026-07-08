@@ -22,6 +22,7 @@
 [Team use](#in-a-team-repo) ·
 [Measured](#measured-not-claimed) ·
 [Commands](#commands) ·
+[FAQ](FAQ.md) ·
 [Contributing](#contributing)
 
 </div>

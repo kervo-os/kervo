@@ -1,1 +1,2 @@
 .kervo/events/*.jsonl merge=union
+.kervo/events/*.jsonl linguist-generated=true

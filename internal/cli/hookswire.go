@@ -70,9 +70,10 @@ func resolveHooksWiring(flagVal string, consumers []string) (bool, error) {
 // post-commit). Compiling before and staging the consumer files makes
 // every commit carry its own fresh digest and leaves the tree clean.
 const preCommitScript = `#!/bin/sh
-# kervo: the commit carries a fresh context artifact
+# kervo: the commit carries a fresh context artifact and its ledger
 kervo compile >/dev/null 2>&1 || exit 0
 for f in CLAUDE.md AGENTS.md; do [ -f "$f" ] && git add -- "$f"; done
+[ -d .kervo/events ] && git add -- .kervo/events
 exit 0
 `
 
@@ -82,6 +83,16 @@ const postMergeScript = "#!/bin/sh\nkervo compile >/dev/null 2>&1 || true\n"
 // next wire because it perpetually dirties the tree (see above). Only
 // an exact match is removed; anything else is a foreign hook.
 const legacyPostCommitScript = postMergeScript
+
+// legacyPreCommitScript is the v0.21.1–v0.22.0 shape — superseded because
+// leaving events unstaged forces standalone "ledger:" commits, which is
+// exactly the review noise teams complain about. Exact match only.
+const legacyPreCommitScript = `#!/bin/sh
+# kervo: the commit carries a fresh context artifact
+kervo compile >/dev/null 2>&1 || exit 0
+for f in CLAUDE.md AGENTS.md; do [ -f "$f" ] && git add -- "$f"; done
+exit 0
+`
 
 // wireGitAutoCompile installs post-commit and post-merge hooks. This is
 // not opt-in: a memory layer for a team that stores its work as commits
@@ -113,12 +124,14 @@ func wireGitAutoCompile(dir string) (string, error) {
 		p := filepath.Join(hooksDir, name)
 		raw, err := os.ReadFile(p)
 		switch {
+		case err == nil && string(raw) == legacyPreCommitScript:
+			// our own previous shape — migrate to the current script
 		case err == nil && strings.Contains(string(raw), "kervo compile"):
 			continue // already wired
 		case err == nil:
 			kept = append(kept, name) // someone else's hook — not ours to rewrite
 			continue
-		case !os.IsNotExist(err):
+		case err != nil && !os.IsNotExist(err):
 			return "", err
 		}
 		if err := os.WriteFile(p, []byte(script), 0o755); err != nil {

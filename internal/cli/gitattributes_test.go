@@ -18,8 +18,10 @@ func TestEnsureGitattributesCreatesAndStaysIdempotent(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got := strings.Count(string(raw), unionAttr); got != 1 {
-		t.Fatalf("union rule appears %d times, want exactly 1:\n%s", got, raw)
+	for _, rule := range kervoAttrs {
+		if got := strings.Count(string(raw), rule); got != 1 {
+			t.Fatalf("rule %q appears %d times, want exactly 1:\n%s", rule, got, raw)
+		}
 	}
 }
 
@@ -33,7 +35,7 @@ func TestEnsureGitattributesPreservesHumanRules(t *testing.T) {
 		t.Fatal(err)
 	}
 	raw, _ := os.ReadFile(filepath.Join(dir, ".gitattributes"))
-	want := human + "\n" + unionAttr + "\n"
+	want := human + "\n" + unionAttr + "\n" + generatedAttr + "\n"
 	if string(raw) != want {
 		t.Fatalf("got:\n%q\nwant:\n%q", raw, want)
 	}
