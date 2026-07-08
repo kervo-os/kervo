@@ -12,7 +12,7 @@
 
 ## Brief
 
-- **Focus**: internal/ ×7 · assets/ ×3 · packaging/ ×3
+- **Focus**: internal/ ×7 · packaging/ ×4 · assets/ ×3
 - **Run**: `make build` · `make test` · `make arch-check`
 
 ## Repository Summary
@@ -35,6 +35,7 @@
 
 ## Recent Changes
 
+- `63a0a9e` 2026-07-08 the red-team round lands: ledger rides commits, queue rot alarms, threat model
 - `fc2985a` 2026-07-08 dash: the overview opens up — expandable lists + commit activity strip
 - `87a8c18` 2026-07-08 changelog: v0.22.0
 - `a330171` 2026-07-08 check: verified decisions gate the diff
@@ -54,17 +55,16 @@
 - `3d1ffc3` 2026-07-07 community: CONTRIBUTING + SECURITY (private vuln reporting enabled)
 - `a78866f` 2026-07-07 changelog: condense 0.1–0.19 + ci: least privilege, SHA-pinned actions
 - `54a7646` 2026-07-07 ledger: blockchain verdict + H5 anchored registration
-- `916897a` 2026-07-07 test: drop an import the assertion rewrite left behind
 
-_Showing 20 of 127 analyzed commits._
+_Showing 20 of 128 analyzed commits._
 
 ### Frequently Changed Files
 
-- .kervo/events/2026-07.jsonl (88)
-- CLAUDE.md (70)
-- README.md (45)
-- README.ja.md (41)
-- README.ko.md (41)
+- .kervo/events/2026-07.jsonl (89)
+- CLAUDE.md (71)
+- README.md (46)
+- README.ja.md (42)
+- README.ko.md (42)
 - CHANGELOG.md (16)
 - internal/core/i18n/i18n.go (16)
 - internal/cli/compile.go (15)
@@ -85,7 +85,7 @@ _No TODO/FIXME comments found._
 
 ## Workspace Facts
 
-- Commits analyzed: 127 (complete)
+- Commits analyzed: 128 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 5
 - Docs captured: 1
@@ -233,7 +233,7 @@ Evidence: design session 2026-07-08; ledger scan: 631 events, 9 ULID/line-order 
 Red-team round shipped (2026-07-08): the ledger rides your commits — pre-commit stages .kervo/events (v0.22.0 hook shape auto-migrated, exact match only) and .gitattributes marks events linguist-generated so GitHub collapses them in PR diffs; standalone 'ledger:' commits become unnecessary. Queue rot alarms out loud: kervo status shows oldest-pending age. SECURITY.md gains the prompt-injection threat model + supply-chain section; FAQ.md answers the seven hardest objections (plain-markdown, ADR lineage, queue rot, commit noise, injection, platform risk, evidence quality) linked from all three READMEs.
 Evidence: user directive 2026-07-08: '위 내용들 기반으로 개선 방안 전부 마련해' after HN/GeekNews-style red-team; live verification: .gitattributes 2 rules, hook migrated on compile, tests green
 
-**[generated — agent:claude]**
+**[verified — human:refuse1993]**
 Post-red-team follow-ups (proposals from the second comment round): (1) H6 candidate — baseline-comparison experiment: kervo vs RAG-with-metadata / an agent memory store / a well-maintained ADR log, answering the 'unmanaged notes is a strawman baseline' objection with the comparison skeptics actually want; (2) narrator-not-witness at the UX layer — the write-back protocol should require consumers to cite the trust label when relaying ledger knowledge (observed once in the wild: a consumer flagged its own answer as [generated]); make it a protocol sentence, not luck.
 Evidence: user-relayed HN-style comments 2026-07-08: commenter_17 (baseline fairness), hn_user_88 (narrator/witness UX)
 <!-- kervo:slot:decisions:end -->

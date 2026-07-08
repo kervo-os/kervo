@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"time"
 
 	"github.com/kervo-os/kervo/internal/adapters/store/jsonl"
 	"github.com/kervo-os/kervo/internal/core/gate"
@@ -50,6 +51,13 @@ func runCheck(args []string) error {
 		dead = gate.Dead(obs, tracked)
 	}
 
+	// Drift: reversals nobody recorded arrive as code churn under the
+	// decision — when anchored paths moved ≥5 commits past the judgment,
+	// ask for re-affirmation instead of trusting silence. The base ref is
+	// scanned: landed churn is what erodes a decision (this diff's own
+	// touches already fire the conflict warning above).
+	drifted := gate.Drifted(obs, gitChanges(*dir, *base, obs))
+
 	gha := os.Getenv("GITHUB_ACTIONS") == "true"
 	for _, c := range conflicts {
 		if gha {
@@ -72,12 +80,65 @@ func runCheck(args []string) error {
 		fmt.Printf("  consider: kervo trust -id %s -to stale -reason \"anchored path gone\"\n", shortID(o.ID))
 	}
 
-	fmt.Printf("check: %d changed files vs %s — %d touched, %d dead anchors\n",
-		len(changed), *base, len(conflicts), len(dead))
+	for _, d := range drifted {
+		if gha {
+			fmt.Printf("::notice::%s was verified before %d commits landed on its anchors — %s — re-affirm (kervo trust -id %s -to verified -reason \"still true\") or retire it\n",
+				shortID(d.Obs.ID), d.Commits, claim(d.Obs.Body), shortID(d.Obs.ID))
+			continue
+		}
+		fmt.Printf("↻ %s anchored code moved in %d commits since verification — %s\n",
+			shortID(d.Obs.ID), d.Commits, claim(d.Obs.Body))
+		fmt.Printf("  re-affirm: kervo trust -id %s -to verified -reason \"still true\" — or retire it\n", shortID(d.Obs.ID))
+	}
+
+	fmt.Printf("check: %d changed files vs %s — %d touched, %d dead anchors, %d drifted\n",
+		len(changed), *base, len(conflicts), len(dead), len(drifted))
 	if *strict && len(conflicts) > 0 {
 		return fmt.Errorf("check: %d verified decision(s) touched (strict mode)", len(conflicts))
 	}
 	return nil
+}
+
+// gitChanges returns the commit footprints needed for drift detection —
+// everything on base after the oldest judgment among verified anchored
+// observations. Empty when there is nothing to scan for.
+func gitChanges(dir, base string, obs []trust.Observation) []gate.Change {
+	var oldest time.Time
+	for _, o := range obs {
+		if o.State == trust.Verified && len(o.Anchors) > 0 && !o.JudgedAt.IsZero() {
+			if oldest.IsZero() || o.JudgedAt.Before(oldest) {
+				oldest = o.JudgedAt
+			}
+		}
+	}
+	if oldest.IsZero() {
+		return nil
+	}
+	out, err := exec.Command("git", "-C", dir, "log", "--no-merges",
+		"--since="+oldest.UTC().Format(time.RFC3339),
+		"--format=%x1e%aI", "--name-only", base).Output()
+	if err != nil {
+		return nil
+	}
+	var changes []gate.Change
+	for _, rec := range strings.Split(string(out), "\x1e") {
+		lines := strings.Split(strings.TrimSpace(rec), "\n")
+		if len(lines) < 2 {
+			continue
+		}
+		at, err := time.Parse(time.RFC3339, strings.TrimSpace(lines[0]))
+		if err != nil {
+			continue
+		}
+		var files []string
+		for _, l := range lines[1:] {
+			if l = strings.TrimSpace(l); l != "" {
+				files = append(files, l)
+			}
+		}
+		changes = append(changes, gate.Change{At: at, Files: files})
+	}
+	return changes
 }
 
 // claim returns the first line of a body — captures are claim-first by

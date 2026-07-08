@@ -8,6 +8,7 @@ package gate
 import (
 	"path"
 	"strings"
+	"time"
 
 	"github.com/kervo-os/kervo/internal/core/trust"
 )
@@ -103,6 +104,64 @@ func Dead(obs []trust.Observation, tracked []string) []trust.Observation {
 		}
 	}
 	return out
+}
+
+// Change is one commit's footprint — when it landed and what it touched.
+type Change struct {
+	At    time.Time
+	Files []string
+}
+
+// Drift pairs a verified anchored observation with how much its governed
+// code moved after the judgment.
+type Drift struct {
+	Obs     trust.Observation
+	Commits int
+}
+
+// DriftThreshold is how many post-judgment commits under an observation's
+// anchors it takes before the system asks for re-affirmation.
+// ponytail: fixed constant — a per-team knob only when a real team asks.
+const DriftThreshold = 5
+
+// Drifted finds the reversals nobody recorded: a reversal rarely
+// announces itself, but it almost always arrives as code churn under the
+// decision it reverses. Verified anchored observations whose anchors were
+// touched by ≥ DriftThreshold commits after their judgment are surfaced
+// for re-affirmation — a deterministic invalidation channel, no LLM, no
+// age timer.
+func Drifted(obs []trust.Observation, changes []Change) []Drift {
+	var out []Drift
+	for _, o := range gated(obs) {
+		if o.JudgedAt.IsZero() {
+			continue
+		}
+		n := 0
+		for _, c := range changes {
+			if !c.At.After(o.JudgedAt) {
+				continue
+			}
+			for _, f := range c.Files {
+				if matchAny(o.Anchors, f) {
+					n++
+					break
+				}
+			}
+		}
+		if n >= DriftThreshold {
+			out = append(out, Drift{Obs: o, Commits: n})
+		}
+	}
+	return out
+}
+
+func matchAny(anchors []string, file string) bool {
+	for _, a := range anchors {
+		if Match(a, file) {
+			return true
+		}
+	}
+	return false
 }
 
 func gated(obs []trust.Observation) []trust.Observation {

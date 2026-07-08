@@ -156,8 +156,11 @@ warns any PR that touches what a verified decision governs, inline in
 the diff (GitHub annotations, zero bot code). Advisory by default:
 a conflicting PR may be an intentional reversal, so the warning teaches
 the loop — deprecate with a reason, capture the new decision. Anchors
-whose paths vanish from the tree get flagged as stale candidates:
-evidence-based invalidation, not just an age timer.
+whose paths vanish from the tree get flagged as stale candidates, and a
+verified decision whose anchored code keeps moving after the judgment
+is asked for re-affirmation: evidence-based invalidation, not just an
+age timer — reversals nobody recorded arrive as churn, and the churn is
+watched.
 
 ```yaml
 - run: git fetch origin main

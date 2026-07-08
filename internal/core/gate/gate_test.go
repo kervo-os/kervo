@@ -2,6 +2,7 @@ package gate
 
 import (
 	"testing"
+	"time"
 
 	"github.com/kervo-os/kervo/internal/core/trust"
 )
@@ -62,6 +63,36 @@ func TestConflictsNoTouchNoConflict(t *testing.T) {
 	all := []trust.Observation{obs("ver", trust.Verified, "services/payments/**")}
 	if got := Conflicts(all, []string{"docs/notes.md"}); len(got) != 0 {
 		t.Fatalf("expected no conflicts, got %+v", got)
+	}
+}
+
+func TestDrifted(t *testing.T) {
+	judged := time.Date(2026, 7, 1, 0, 0, 0, 0, time.UTC)
+	o := obs("dec", trust.Verified, "services/payments/**")
+	o.JudgedAt = judged
+	fresh := obs("fresh", trust.Verified, "services/api/**")
+	fresh.JudgedAt = judged
+
+	day := 24 * time.Hour
+	var changes []Change
+	for i := 1; i <= 5; i++ { // 5 post-judgment commits on payments
+		changes = append(changes, Change{At: judged.Add(time.Duration(i) * day),
+			Files: []string{"services/payments/gateway.go"}})
+	}
+	// pre-judgment churn must not count
+	changes = append(changes, Change{At: judged.Add(-day), Files: []string{"services/payments/old.go"}})
+	// churn elsewhere must not count for either
+	changes = append(changes, Change{At: judged.Add(day), Files: []string{"docs/x.md"}})
+
+	got := Drifted([]trust.Observation{o, fresh}, changes)
+	if len(got) != 1 || got[0].Obs.ID != "dec" || got[0].Commits != 5 {
+		t.Fatalf("want dec drifted with 5 commits, got %+v", got)
+	}
+
+	// one commit under threshold — silence
+	few := Drifted([]trust.Observation{o}, changes[:4])
+	if len(few) != 0 {
+		t.Fatalf("below threshold must not drift, got %+v", few)
 	}
 }
 

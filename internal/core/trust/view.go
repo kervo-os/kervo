@@ -19,8 +19,9 @@ type Observation struct {
 	Actor     string // who proposed it
 	Source    string
 	State     State
-	LastActor string // who put it in its current state
-	Reason    string // reason of the last transition, "" if none
+	LastActor string    // who put it in its current state
+	Reason    string    // reason of the last transition, "" if none
+	JudgedAt  time.Time // when the last transition happened; zero if never judged
 	// Conflict is set when different actors' latest judgments disagree
 	// (RFC-0005 §2.2: latest wins, disagreement is surfaced, resolution
 	// is v2 multi-party territory — v1 only refuses to hide it).
@@ -86,6 +87,7 @@ func (f *Folder) Add(e event.Event) {
 		o.State = p.To
 		o.Reason = p.Reason
 		o.LastActor = e.Actor
+		o.JudgedAt = e.At
 		if f.actorLatest[e.Ref] == nil {
 			f.actorLatest[e.Ref] = map[string]State{}
 		}

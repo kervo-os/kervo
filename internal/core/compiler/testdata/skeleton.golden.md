@@ -115,4 +115,6 @@ exclusion reason instead of being silently dropped._
 > verified -reason "<their words>"`) — only undiscussed facts wait in
 > the queue (`kervo review`). If evidence contradicts a verified entry,
 > raise it with the human and record their updated judgment instead of
-> re-proposing.
+> re-proposing. When you relay this artifact's knowledge, carry its
+> trust label with it — the reader must be able to tell record from
+> inference.
