@@ -3,6 +3,29 @@
 All notable changes, newest first. Versions are git tags; every release
 ships prebuilt binaries and a Homebrew cask (`brew install kervo-os/tap/kervo`).
 
+## v0.22.0 — 2026-07-08
+
+- New: **decisions gate CI.** `kervo capture` takes a repeatable
+  `-anchor <glob>` naming the paths a decision governs; `kervo check
+  -base <ref>` warns any diff that touches what a verified decision
+  anchors. In CI the output is GitHub annotations — PR-inline, zero bot
+  code; advisory by default, `-strict` to block. The warning teaches the
+  reversal loop (deprecate with a reason, capture the new decision), and
+  only verified knowledge gates — unsigned proposals never block a
+  build. MCP `kervo_capture` accepts anchors too.
+- New: anchors whose paths vanish from the tree surface as stale
+  candidates in `kervo check` — the first evidence-based invalidation
+  channel beside the age timer.
+- New: the `kervo init` result screen's found row shows AGENTS.md, so a
+  codex user can see their consumer is wired (derived from what this
+  init injected).
+- npm: `@kervo-os/kervo` is now a real wrapper — first run downloads the
+  matching GoReleaser binary (verified against the release's
+  checksums.txt, cached per version); the npm version tracks the
+  release tag.
+- Internal: a replay benchmark and a 50k-event budget test pin the
+  compaction tripwire (currently ~100 ms — the wall is far).
+
 ## v0.21.1 — 2026-07-07
 
 - Auto-compile moves from post-commit to **pre-commit**: compiling after
