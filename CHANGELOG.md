@@ -3,6 +3,37 @@
 All notable changes, newest first. Versions are git tags; every release
 ships prebuilt binaries and a Homebrew cask (`brew install kervo-os/tap/kervo`).
 
+## v0.23.0 — 2026-07-08
+
+Two red-team rounds, metabolized the same day. Every item below traces
+to a verified decision in this repo's own ledger.
+
+- `kervo check` grows into a full gate: **drift detection** (a verified
+  decision whose anchored code moved ≥5 commits or ≥200 lines after the
+  judgment is asked for re-affirmation — counting, never meaning),
+  **in-diff trust transitions surfaced** (a PR cannot silently retire
+  the decision that would flag it; the legitimate deprecate-beside-code
+  reversal flow is surfaced for review, not blocked), **dead anchors get
+  forwarding addresses** from git rename detection, and `-strict` now
+  fails on shipped trust changes too.
+- **Relayed judgments must quote the human**: `agent:` actors and every
+  MCP `review_judge` call are rejected without a reason — one real quote
+  per verified. A human at the terminal still signs in one keystroke.
+- The ledger **rides your commits**: pre-commit stages events with the
+  change that produced them (old hook shape migrates itself), and
+  `.gitattributes` marks them `linguist-generated` so GitHub collapses
+  them in PR diffs. Standalone ledger commits are obsolete.
+- Judgment surfaces show what you sign: **anchors visible** in `review`
+  and the dash; the dash also gains expandable lists ("+N more" is now a
+  button), a 56-day commit-activity strip, and sha tooltips.
+- Gauges: `kervo status` shows queue age and 24h judgment velocity;
+  `compile` warns when the artifact passes ~12k tokens.
+- The write-back protocol (three languages) requires consumers to carry
+  the trust label when relaying artifact knowledge.
+- Docs: SECURITY.md gains the injection threat model, supply-chain notes
+  and the identity model ("signed" = audited human judgment at git trust
+  level); FAQ.md answers the hardest objections; linked from all READMEs.
+
 ## v0.22.0 — 2026-07-08
 
 - New: **decisions gate CI.** `kervo capture` takes a repeatable

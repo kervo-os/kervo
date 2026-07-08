@@ -12,7 +12,7 @@
 
 ## Brief
 
-- **Focus**: internal/ ×9 · packaging/ ×7 · assets/ ×3
+- **Focus**: internal/ ×8 · packaging/ ×8 · assets/ ×3
 - **Run**: `make build` · `make test` · `make arch-check`
 
 ## Repository Summary
@@ -35,6 +35,7 @@
 
 ## Recent Changes
 
+- `df96095` 2026-07-08 cleanup: remove the nested npm-packaging workspace
 - `abb1337` 2026-07-08 check/trust: round four — the gate gates, the fast lane pays, the gauge reads
 - `0ef152a` 2026-07-08 check: the constitution round — judgments ship like code, signatures see their globs
 - `6c32b6e` 2026-07-08 check: unrecorded reversals arrive as churn — so watch the churn
@@ -54,14 +55,13 @@
 - `1a2f72c` 2026-07-07 ledger: session hook events
 - `184d43b` 2026-07-07 ledger: session hook events
 - `8813dc6` 2026-07-07 readme: quickstart as a colored terminal card (freeze SVG of the real init styling)
-- `490327b` 2026-07-07 npm: the wrapper downloads the real binary
 
-_Showing 20 of 131 analyzed commits._
+_Showing 20 of 132 analyzed commits._
 
 ### Frequently Changed Files
 
-- .kervo/events/2026-07.jsonl (92)
-- CLAUDE.md (74)
+- .kervo/events/2026-07.jsonl (93)
+- CLAUDE.md (75)
 - README.md (47)
 - README.ja.md (43)
 - README.ko.md (43)
@@ -85,7 +85,7 @@ _No TODO/FIXME comments found._
 
 ## Workspace Facts
 
-- Commits analyzed: 131 (complete)
+- Commits analyzed: 132 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 5
 - Docs captured: 1
