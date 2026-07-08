@@ -110,6 +110,9 @@ func Dead(obs []trust.Observation, tracked []string) []trust.Observation {
 type Change struct {
 	At    time.Time
 	Files []string
+	// Lines maps file → added+deleted when the caller has numstat data;
+	// nil degrades drift to commit-counting only.
+	Lines map[string]int
 }
 
 // Drift pairs a verified anchored observation with how much its governed
@@ -117,39 +120,49 @@ type Change struct {
 type Drift struct {
 	Obs     trust.Observation
 	Commits int
+	Lines   int
 }
 
-// DriftThreshold is how many post-judgment commits under an observation's
-// anchors it takes before the system asks for re-affirmation.
-// ponytail: fixed constant — a per-team knob only when a real team asks.
-const DriftThreshold = 5
+// Drift trips on either axis: many small commits OR one big rewrite —
+// commit count alone misses the single-commit reversal, line count alone
+// misses the slow erosion. Both are counting, never meaning: semantic
+// staleness stays constitutionally banned, and the demotion stays human.
+// ponytail: fixed constants — per-team knobs only when a real team asks.
+const (
+	DriftThreshold     = 5
+	DriftLineThreshold = 200
+)
 
 // Drifted finds the reversals nobody recorded: a reversal rarely
 // announces itself, but it almost always arrives as code churn under the
-// decision it reverses. Verified anchored observations whose anchors were
-// touched by ≥ DriftThreshold commits after their judgment are surfaced
-// for re-affirmation — a deterministic invalidation channel, no LLM, no
-// age timer.
+// decision it reverses. Verified anchored observations whose anchors saw
+// ≥ DriftThreshold commits or ≥ DriftLineThreshold changed lines after
+// their judgment are surfaced for re-affirmation — a deterministic
+// invalidation channel, no LLM, no age timer.
 func Drifted(obs []trust.Observation, changes []Change) []Drift {
 	var out []Drift
 	for _, o := range gated(obs) {
 		if o.JudgedAt.IsZero() {
 			continue
 		}
-		n := 0
+		commits, lines := 0, 0
 		for _, c := range changes {
 			if !c.At.After(o.JudgedAt) {
 				continue
 			}
+			hit := false
 			for _, f := range c.Files {
 				if matchAny(o.Anchors, f) {
-					n++
-					break
+					hit = true
+					lines += c.Lines[f]
 				}
 			}
+			if hit {
+				commits++
+			}
 		}
-		if n >= DriftThreshold {
-			out = append(out, Drift{Obs: o, Commits: n})
+		if commits >= DriftThreshold || lines >= DriftLineThreshold {
+			out = append(out, Drift{Obs: o, Commits: commits, Lines: lines})
 		}
 	}
 	return out

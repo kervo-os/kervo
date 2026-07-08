@@ -12,7 +12,7 @@
 
 ## Brief
 
-- **Focus**: internal/ ×7 · packaging/ ×5 · assets/ ×3
+- **Focus**: internal/ ×8 · packaging/ ×6 · assets/ ×3
 - **Run**: `make build` · `make test` · `make arch-check`
 
 ## Repository Summary
@@ -35,6 +35,7 @@
 
 ## Recent Changes
 
+- `0ef152a` 2026-07-08 check: the constitution round — judgments ship like code, signatures see their globs
 - `6c32b6e` 2026-07-08 check: unrecorded reversals arrive as churn — so watch the churn
 - `63a0a9e` 2026-07-08 the red-team round lands: ledger rides commits, queue rot alarms, threat model
 - `fc2985a` 2026-07-08 dash: the overview opens up — expandable lists + commit activity strip
@@ -54,22 +55,21 @@
 - `8813dc6` 2026-07-07 readme: quickstart as a colored terminal card (freeze SVG of the real init styling)
 - `490327b` 2026-07-07 npm: the wrapper downloads the real binary
 - `3d1ffc3` 2026-07-07 community: CONTRIBUTING + SECURITY (private vuln reporting enabled)
-- `a78866f` 2026-07-07 changelog: condense 0.1–0.19 + ci: least privilege, SHA-pinned actions
 
-_Showing 20 of 129 analyzed commits._
+_Showing 20 of 130 analyzed commits._
 
 ### Frequently Changed Files
 
-- .kervo/events/2026-07.jsonl (90)
-- CLAUDE.md (72)
+- .kervo/events/2026-07.jsonl (91)
+- CLAUDE.md (73)
 - README.md (47)
 - README.ja.md (43)
 - README.ko.md (43)
 - internal/core/i18n/i18n.go (17)
 - CHANGELOG.md (16)
 - internal/cli/compile.go (15)
-- internal/cli/dash.go (14)
-- internal/cli/dashpage.go (14)
+- internal/cli/dash.go (15)
+- internal/cli/dashpage.go (15)
 
 ## Open Tasks
 
@@ -85,7 +85,7 @@ _No TODO/FIXME comments found._
 
 ## Workspace Facts
 
-- Commits analyzed: 129 (complete)
+- Commits analyzed: 130 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 5
 - Docs captured: 1
@@ -240,6 +240,10 @@ Evidence: user-relayed HN-style comments 2026-07-08: commenter_17 (baseline fair
 **[verified — human:refuse1993]**
 Constitution-checked repair round (2026-07-08, PRD v1.3 + RFC-0005 read first): (1) drift re-affirmation no longer dictates a canned reason — 'evidential trust, not statistical decay' forbids the system writing your evidence; (2) kervo check surfaces trust transitions shipped inside the diff (± line / GHA warning) — a PR cannot silently retire the decision that would flag it, and the legitimate deprecate+capture-beside-code flow stays unblocked (RFC-0005 §2.2 disagreement-is-surfaced, extended to pre-merge); (3) review/dash/judgment surfaces now show anchors — humans sign what they can see. Rejected repair: reading the ledger from base only, which would have broken the recommended reversal flow.
 Evidence: design docs read: 통합기획서 v1.3 §7.2/§5.7/§14/§19, RFC-0005 §2.2; e2e: sneaky PR deprecating its own gate now surfaces '± → deprecated by agent:attacker in this diff'
+
+**[verified — human:refuse1993]**
+Red-team round 4 shipped (2026-07-08): strict mode blocks in-diff trust transitions (surfacing that strict ignores is a log line, not a gate); drift gains a line-churn axis (>=200 lines catches the single-commit rewrite commit-counting missed — still counting, never meaning); dead anchors get rename forwarding (git log -M: 'moved? payments -> billing'); relayed judgments require the human's words (agent: actors and all MCP review_judge calls — the fast lane's rate limiter is a real quote per verified); status shows 24h judgment velocity; compile warns past ~12k artifact tokens (pressure gauge for scoped injection). Identity model documented: actors are git-trust-level, self-reported like commit authorship — 'signed' means audited human judgment, crypto binding stays v2. v1.4 deliberately NOT reopened same-day.
+Evidence: e2e: strict exit 1 on sneaky-± PR; rename hint on moved anchor only; agent no-reason trust rejected; status velocity line live (18 judged/24h); go test -race green
 <!-- kervo:slot:decisions:end -->
 
 ## Known Risks

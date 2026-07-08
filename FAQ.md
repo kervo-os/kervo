@@ -60,6 +60,28 @@ not features. If every vendor someday agrees on a git-native, signed,
 portable memory format, this project retires happily — that's the world
 it argues for.
 
+### "Signed memory" — where's the signature?
+
+The signature is a recorded human judgment with provenance, at git's
+trust level — the same level as your commit authorship, no more, no
+less. Anyone who can forge a commit author can forge an actor; teams
+that sign commits get judgment commits signed for free. What the word
+buys you today is auditability (who judged what, when, why — replayable)
+plus two hard rules: agents can never promote claims to `verified`, and
+an agent relaying your judgment must quote your words or the ledger
+rejects it. Cryptographic content-hash binding is v2 territory, for
+teams whose threat model needs signatures stronger than their commits.
+
+### Who governs the governor? The design doc is written by the same agent that builds the features.
+
+True, and v1 doesn't pretend otherwise: this is a single-human team, so
+every check ultimately routes through one person plus their agent. The
+honest controls are external ones — the ledger is public and replayable,
+experiments are pre-registered with anchored hashes, and the replication
+kit invites anyone to check the claims. Multi-party trust (judgments
+that require more than one human) is explicitly v2's boundary, gated on
+the first team that needs it.
+
 ### Is the evidence any good?
 
 It is honest more than it is heavy: pre-registered thresholds (anchored

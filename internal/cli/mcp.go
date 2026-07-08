@@ -8,6 +8,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/kervo-os/kervo/internal/adapters/store/jsonl"
 	"github.com/kervo-os/kervo/internal/core/trust"
@@ -230,6 +231,14 @@ func mcpCall(dir, name string, args json.RawMessage) (string, error) {
 		target := trust.State(a.To)
 		if !trust.CanTransition(obs.State, target) {
 			return "", fmt.Errorf("%s → %s is not a legal transition", obs.State, target)
+		}
+		// MCP judging is by definition a relay — an agent is calling this
+		// tool. The human's words are the judgment; without them this
+		// would be the agent judging, which is forbidden. This is also the
+		// fast lane's rate limiter: every verified minted here costs a
+		// real quote.
+		if strings.TrimSpace(a.Reason) == "" {
+			return "", fmt.Errorf("review_judge: quote the human — a relayed judgment needs their words in Reason")
 		}
 		if err := appendTransition(store, dir, "", obs, target, a.Reason); err != nil {
 			return "", err

@@ -52,7 +52,14 @@ func runTrust(args []string) error {
 
 // appendTransition records a human judgment in the ledger — shared by
 // `trust` (by-ID primitive) and `review` (triage queue).
+// A human at the terminal signs in one keystroke (the constitution's
+// promise); an agent relaying a judgment must quote the human — a relayed
+// judgment without their words is the agent's own, which is forbidden.
 func appendTransition(store *jsonl.Store, dir, actorFlag string, obs trust.Observation, target trust.State, reason string) error {
+	actor := resolveActor(actorFlag, dir)
+	if strings.HasPrefix(actor, "agent:") && strings.TrimSpace(reason) == "" {
+		return fmt.Errorf("trust: a relayed judgment must carry the human's words — add -reason \"<their words>\"")
+	}
 	payload, err := json.Marshal(map[string]string{"to": string(target), "reason": reason})
 	if err != nil {
 		return err
@@ -65,7 +72,7 @@ func appendTransition(store *jsonl.Store, dir, actorFlag string, obs trust.Obser
 		Kind:    event.KindTransition,
 		Type:    "transition",
 		Repo:    filepath.Base(abs),
-		Actor:   resolveActor(actorFlag, dir),
+		Actor:   actor,
 		Source:  "human",
 		Ref:     obs.ID,
 		Payload: json.RawMessage(payload),
@@ -83,9 +90,19 @@ func runStatus(args []string) error {
 	}
 	store := jsonl.Open(*dir)
 	events := 0
+	judged24, verified24 := 0, 0
 	folder := trust.NewFolder()
 	if err := store.Replay(context.Background(), "", func(e event.Event) error {
 		events++
+		if e.Kind == event.KindTransition && time.Since(e.At) < 24*time.Hour {
+			judged24++
+			var p struct {
+				To string `json:"to"`
+			}
+			if json.Unmarshal(e.Payload, &p) == nil && p.To == string(trust.Verified) {
+				verified24++
+			}
+		}
 		folder.Add(e)
 		return nil
 	}); err != nil {
@@ -99,6 +116,11 @@ func runStatus(args []string) error {
 	fmt.Printf("Ledger: %d events · %d observations\n", events, len(obs))
 	fmt.Printf("  generated %d · observed %d · verified %d · stale %d · deprecated %d\n",
 		counts[trust.Generated], counts[trust.Observed], counts[trust.Verified], counts[trust.Stale], counts[trust.Deprecated])
+	if judged24 > 0 {
+		// Judgment velocity in plain sight: a signature minted every few
+		// minutes is information the signer should have to look at.
+		fmt.Printf("  judged in the last 24h: %d (%d verified)\n", judged24, verified24)
+	}
 	pending := 0
 	var oldest time.Time
 	for _, o := range obs {

@@ -94,6 +94,16 @@ func TestDrifted(t *testing.T) {
 	if len(few) != 0 {
 		t.Fatalf("below threshold must not drift, got %+v", few)
 	}
+
+	// one massive rewrite: the line axis catches what commit count misses
+	big := Drifted([]trust.Observation{o}, []Change{{
+		At:    judged.Add(day),
+		Files: []string{"services/payments/gateway.go"},
+		Lines: map[string]int{"services/payments/gateway.go": 500},
+	}})
+	if len(big) != 1 || big[0].Lines != 500 || big[0].Commits != 1 {
+		t.Fatalf("single-commit rewrite must drift via lines, got %+v", big)
+	}
 }
 
 func TestDead(t *testing.T) {

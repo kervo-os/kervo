@@ -47,6 +47,21 @@ we treat it as one rather than deny it:
   infections occurred in the unmanaged arm. Protocols and raw
   responses: [kervo-os/experiments](https://github.com/kervo-os/experiments).
 
+## Identity model
+
+Actors in the ledger (`human:<name>`, `agent:<consumer>`) are recorded
+from git identity and are **exactly as trustworthy as your repository's
+commit authorship** — self-reported, spoofable by anyone with commit
+access, auditable in the same way. kervo deliberately does not build a
+second identity system: if your team signs commits, judgment commits are
+covered by the same signatures; if it doesn't, the ledger inherits that
+posture. Cryptographic binding of judgments to content hashes is on the
+roadmap for teams whose threat model needs it (multi-party trust, v2).
+What IS enforced today: agents cannot sign claims (state transitions to
+`verified` are human acts), and an agent relaying a human judgment must
+quote the human's words — an empty-reason relay is rejected at the
+ledger door.
+
 ## Supply chain
 
 Zero runtime dependencies (stdlib-only `go.mod`). Release binaries ship

@@ -138,8 +138,20 @@ func runCompile(args []string) error {
 	}
 	fmt.Printf("Artifact: .kervo/artifact.md (%s · ledger: %d live, %d stale)\n", mode, len(enh), len(staleNotes))
 	fmt.Printf("Injected: %s (marker block)\n", strings.Join(injected, ", "))
+	// Every consumer session pays the artifact's size — a context tool
+	// with no size gauge would be fighting rot while growing fat. ~4
+	// bytes/token is the honest ballpark; the budget is a pressure gauge,
+	// not a cap (scoped injection is the eventual answer).
+	if tokens := len(rendered) / 4; tokens > artifactTokenBudget {
+		fmt.Printf("  ⚠ artifact ≈ %dk tokens (budget %dk) — every session pays this; retire what no longer earns its place\n",
+			tokens/1000, artifactTokenBudget/1000)
+	}
 	return nil
 }
+
+// artifactTokenBudget is when compile starts saying the artifact is
+// heavy. ponytail: fixed constant — real teams' metrics move it.
+const artifactTokenBudget = 12_000
 
 func ingestProposals(store *jsonl.Store, folder *trust.Folder, proposals []artifact.Enhancement, repo string, gapFillOnly bool) (int, error) {
 	if len(proposals) == 0 {
