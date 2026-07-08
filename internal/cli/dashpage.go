@@ -92,6 +92,8 @@ main{max-width:66rem;margin:0 auto;padding:1.6rem 1.4rem 3rem}
 .ov .li .m{font-family:ui-monospace,monospace;color:var(--fg);flex:none;max-width:12rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ov .li .t{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 .ov .chips{display:flex;flex-wrap:wrap;gap:.35rem}
+.anchors{display:flex;flex-wrap:wrap;gap:.35rem;margin:-.2rem 0 .7rem}
+.anchors .chip{font-family:ui-monospace,monospace;color:var(--v);border-color:rgba(52,211,153,.35)}
 .ov .more{color:var(--faint);font-size:.72rem;padding-top:.2rem}
 .ov button.more{background:none;border:none;padding:.25rem 0 0;color:var(--v);font-weight:600;cursor:pointer;font-size:.72rem}
 .ov button.more:hover{text-decoration:underline}
@@ -480,6 +482,12 @@ function renderTriage(){
   m.append(el("span","tag "+o.Type,o.Type), el("span","mono",o.ShortID), el("span","",o.State), el("span","",o.Actor));
   if(o.Conflict) m.append(el("span","conf","⚠ conflict"));
   c.append(m);
+  // Anchors are part of what you sign — show every glob before the keystroke.
+  if((o.Anchors||[]).length){
+    const an = el("div","anchors");
+    o.Anchors.forEach(a=>an.append(el("span","chip","⚓ "+a)));
+    c.append(an);
+  }
   // Claim-first display: the first line (or the pre-colon lead of a
   // one-paragraph body) becomes the headline, the rest reads as detail.
   const nl = o.Body.indexOf("\n"), col = o.Body.indexOf(":");
@@ -530,6 +538,11 @@ function renderRails(){
       const st = el("span","st",it.State); st.style.color = SC[it.State]||"var(--muted)";
       m.append(el("span","tag "+it.Type,it.Type), st, el("span","",it.Actor));
       k.append(m);
+      if((it.Anchors||[]).length){
+        const an = el("div","anchors");
+        it.Anchors.forEach(a=>an.append(el("span","chip","⚓ "+a)));
+        k.append(an);
+      }
       const nl = it.Body.indexOf("\n"), col = it.Body.indexOf(":");
       let head = it.Body, rest = "";
       if(nl > 0){ head = it.Body.slice(0,nl); rest = it.Body.slice(nl+1).trim() }

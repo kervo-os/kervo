@@ -73,6 +73,9 @@ type dashItem struct {
 	Evidence                              string `json:",omitempty"`
 	Reason                                string `json:",omitempty"`
 	Conflict                              bool   `json:",omitempty"`
+	// Anchors are part of what a human signs — a judgment screen that
+	// hides them asks people to verify globs they never saw.
+	Anchors []string `json:",omitempty"`
 }
 
 type dashRepo struct {
@@ -201,7 +204,7 @@ func newDashServer(paths []string, actorFlag string, lang i18n.Lang) (*dashServe
 			it := dashItem{
 				ID: o.ID, ShortID: shortID(o.ID), Type: o.Type, State: string(o.State),
 				Actor: o.Actor, Body: unescapeBody(o.Body), Evidence: unescapeBody(o.Evidence), Reason: o.Reason,
-				Conflict: o.Conflict,
+				Conflict: o.Conflict, Anchors: o.Anchors,
 			}
 			if o.State == trust.Generated || o.Conflict {
 				repo.Items = append(repo.Items, it)

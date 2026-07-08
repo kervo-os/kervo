@@ -12,7 +12,7 @@
 
 ## Brief
 
-- **Focus**: internal/ ×7 · packaging/ ×4 · assets/ ×3
+- **Focus**: internal/ ×7 · packaging/ ×5 · assets/ ×3
 - **Run**: `make build` · `make test` · `make arch-check`
 
 ## Repository Summary
@@ -35,6 +35,7 @@
 
 ## Recent Changes
 
+- `6c32b6e` 2026-07-08 check: unrecorded reversals arrive as churn — so watch the churn
 - `63a0a9e` 2026-07-08 the red-team round lands: ledger rides commits, queue rot alarms, threat model
 - `fc2985a` 2026-07-08 dash: the overview opens up — expandable lists + commit activity strip
 - `87a8c18` 2026-07-08 changelog: v0.22.0
@@ -54,19 +55,18 @@
 - `490327b` 2026-07-07 npm: the wrapper downloads the real binary
 - `3d1ffc3` 2026-07-07 community: CONTRIBUTING + SECURITY (private vuln reporting enabled)
 - `a78866f` 2026-07-07 changelog: condense 0.1–0.19 + ci: least privilege, SHA-pinned actions
-- `54a7646` 2026-07-07 ledger: blockchain verdict + H5 anchored registration
 
-_Showing 20 of 128 analyzed commits._
+_Showing 20 of 129 analyzed commits._
 
 ### Frequently Changed Files
 
-- .kervo/events/2026-07.jsonl (89)
-- CLAUDE.md (71)
-- README.md (46)
-- README.ja.md (42)
-- README.ko.md (42)
+- .kervo/events/2026-07.jsonl (90)
+- CLAUDE.md (72)
+- README.md (47)
+- README.ja.md (43)
+- README.ko.md (43)
+- internal/core/i18n/i18n.go (17)
 - CHANGELOG.md (16)
-- internal/core/i18n/i18n.go (16)
 - internal/cli/compile.go (15)
 - internal/cli/dash.go (14)
 - internal/cli/dashpage.go (14)
@@ -85,7 +85,7 @@ _No TODO/FIXME comments found._
 
 ## Workspace Facts
 
-- Commits analyzed: 128 (complete)
+- Commits analyzed: 129 (complete)
 - Open tasks (TODO/FIXME): 0
 - Top-level modules: 5
 - Docs captured: 1
@@ -236,6 +236,10 @@ Evidence: user directive 2026-07-08: '위 내용들 기반으로 개선 방안 �
 **[verified — human:refuse1993]**
 Post-red-team follow-ups (proposals from the second comment round): (1) H6 candidate — baseline-comparison experiment: kervo vs RAG-with-metadata / an agent memory store / a well-maintained ADR log, answering the 'unmanaged notes is a strawman baseline' objection with the comparison skeptics actually want; (2) narrator-not-witness at the UX layer — the write-back protocol should require consumers to cite the trust label when relaying ledger knowledge (observed once in the wild: a consumer flagged its own answer as [generated]); make it a protocol sentence, not luck.
 Evidence: user-relayed HN-style comments 2026-07-08: commenter_17 (baseline fairness), hn_user_88 (narrator/witness UX)
+
+**[verified — human:refuse1993]**
+Constitution-checked repair round (2026-07-08, PRD v1.3 + RFC-0005 read first): (1) drift re-affirmation no longer dictates a canned reason — 'evidential trust, not statistical decay' forbids the system writing your evidence; (2) kervo check surfaces trust transitions shipped inside the diff (± line / GHA warning) — a PR cannot silently retire the decision that would flag it, and the legitimate deprecate+capture-beside-code flow stays unblocked (RFC-0005 §2.2 disagreement-is-surfaced, extended to pre-merge); (3) review/dash/judgment surfaces now show anchors — humans sign what they can see. Rejected repair: reading the ledger from base only, which would have broken the recommended reversal flow.
+Evidence: design docs read: 통합기획서 v1.3 §7.2/§5.7/§14/§19, RFC-0005 §2.2; e2e: sneaky PR deprecating its own gate now surfaces '± → deprecated by agent:attacker in this diff'
 <!-- kervo:slot:decisions:end -->
 
 ## Known Risks

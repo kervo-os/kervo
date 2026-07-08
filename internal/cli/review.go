@@ -68,6 +68,11 @@ loop:
 		if o.Evidence != "" {
 			fmt.Fprintf(out, "  evidence: %s\n", o.Evidence)
 		}
+		if len(o.Anchors) > 0 {
+			// The anchors are part of what you sign — a verified anchored
+			// decision gates CI on these paths.
+			fmt.Fprintf(out, "  anchors: %s\n", strings.Join(o.Anchors, ", "))
+		}
 		fmt.Fprint(out, "> ")
 		line, rerr := reader.ReadString('\n')
 

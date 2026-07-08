@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -8,6 +9,7 @@ import (
 	"time"
 
 	"github.com/kervo-os/kervo/internal/adapters/store/jsonl"
+	"github.com/kervo-os/kervo/internal/core/event"
 	"github.com/kervo-os/kervo/internal/core/gate"
 	"github.com/kervo-os/kervo/internal/core/trust"
 )
@@ -80,15 +82,37 @@ func runCheck(args []string) error {
 		fmt.Printf("  consider: kervo trust -id %s -to stale -reason \"anchored path gone\"\n", shortID(o.ID))
 	}
 
+	// Evidential trust, not statistical decay: the re-affirmation reason is
+	// yours to write — the system never dictates one, or the signature is
+	// theater.
 	for _, d := range drifted {
 		if gha {
-			fmt.Printf("::notice::%s was verified before %d commits landed on its anchors — %s — re-affirm (kervo trust -id %s -to verified -reason \"still true\") or retire it\n",
+			fmt.Printf("::notice::%s was verified before %d commits landed on its anchors — %s — re-affirm with your reason (kervo trust -id %s -to verified -reason \"<why it still holds>\") or retire it\n",
 				shortID(d.Obs.ID), d.Commits, claim(d.Obs.Body), shortID(d.Obs.ID))
 			continue
 		}
 		fmt.Printf("↻ %s anchored code moved in %d commits since verification — %s\n",
 			shortID(d.Obs.ID), d.Commits, claim(d.Obs.Body))
-		fmt.Printf("  re-affirm: kervo trust -id %s -to verified -reason \"still true\" — or retire it\n", shortID(d.Obs.ID))
+		fmt.Printf("  re-affirm with your reason: kervo trust -id %s -to verified -reason \"<why it still holds>\" — or retire it\n", shortID(d.Obs.ID))
+	}
+
+	// Trust changes shipped inside the diff are review objects themselves.
+	// A PR must not silently retire the decision that would have flagged
+	// it — RFC-0005 §2.2: disagreement is surfaced, never hidden. This is
+	// also the legitimate reversal flow (deprecate + capture beside the
+	// code), so it is surfaced for the reviewer, not blocked.
+	for _, tr := range diffTransitions(*dir, *base) {
+		body := ""
+		if o, ok := folder.Get(tr.Ref); ok {
+			body = " — " + claim(o.Body)
+		}
+		if gha {
+			fmt.Printf("::warning::this PR itself moves %s to %s (%s)%s — the judgment ships with the code; reviewer, confirm both\n",
+				shortID(tr.Ref), tr.To, tr.Actor, body)
+			continue
+		}
+		fmt.Printf("± %s → %s by %s in this diff%s\n", shortID(tr.Ref), tr.To, tr.Actor, body)
+		fmt.Printf("  the judgment ships with the code — review it like the code\n")
 	}
 
 	fmt.Printf("check: %d changed files vs %s — %d touched, %d dead anchors, %d drifted\n",
@@ -155,6 +179,42 @@ func moreFiles(files []string) string {
 		return ""
 	}
 	return fmt.Sprintf(" (+%d more files)", len(files)-1)
+}
+
+// diffTransition is one trust-state change carried inside the diff.
+type diffTransition struct {
+	Ref, To, Actor string
+}
+
+// diffTransitions parses trust transitions out of the ledger lines this
+// diff ADDS. Only added lines count — history is append-only, so removed
+// ledger lines never carry a judgment (a PR deleting ledger lines is its
+// own kind of alarm, visible in the raw diff).
+func diffTransitions(dir, base string) []diffTransition {
+	out, err := exec.Command("git", "-C", dir, "diff", "--unified=0",
+		base+"...HEAD", "--", ".kervo/events").Output()
+	if err != nil {
+		return nil
+	}
+	var trs []diffTransition
+	for _, line := range strings.Split(string(out), "\n") {
+		if !strings.HasPrefix(line, "+") || strings.HasPrefix(line, "+++") {
+			continue
+		}
+		var e event.Event
+		if json.Unmarshal([]byte(strings.TrimPrefix(line, "+")), &e) != nil {
+			continue
+		}
+		if e.Kind != event.KindTransition || e.Ref == "" {
+			continue
+		}
+		var p struct {
+			To string `json:"to"`
+		}
+		_ = json.Unmarshal(e.Payload, &p)
+		trs = append(trs, diffTransition{Ref: e.Ref, To: p.To, Actor: e.Actor})
+	}
+	return trs
 }
 
 // gitList runs git in dir and returns non-empty output lines.
